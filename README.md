@@ -38,7 +38,8 @@ python tools/tracker_log.py note --handle @castt.ai --text "..."
 python tools/tracker_log.py touch --handle @castt.ai --date 2026-10-12
 python tools/run_monetization_verdicts.py  # regenerate MONETIZATION_VERDICTS.md
 python tools/reconcile_gmail.py --export <gmail-export.csv> --campaign <label> [--dry-run]
-python -m pytest                           # 67 tests
+python tools/audit_wave_lists.py --waves <wave-lists.json> [--sent-export <export.csv>]
+python -m pytest                           # 79 tests
 ```
 
 **The tracker is the source of truth.** `templates/creator_tracker.csv` is live pipeline state
@@ -67,3 +68,9 @@ python tools/reconcile_gmail.py --export daily/2026-10-10/gmail_export_raw_to_wh
 Imported recipients land as `QUARANTINED`, which `leak_finder.py` treats as terminal: they
 count toward the outreach-touch denominator so the numbers stay honest, but they never
 re-enter a send queue and are never re-pitched.
+
+**Gate every bulk wave before you schedule it.** `tools/audit_wave_lists.py` checks a wave
+list against the tracker, sent-mail exports, Gate G8 declines, live conversations, the
+banned Motivation/Wealth niche and the daily cap, and exits non-zero when anything is
+blocked. The hardened sender lives at `gas/wave_autopilot_safe.gs` — it ships with sending
+disabled, no draft fallback, an enforced suppression list and a 25/day ceiling.
