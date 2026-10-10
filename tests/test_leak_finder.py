@@ -170,3 +170,71 @@ def test_brief_reports_the_one_thing_and_the_cap():
 def test_email_extraction_from_channel_column():
     assert lf.email_of(row(channel="Email (lucianocasti27@gmail.com)")) == "lucianocasti27@gmail.com"
     assert lf.email_of(row(channel="DM")) == ""
+
+
+# ------------------------------------------------------- quarantined / touches
+def test_quarantined_is_a_terminal_state():
+    assert lf.stage_of(row(status="QUARANTINED (raw-to-whop-48h) - untracked "
+                                 "send found in Gmail")) == "quarantined"
+    assert "quarantined" in lf.TERMINAL
+
+
+def test_quarantined_lead_never_reaches_the_send_queue():
+    """Quarantine means counted, not worked. It must never be re-pitched."""
+    rows = [row(handle="@q", status="QUARANTINED (raw-to-whop-48h)",
+                first_touch_date="2026-10-09", last_touch_date="2026-10-09",
+                conversion_score="99", tier="P1")]
+    assert lf.send_queue(rows, TODAY) == []
+
+
+def test_a_lead_that_went_cold_or_quarantined_still_counts_as_a_touch():
+    """The funnel counts a lead only at its most advanced stage, so a contacted
+    lead that later went COLD or QUARANTINED drops out of 'contacted'. The kill
+    criterion is per outreach TOUCH, so it needs the separate denominator."""
+    rows = [
+        row(handle="@live", status="OUTREACH_SENT", first_touch_date="2026-10-08"),
+        row(handle="@cold", status="COLD", first_touch_date="2026-10-08"),
+        row(handle="@quar", status="QUARANTINED (x)", first_touch_date="2026-10-09"),
+    ]
+    cum, _ = lf.funnel(rows)
+    assert {k: n for k, _, n in cum}["contacted"] == 1   # the funnel sees one
+    assert len(lf.touched(rows)) == 3                    # the operator sent three
+
+
+def test_kill_criteria_not_evaluable_below_100_touches():
+    rows = [row(handle=f"@h{i}", status="OUTREACH_SENT", first_touch_date="2026-10-08")
+            for i in range(30)]
+    kc = lf.kill_criteria(rows)
+    assert kc["touches"] == 30
+    assert kc["evaluable"] is False
+    assert kc["triggered"] is False
+
+
+def test_kill_criteria_triggers_at_100_touches_with_fewer_than_5_positives():
+    rows = [row(handle=f"@h{i}", status="OUTREACH_SENT", first_touch_date="2026-10-08")
+            for i in range(101)]
+    rows[0]["status"] = "WARM (POSITIVE reply 2026-10-10)"
+    rows[1]["status"] = "WARM (POSITIVE reply 2026-10-10)"
+    kc = lf.kill_criteria(rows)
+    assert kc["touches"] == 101
+    assert kc["positives"] == 2
+    assert kc["evaluable"] is True
+    assert kc["triggered"] is True
+
+
+def test_kill_criteria_clears_with_5_positives():
+    rows = [row(handle=f"@h{i}", status="OUTREACH_SENT", first_touch_date="2026-10-08")
+            for i in range(101)]
+    for i in range(5):
+        rows[i]["status"] = "WARM (POSITIVE reply 2026-10-10)"
+    kc = lf.kill_criteria(rows)
+    assert kc["triggered"] is False
+
+
+def test_brief_tells_the_operator_to_stop_when_the_criterion_fires():
+    rows = [row(handle=f"@h{i}", status="OUTREACH_SENT", first_touch_date="2026-10-08",
+                last_touch_date="2026-10-08")
+            for i in range(101)]
+    brief = lf.daily_brief(rows, TODAY)
+    assert "TRIGGERED - STOP ADDING VOLUME" in brief
+    assert "do NOT send the queue above" in brief
