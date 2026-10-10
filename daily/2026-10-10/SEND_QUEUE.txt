@@ -1,0 +1,15 @@
+SEND QUEUE (cap 8/day, human-sent only - Gate G4)
+  [SEND]  1. @promptseen                  touch 2  TOUCH2_DUE     2d silent  score 93  P1             contact@promptseen.com
+  [SEND]  2. @castt.ai                    touch 2  TOUCH2_DUE     2d silent  score 92  P1             lucianocasti27@gmail.com
+  [SEND]  3. @creagen.ai                  touch 2  TOUCH2_DUE     2d silent  score 91  P1             creagen.ai.trends@gmail.com
+  [SEND]  4. @learnaifaster               touch 2  TOUCH2_DUE     2d silent  score 89  P1             learnaifasterx@gmail.com
+  [SEND]  5. @bossymiss                   touch 2  TOUCH2_DUE     2d silent  score 89  P1             preksha.kap@gmail.com
+  [SEND]  6. @yaisalinas                  touch 2  TOUCH2_DUE     2d silent  score 89  P1             yai.salinas@gmail.com
+  [SEND]  7. @saffvfx                     touch 2  TOUCH2_DUE     2d silent  score 87  P1             Saffvisualfx@gmail.com
+  [SEND]  8. @sysinacgi                   touch 2  TOUCH2_DUE     2d silent  score 87  P1             sysinacgi@outlook.com
+  [hold]  9. @maurosfilms                 touch 2  TOUCH2_DUE     2d silent  score 87  P1             maurosmedia@gmail.com
+  [hold] 10. @kevin_gnu                   touch 2  TOUCH2_DUE     2d silent  score 85  P1             gnutzmans@gmail.com
+  [hold] 11. @deeply.ai                   touch 2  TOUCH2_DUE     2d silent  score 85  P1             deepshikhar2305@gmail.com
+  [hold] 12. @theaicolab                  touch 2  TOUCH2_DUE     2d silent  score 84  P1             Reloaded.v2@gmail.com
+
+  Rules: one ask per message, touch 2 adds NEW value, touch 3 is a graceful close, then COLD. Never contact after a 'no' (G8).
