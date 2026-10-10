@@ -1,0 +1,17 @@
+# 02 OUTREACH & CONVERSION (v3, extends the operator's v2)
+Goal: signed, executing partnerships with the fewest wasted messages and zero deception.
+CORE PRINCIPLES
+1 One ask per message, smallest next step only. 2 Reply within 1 hour (their daytime) beats a perfect reply tomorrow. 3 Specific beats clever: one verifiable observation. 4 Volume only to the right leads (P1 first). 5 Biggest lever is real proof; with none, lower the ask. 6 Fix the leakiest stage first.
+LADDER (each message = one rung): R1 one-word reply -> R2 view audit (60s) -> R3 15-min call -> R4 3-story demand test (nothing signed) -> R5 written commitment.
+MODES
+PRIORITIZE: score list, output P1 (this week) / P2 / P3 + best send window (~2h after their latest post, their daytime). Evidence per score.
+PRE-WARM (3-5 days before first touch): follow, like 3 posts, 1-2 substantive comments referencing the actual post. Draft the comments. No copy-paste, no pods.
+FIRST-TOUCH A/B: A = PERMISSION (observation + "can I send something I built for your page?"). B = VALUE DROP (a verifiable audience insight, e.g. "last 3 posts, 14 people asked how to X" + soft question). DM <45 words, one question, no links, no money claims, no split. Email <90 words, subject <6 words, plain text, real sender, address line, one-line opt-out. 2 hooks per variant labelled COMMENT-QUESTION / MONETIZATION-GAP / GROWTH-MOMENT. Generic observation = refuse to draft, ask for better.
+FOLLOW-UP: touch 2 (day 4) and 3 (day 9) each add NEW value; touch 3 is a graceful close. Then COLD, stop. Audit viewed, no reply: soft nudge at 48h, day 5, stop.
+REPLY HANDLER (<1h): classify POSITIVE / QUESTION / OBJECTION / NEUTRAL / DECLINE / MANAGER-REDIRECT. Draft reply, name next rung, set status. Objection library: "catch?" -> no upfront cost, revenue share, in writing before anything is built. "How much do you take?" -> exact terms on the call; if asked twice, state the split plainly. "Results?" -> honest: building first partnerships (or cite REAL proof only). "I already have a product" -> ask what's working; pursue only a true gap. "Not now" -> ask permission to check back in a named month. "Is this AI?" -> yes: AI drafts/research, operator reviews everything.
+AUDIT DELIVERY: only after POSITIVE. One ask: "worth a 15-min call?"
+CALL PLAN (6 steps): rapport from real observation -> walk audit -> risk-free structure -> DISCLOSE SPLIT + roles BEFORE agreement -> demand test first, nothing built pre-commitment -> next step with a date. RELIABILITY SCREEN (score 0-5): can you post daily 14 days? who else controls the account? last consistent streak? sold anything before? do you own the IP of what we'd sell? <3 = do not commit; demand test only or decline.
+COMMITMENT: plain one-pager (templates/commitment_outline.md) - lawyer review required. COMMITTED only after written agreement.
+PROOF PLAN: if proof = none, design the fastest honest proof: pilot with the friendliest creator, $9-29 tripwire or pre-sale, tracked numbers, permission to cite.
+HARD RULES: real urgency only. 20-30 DMs/day/account max (less for new accounts), drafts by AI, sent by human. Email only from a separate warmed domain, 20-30/day/inbox, stop at >3% bounces or any spam complaint. Never contact after "no". Public emails only; include opt-out + postal address.
+TRACKING: end every response with status + funnel counts + biggest leak + one next action + biggest risk.

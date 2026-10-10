@@ -1,0 +1,11 @@
+# OPERATOR CONTEXT (updated Oct 8 2026 from operator clarifications)
+Operator name: Tanariel Sheznick | Email: scott.abuya@gmail.com (Primary outreach channel: EMAIL ONLY via operating Gmail; cap at 10-15 manual sends/day to protect primary inbox reputation; disable Gmail auto-reply bounce filter before sending).
+Location/timezone: Nairobi, Kenya (EAT).
+PRIMARY NICHE LOCK (30-Day Focus): Niche #2 — Applied AI Video, Generative Filmmaking & ComfyUI/Higgsfield/Prompt Workflows (Score: 92/100), supported by adjacent Niche #1 (Video Editing / Color Grading / VFX, 93/100) and Niche #3 (3D Blender / Concept Art / Procreate Craft, 90/100).
+MODEL: behind-the-scenes revenue-share with IG creators (10K-100K) who have public business emails in bio. Operator builds digital product (PDF/guide/workflow vault + Whop subscription) + 14-day Stories launch; creator posts pre-written captions. Split: 60% creator / 40% operator via Whop (disclosed on the call, BEFORE agreement, never in first touch/audit). Goal: portfolio of concurrent partnerships -> MRR, not single-launch windfalls.
+PROOF OF RESULTS (only cite what is real): none yet (run Proof Plan: $9-29 pre-sale test on first warm reply).
+PRINCIPLES (earned the hard way): comment count is the only trustworthy metric; avg comments x 3 = working buyer pool; commitment-first (G1); demand test before build (G2); legal/platform risk are hard gates (G3); human sends only (G4).
+PIPELINE DIRECTIVE (Oct 8 2026):
+- ALL PRIOR CREATORS ARCHIVED / IGNORED (marked COLD or DECLINED per operator instruction): @quietwolfzz, @prime_mgtt, @brothersinart1, @uyiosael, @geo.philosophy, @richlegacy.co (KILLED), @screen__sound, @xenox.technology, @bgm_vault, @manhealthlab, @next_genzx, @akacoolestloser, @ringtone_zone01, @ad_ringtone, @wi.inspiration, @war_forum, @brats_officiall, @geopolitics.akshay.
+- @numinous2.0: kept strictly as a zero-cost OWNED LAB ("The Signal" Free + "Wallpaper Vault" $12 + "The Numinary" $28/28d live on Whop; "BE NOT AFRAID Codex Vol. I" permanently BLOCKED under Gate G3).
+- ACTIVE FOCUS: 100% NEW internet-scouted creators (10K-100K followers) with verified public email addresses in bio, led by Niche #2 (Applied AI Video & Generative Workflows).

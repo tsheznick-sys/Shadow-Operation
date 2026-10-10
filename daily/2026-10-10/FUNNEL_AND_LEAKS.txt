@@ -1,0 +1,28 @@
+FUNNEL (cumulative, from templates/creator_tracker.csv)
+  stage           at stage  cumulative
+  scouted                0          29
+  staged                 0          29
+  contacted             29          29
+  replied                0           0
+  positive               0           0
+  audit_sent             0           0
+  call_booked            0           0
+  test_running           0           0
+  committed              0           0
+  paid                   0           0
+
+STAGE-TO-STAGE CONVERSION
+  scouted       -> staged           29/29   = 100.0%
+  staged        -> contacted        29/29   = 100.0%
+  contacted     -> replied           0/29   = 0.0%  <-- LEAK
+
+BIGGEST LEAK: contacted -> replied (0/29 = 0.0%)
+  leak type : targeting / hook / timing
+  ONE FIX   : Re-write the first-touch hook for the top 10 P1 leads using one verifiable observation each (prompts/02). Do not send more volume into a broken hook.
+
+TERMINAL / PARKED
+  declined     4  @richlegacy.co, @war_forum, @brats_officiall, @geopolitics.akshay
+  cold        10  @quietwolfzz, @prime_mgtt, @brothersinart1, @uyiosael, @geo.philosophy, @screen__sound, @xenox.technology, @bgm_vault ...
+  hold         1  @numinous2.0
+
+NOTE: every rate above is an ASSUMPTION (prompts/07). Only compare variants with 100+ sends each.

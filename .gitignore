@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local safety net: pre-write tracker backups are for the operator's machine,
+# not for git history.
+templates/backups/
+
+# Environments
+.venv/
+venv/
+.env
