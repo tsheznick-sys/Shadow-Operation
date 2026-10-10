@@ -76,7 +76,7 @@ it is the only thing in this folder that matches the current thread. But it is n
 |---|---|---|
 | Your first touch | Sat 10 Oct 02:36 (+0200) | `1a1233dda0aef6cc` |
 | **Raz's positive reply** | **Sat 10 Oct 14:40 (+0000)** | **`1a12642bdade0bd6`** |
-| Your reply | — | **not sent** |
+| **Your reply — SENT** | **Sat 10 Oct 19:03 (+0200)** | **`1a126c9a8c6e0df2`** |
 
 Your first email asked: *"Open to seeing a custom 3-page Monetisation Gameplan PDF I mapped
 out for @ainewscentral?"* — **nothing was attached** (2,545 bytes, plain text, no
@@ -93,17 +93,21 @@ He also corrected your data: **AI News Central is over 100,000 followers**, not 
 your email used. That is 2.2x your figure, and it is at the very top of the kit's 10K–100K
 band.
 
-**SLA status:** `prompts/02` sets a 1-hour reply window. He wrote at 14:40 UTC. This is
-now roughly 2 hours overdue. He is the strongest lead in the operation.
+**STATUS: REPLIED 2026-10-10 19:03 EAT** (message `1a126c9a8c6e0df2`, in-thread). The
+operator approved sending the staged draft verbatim. It answers all five questions and
+makes three corrections: the split-in-subject line, the withdrawn revenue range, and
+"my team" → solo operator.
 
-**The reply is ready but the attachment is not.** Sending the draft without the gameplan
-means answering four of his five questions and ignoring the one thing he actually asked to
-see.
+**The reply made a commitment: the 3-page gameplan within 24 hours (due 2026-10-11).**
+That is now the binding deadline, and the deliverable still does not exist.
 
-→ Skeleton drafted at `GAMEPLAN_ainewscentral_DRAFT.md`. It cannot be finished honestly
-without data only you can pull (see the `[VERIFY]` markers): his last 12 non-pinned posts'
-like and comment counts, and a count of comments asking for files/templates. That is ~15
-minutes of manual work and it is the difference between an audit and a sales page.
+→ Skeleton at `GAMEPLAN_ainewscentral_DRAFT.md`. It cannot be finished honestly without
+data only the operator can pull (see the `[VERIFY]` markers): his last 12 non-pinned posts'
+like and comment counts, and a count of comments asking for files/templates. ~15 minutes
+of manual work, and it is the difference between an audit and a sales page.
+
+→ If it cannot be delivered by then, say so before the deadline, not after. A missed
+promise to a lead who is already running diligence is worse than a slower honest one.
 
 ---
 
@@ -134,12 +138,12 @@ rather than quote.
 
 | | `@ainewscentral` (Raz) | `@premiereprotutos` (Omar) |
 |---|---|---|
-| Stage | positive reply, **awaiting your response** | positive reply, **you responded**, awaiting him |
+| Stage | positive reply, **you replied 19:03 EAT** | positive reply, **you responded**, awaiting him |
 | Contribution | has resources/prompts/workflows | **has no asset library** |
 | Split on the table | 60/40 | 60/40 for a 100% scratch build |
 | Blocking item | **gameplan + terms don't exist** | Gate G1 — do not build before commitment + test |
 | Next owner | YOU: 12-post count, then send | HIM: he must reply first |
 | Risk if mishandled | slow reply loses the best lead | you build 50+ assets and he walks |
 
-**Two live leads, and the single highest-value hour available today is: count Raz's last 12
-posts, finish the gameplan, send it with the reply already drafted.**
+**Two live leads. The single highest-value hour available now is: count Raz's last 12 posts,
+finish the gameplan, and deliver it before the 24-hour commitment lapses (2026-10-11).**

@@ -1,7 +1,17 @@
 # REPLY DRAFT — `@ainewscentral` (Raz) · 2026-10-10
 
-**Status: DRAFTED, NOT SENT.** Gate G4 (human sends) and G7 (no legal terms accepted by the
-agent). Review, fill the bracketed decisions, and send in-thread.
+> ## ✅ SENT — 2026-10-10 19:03 EAT
+>
+> Gmail message `1a126c9a8c6e0df2`, in-thread on `1a121902e6aebe50`, verbatim as drafted
+> below. Operator approved the send and confirmed the solo-operator correction.
+>
+> **This created a live commitment: the 3-page gameplan within 24 hours, due 2026-10-11.**
+> See `GAMEPLAN_ainewscentral_DRAFT.md` — it still needs the 12-post data pull.
+>
+> The six decisions below are now **made**, not proposed. They are the terms on the table
+> for `@ainewscentral`.
+
+**Status: SENT.** Kept as the record of the terms agreed in writing.
 
 **Thread:** `1a121902e6aebe50` · reply to `<CAB_-Z8EKawzPo9hAWziQq+9PJK_JdmmSpREcXDui6R0m_SJcxA@mail.gmail.com>`
 **Classification:** POSITIVE + QUESTIONS (prompts/02 reply handler)
