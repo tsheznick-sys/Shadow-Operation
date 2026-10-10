@@ -1,6 +1,30 @@
 # REPLY DRAFT — `@premiereprotutos` (Omar) · 2026-10-10
 
-**Status: DRAFTED, NOT SENT.** Review and send in-thread.
+> ## ⚠ THIS FILE IS STALE — DO NOT SEND
+>
+> **You already replied to Omar**, on Sat 10 Oct 01:24 (+0300), Gmail message
+> `1a122c50106cb08e`: *"100% — we can build the entire product from scratch for you on the
+> 60/40 revenue split…"*, with the gameplan PDF attached and a Drive Launch Kit folder
+> linked.
+>
+> Option A below renegotiates to 30/70. **Sending that now would contradict a message you
+> already sent, in the same thread, 17 hours later.** It would also undo a commitment he
+> has not yet responded to.
+>
+> There is an unsent Gmail draft containing this text (message `1a126a2031a2c79f`) —
+> delete it or leave it, but do not send it.
+>
+> The analysis below is still worth reading: it correctly identifies that this deal has
+> you supplying 100% of the IP for 40%, which is the `@war_forum` pattern. It is just too
+> late to use as a reply.
+>
+> **See `THREAD_STATE.md` for what to do instead.**
+>
+> Omar has not replied since. The ball is his — do not nudge.
+
+---
+
+**Status: SUPERSEDED — a reply was already sent.** Kept for the record.
 
 **Thread:** `1a1218c9defc5121` · reply to `<CAPTpB6POiAS8eAWy01PVfA62_7E2u-mH=h1TZEfg2p6i-xr7Ew@mail.gmail.com>`
 **Classification:** POSITIVE, but **the offer's premise fails** (prompts/02 reply handler)

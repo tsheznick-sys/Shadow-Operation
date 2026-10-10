@@ -37,7 +37,8 @@ python tools/algorithm_engine.py --dry-run # merge engine data into the tracker 
 python tools/tracker_log.py note --handle @castt.ai --text "..."
 python tools/tracker_log.py touch --handle @castt.ai --date 2026-10-12
 python tools/run_monetization_verdicts.py  # regenerate MONETIZATION_VERDICTS.md
-python -m pytest                           # 48 tests
+python tools/reconcile_gmail.py --export <gmail-export.csv> --campaign <label> [--dry-run]
+python -m pytest                           # 67 tests
 ```
 
 **The tracker is the source of truth.** `templates/creator_tracker.csv` is live pipeline state
@@ -50,3 +51,19 @@ about, keeps the file's own column order, and writes a timestamped backup to
 `--force` only when you have decided the engine is right. Use `tools/tracker_log.py` for
 hand edits rather than opening the CSV.
 
+
+**The tracker is not the pipeline — Gmail is.** Any email you send and do not write into
+`templates/creator_tracker.csv` is invisible to the funnel, to the kill criteria and to
+Gate G8. On 2026-10-10 an audit found a 101-recipient campaign in Gmail that was not in the
+tracker at all: the tracker read "29 contacted, 0 replies" while the truth was "130
+touched, 2 positive" and the operator's own pre-registered kill criterion had already
+fired. Export sent mail, then reconcile it:
+
+```bash
+python tools/reconcile_gmail.py --export daily/2026-10-10/gmail_export_raw_to_whop.csv \
+                                --campaign raw-to-whop-48h --dry-run
+```
+
+Imported recipients land as `QUARANTINED`, which `leak_finder.py` treats as terminal: they
+count toward the outreach-touch denominator so the numbers stay honest, but they never
+re-enter a send queue and are never re-pitched.
