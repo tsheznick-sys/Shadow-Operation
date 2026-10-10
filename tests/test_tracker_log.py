@@ -95,3 +95,34 @@ def test_backup_written_before_overwrite(tmp_path):
     path = seed(tmp_path)
     run("note", "--handle", "@castt.ai", "--file", str(path), "--text", "x")
     assert list((tmp_path / "backups").glob("creator_tracker_*.csv"))
+
+
+def test_add_creates_a_row_and_refuses_duplicates(tmp_path):
+    path = seed(tmp_path)
+    run("add", "--handle", "@ainewscentral", "--file", str(path),
+        "--set", "status=WARM", "--set", "replies=1")
+    rows = read(path)
+    assert len(rows) == 2
+    new = rows[1]
+    assert new["handle"] == "@ainewscentral"
+    assert new["status"] == "WARM"
+    assert new["replies"] == "1"
+    assert new["price"] == ""            # unknown columns stay blank, never invented
+
+    out = subprocess.run(
+        [sys.executable, os.path.join(TOOLS, "tracker_log.py"), "add", "--handle",
+         "@ainewscentral", "--file", str(path), "--set", "status=X"],
+        capture_output=True, text=True)
+    assert out.returncode != 0
+    assert "already in the tracker" in (out.stdout + out.stderr)
+    assert len(read(path)) == 2          # and nothing was written
+
+
+def test_add_rejects_malformed_set(tmp_path):
+    path = seed(tmp_path)
+    out = subprocess.run(
+        [sys.executable, os.path.join(TOOLS, "tracker_log.py"), "add", "--handle",
+         "@new", "--file", str(path), "--set", "oops"],
+        capture_output=True, text=True)
+    assert out.returncode != 0
+    assert "FIELD=VALUE" in (out.stdout + out.stderr)

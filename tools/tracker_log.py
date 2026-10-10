@@ -80,7 +80,7 @@ def append_note(row, text):
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("command", choices=["note", "touch", "set", "show"])
+    p.add_argument("command", choices=["note", "touch", "set", "show", "add"])
     p.add_argument("--handle", required=True)
     p.add_argument("--file", default=TRACKER)
     p.add_argument("--text", help="note text (command: note)")
@@ -88,6 +88,8 @@ def main(argv=None):
     p.add_argument("--status")
     p.add_argument("--replies")
     p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--set", action="append", default=[], metavar="FIELD=VALUE",
+                   help="extra column to set (repeatable); command: add")
     a = p.parse_args(argv)
 
     path = resolve(a.file)
@@ -95,11 +97,23 @@ def main(argv=None):
         raise SystemExit(f"tracker not found: {path}")
     rows, fields = load(path)
     row = find(rows, a.handle)
-    if row is None:
+
+    if a.command == "add":
+        # the only command allowed to name a handle that is not in the file yet
+        if row is not None:
+            raise SystemExit(f"{a.handle} is already in the tracker - use note/set instead")
+        new = {"handle": a.handle}
+        for item in a.set:
+            if "=" not in item:
+                raise SystemExit(f"--set needs FIELD=VALUE, got: {item}")
+            k, v = item.split("=", 1)
+            new[k.strip()] = v.strip()
+        rows.append(new)
+        print(f"{a.handle} added ({len(rows)} rows)")
+    elif row is None:
         known = ", ".join(sorted((r.get("handle") or "") for r in rows)[:10])
         raise SystemExit(f"no such handle: {a.handle}\nknown handles include: {known} ...")
-
-    if a.command == "show":
+    elif a.command == "show":
         for k in fields:
             print(f"{k:<24} {row.get(k, '')}")
         return 0
