@@ -1,0 +1,164 @@
+{
+  "date": "2026-10-16",
+  "method": "direct dork search + listicle/directory scraping",
+  "queries_run": 20,
+  "sources": [
+    "socialveins.com",
+    "influencer-hero.com",
+    "infldb.com",
+    "expertphotography.com",
+    "realitymax.com"
+  ],
+  "confirmed_new_leads": [
+    {
+      "handle": "@lemoon.synthography",
+      "followers": 29000,
+      "email": "contact@etherealmoon.xyz",
+      "niche": "Niche #2: AI Video (Sora/Runway/Pika/Kling/Hailuo)",
+      "source": "direct search"
+    },
+    {
+      "handle": "@ai.fiedstudio",
+      "followers": 27000,
+      "email": "aibrosteamm@gmail.com",
+      "niche": "Niche #2: AI Tools & Tech",
+      "source": "direct search"
+    },
+    {
+      "handle": "@ai.with.100",
+      "followers": 15000,
+      "email": "ai.with.100@gmail.com",
+      "niche": "Niche #2: AI Tools & Tips",
+      "source": "direct search"
+    },
+    {
+      "handle": "@matthewencina",
+      "followers": 95000,
+      "email": "hello@matthewencina.com",
+      "niche": "Niche #1: Motion Design (ex-CCO TheFutur)",
+      "source": "influencer-hero listicle"
+    },
+    {
+      "handle": "@jennymjiang",
+      "followers": 19000,
+      "email": "jenny@jennymjiang.com",
+      "niche": "Niche #1: 3D/Motion NYC & NZ",
+      "source": "influencer-hero listicle"
+    },
+    {
+      "handle": "@benfearnley.studio",
+      "followers": 51000,
+      "email": "hello@benfearnley.studio",
+      "niche": "Niche #3: 3D Art Direction (NY/London/Paris)",
+      "source": "influencer-hero listicle"
+    },
+    {
+      "handle": "@gravityblend",
+      "followers": 16000,
+      "email": "gravity3dcontact@gmail.com",
+      "niche": "Niche #3: Blender 3D Environment",
+      "source": "socialveins listicle"
+    },
+    {
+      "handle": "@3seater",
+      "followers": 20000,
+      "email": "contact@3seater.com",
+      "niche": "Niche #3: 3D Artist",
+      "source": "influencer-hero listicle"
+    },
+    {
+      "handle": "@figma._.designer",
+      "followers": 50000,
+      "email": "abhipathak881@gmail.com",
+      "niche": "Adjacent: UI/UX Figma Design",
+      "source": "direct search"
+    },
+    {
+      "handle": "@alexblainanim_",
+      "followers": 22000,
+      "email": "alexblain.contact@gmail.com",
+      "niche": "Adjacent: 2D Animation",
+      "source": "direct search"
+    }
+  ],
+  "needs_bio_verification": [
+    {
+      "handle": "@aymeric_kevin",
+      "followers": 56000,
+      "niche": "Niche #1: VFX Director (Spiderverse/Arcane)",
+      "note": "World-class credits"
+    },
+    {
+      "handle": "@cooldeep.ai",
+      "followers": 71000,
+      "niche": "Niche #2: AI/ChatGPT/Tech",
+      "note": "85K newsletter subscribers"
+    },
+    {
+      "handle": "@danny_mac3d",
+      "followers": 72000,
+      "niche": "Niche #3: Blender 3D Character",
+      "note": "UK-based educator"
+    },
+    {
+      "handle": "@space_meerkat",
+      "followers": 91000,
+      "niche": "Niche #3: Blender 3D CGI",
+      "note": "Game art director"
+    },
+    {
+      "handle": "@perry__cooper",
+      "followers": 58000,
+      "niche": "Niche #1: 3D Motion Graphics",
+      "note": "18yr advertising career"
+    },
+    {
+      "handle": "@jakeinmotion",
+      "followers": 52000,
+      "niche": "Niche #1: Motion Design AE",
+      "note": "Lead educator Battle Axe"
+    },
+    {
+      "handle": "@prashan.subasinghe",
+      "followers": 52000,
+      "niche": "Niche #3: 3D Character Artist",
+      "note": "Minneapolis-based"
+    },
+    {
+      "handle": "@render_fruit",
+      "followers": 35000,
+      "niche": "Niche #1: 3D Animation",
+      "note": "Worked with Nike/MTV/Adult Swim"
+    },
+    {
+      "handle": "@ryantalbot_art",
+      "followers": 31000,
+      "niche": "Niche #3: 3D Artist SoCal",
+      "note": "29.5% engagement rate"
+    },
+    {
+      "handle": "@jaieart",
+      "followers": 44000,
+      "niche": "Niche #3: 3D Artist LA",
+      "note": ""
+    },
+    {
+      "handle": "@nickhshaheen",
+      "followers": 15000,
+      "niche": "Niche #1: Motion Graphics Filmmaker",
+      "note": ""
+    },
+    {
+      "handle": "@gagavideoeditor",
+      "followers": 89000,
+      "niche": "Niche #1: Premiere/AE tutorials",
+      "note": "Already sells editing packs"
+    },
+    {
+      "handle": "@manueldoesmotion",
+      "followers": 80000,
+      "niche": "Niche #1: Motion Design",
+      "note": "Freelance + courses"
+    }
+  ]
+}
