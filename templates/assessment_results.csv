@@ -1,0 +1,425 @@
+handle,niche,niche_group,followers,engagement_rate,niche_fit,audience_quality,product_fit,growth_signal,total_score,gate_result,gate_reasons,qualified
+@plasticaction,Animation,Niche #1,356000,19.9,30,25,25,20,100,PASS,clean,True
+@andyharbeck,Animation,Niche #1,165000,17.1,30,25,25,16,96,PASS,clean,True
+@editor_dhanush_official,Video Editing,Niche #1,251000,5.6,30,25,25,14,94,PASS,clean,True
+@zoneofeditors,Video Editing,Niche #1,154000,7.6,30,25,25,14,94,PASS,clean,True
+@gerdegotit,AI Video,Niche #2,1100000,28.4,28,20,25,20,93,AMBER,"too_large (1,100,000)",True
+@ycimaging,Video Editing,Niche #1,103000,5.6,30,25,25,12,92,PASS,clean,True
+@vlo.mktg,Video Editing,Niche #1,151000,6.6,30,25,25,12,92,PASS,clean,True
+@dawahsalah,Video Editing,Niche #1,137000,6.1,30,25,25,12,92,PASS,clean,True
+@babygotbackhead,3D Art,Niche #3,124000,8.5,28,25,25,14,92,PASS,clean,True
+@3daneder,3D Art,Niche #3,36000,33.1,28,25,25,14,92,PASS,clean,True
+@bitchseida,3D Art,Niche #3,43000,27.3,28,25,25,14,92,PASS,clean,True
+@ronkijan,VFX,Niche #1,215000,3.0,30,24,25,12,91,PASS,clean,True
+@processvideo,Video Editing,Niche #1,559000,7.5,30,20,25,16,91,AMBER,"too_large (559,000)",True
+@officialgogna05,Video Editing,Niche #1,203000,4.2,30,24,25,12,91,PASS,clean,True
+@raymor220,Video Editing,Niche #1,176000,3.0,30,24,25,12,91,PASS,clean,True
+@peshome,Animation,Niche #1,445000,2.5,30,22,25,14,91,PASS,clean,True
+@mikeyplease,Animation,Niche #1,189000,3.5,30,24,25,12,91,PASS,clean,True
+@cammiereis,Animation,Niche #1,414000,2.5,30,22,25,14,91,PASS,clean,True
+@benmarriott_,Motion Design,Niche #1,300000,3.0,30,24,25,12,91,PASS,clean,True
+@zachking,VFX,Niche #1,25500000,2.0,30,15,25,20,90,AMBER,"too_large (25,500,000)",True
+@candy_dust23,Animation,Niche #1,13000,23.0,30,25,25,10,90,PASS,clean,True
+@rubenfro,VFX,Niche #1,80000,4.0,30,25,25,10,90,PASS,clean,True
+@iamchaporro,VFX,Niche #1,60000,5.0,30,25,25,10,90,PASS,clean,True
+@ant.rubinstein,VFX,Niche #1,45000,6.0,30,25,25,10,90,PASS,clean,True
+@romthirty_vfx,VFX,Niche #1,35000,7.0,30,25,25,10,90,PASS,clean,True
+@vfxexpress,VFX,Niche #1,90000,3.5,30,25,25,10,90,PASS,clean,True
+@raffo_vfx,VFX,Niche #1,58000,4.0,30,25,25,10,90,PASS,clean,True
+@sirwadefx,Animation,Niche #1,20000,15.5,30,25,25,10,90,PASS,clean,True
+@orbssyai,AI Art,Niche #2,65000,12.6,28,25,25,12,90,PASS,clean,True
+@xr.architect,AI Art,Niche #2,14000,42.6,28,25,25,12,90,PASS,clean,True
+@brittabug,3D Art,Niche #3,50000,19.5,28,25,25,12,90,PASS,clean,True
+@trinketsorceress,3D Art,Niche #3,62000,8.9,28,25,25,12,90,PASS,clean,True
+@thou_art_lumi,Animation,Niche #1,237000,76.2,30,15,25,20,90,PASS,engagement_suspect (76.2%),True
+@karenxcheng,VFX,Niche #1,500000,2.0,30,22,25,12,89,PASS,clean,True
+@editoreallive,Video Editing,Niche #1,250000,2.3,30,22,25,12,89,PASS,clean,True
+@ultimatediting,Video Editing,Niche #1,125000,3.0,30,24,25,10,89,PASS,clean,True
+@inkwell_illustrations,Animation,Niche #1,112000,3.3,30,24,25,10,89,PASS,clean,True
+@slurpstudio,Motion Design,Niche #1,485000,2.0,30,22,25,12,89,PASS,clean,True
+@davidoreilly,Animation,Niche #1,387000,2.0,30,22,25,12,89,PASS,clean,True
+@tunabora,Animation,Niche #1,156000,3.0,30,24,25,10,89,PASS,clean,True
+@winchumbo,VFX,Niche #1,150000,3.0,30,24,25,10,89,PASS,clean,True
+@motiondesigners,Motion Design,Niche #1,252000,2.5,30,22,25,12,89,PASS,clean,True
+@schoolofmotion,Motion Design,Niche #1,300000,2.0,30,22,25,12,89,PASS,clean,True
+@twomoosedesign,3D Art,Niche #3,223000,3.0,28,24,25,12,89,PASS,clean,True
+@will_toulan,AI Art,Niche #2,80000,3.0,28,25,25,10,88,PASS,clean,True
+@polysbymolly,3D Art,Niche #3,80000,2.9,28,25,25,10,88,PASS,clean,True
+@j2motion,3D Art,Niche #3,18000,22.8,28,25,25,10,88,PASS,clean,True
+@pixarmike,3D Art,Niche #3,15000,14.8,28,25,25,10,88,PASS,clean,True
+@ooziboi,3D Art,Niche #3,18000,11.6,28,25,25,10,88,PASS,clean,True
+@emty01,Houdini,Niche #3,80000,3.0,28,25,25,10,88,PASS,clean,True
+@polygonrunaway,Blender,Niche #3,100000,3.0,28,25,25,10,88,PASS,clean,True
+@rebelwayvfx,VFX,Niche #1,120000,2.5,30,22,25,10,87,PASS,clean,True
+@editor_how,Video Editing,Niche #1,134000,2.7,30,22,25,10,87,PASS,clean,True
+@digitaldisaster,VFX,Niche #1,137000,2.5,30,22,25,10,87,PASS,clean,True
+@annibalesiconolfi,3D Art,Niche #3,300000,2.5,28,22,25,12,87,PASS,clean,True
+@bolek_3d,3D Art,Niche #3,254000,2.2,28,22,25,12,87,PASS,clean,True
+@mojahedfudailat,3D Art,Niche #3,348000,2.0,28,22,25,12,87,PASS,clean,True
+@filmcrux,Video Editing,Niche #1,50000,3.0,30,25,25,6,86,PASS,clean,True
+@leeparisi,Video Editing,Niche #1,84000,2.0,30,25,25,6,86,PASS,clean,True
+@zayetheplug,Video Editing,Niche #1,32000,5.7,30,25,25,6,86,PASS,clean,True
+@mikeday509,Video Editing,Niche #1,16000,6.5,30,25,25,6,86,PASS,clean,True
+@filmcolorist,Color Grading,Niche #1,19000,3.0,30,25,25,6,86,PASS,clean,True
+@frenchie_ct,Color Grading,Niche #1,6000,4.0,30,25,25,6,86,PASS,clean,True
+@tobiamontanari,Color Grading,Niche #1,15000,2.5,30,25,25,6,86,PASS,clean,True
+@julbass,VFX,Niche #1,35000,5.0,30,25,25,6,86,PASS,clean,True
+@animestation__,Animation,Niche #1,12000,7.2,30,25,25,6,86,PASS,clean,True
+@thevfxinstitute,VFX,Niche #1,12000,4.0,30,25,25,6,86,PASS,clean,True
+@dannystern,Motion Design,Niche #1,15000,8.0,30,25,25,6,86,PASS,clean,True
+@jimh_motion,Motion Design,Niche #1,12000,6.0,30,25,25,6,86,PASS,clean,True
+@stephenonguk,Motion Design,Niche #1,18000,4.5,30,25,25,6,86,PASS,clean,True
+@eleanor.ngai,Animation,Niche #1,20000,3.0,30,25,25,6,86,PASS,clean,True
+@georgieyanadesign,Motion Design,Niche #1,12000,5.0,30,25,25,6,86,PASS,clean,True
+@matvoyce,Motion Design,Niche #1,45000,4.0,30,25,25,6,86,PASS,clean,True
+@thomasburden,Animation,Niche #1,30000,3.5,30,25,25,6,86,PASS,clean,True
+@carmelobm,Animation,Niche #1,55000,2.5,30,25,25,6,86,PASS,clean,True
+@wildercarrigan,VFX,Niche #1,5000,8.0,30,25,25,6,86,PASS,clean,True
+@eliapelle,VFX,Niche #1,60000,2.0,30,25,25,6,86,PASS,clean,True
+@agreenster,Animation,Niche #1,22000,4.2,30,25,25,6,86,PASS,clean,True
+@_maxnovak,VFX,Niche #1,20000,3.1,30,25,25,6,86,PASS,clean,True
+@yatoimtop,Animation,Niche #1,16000,2.4,30,25,25,6,86,PASS,clean,True
+@thechristopherwright,Animation,Niche #1,19000,4.6,30,25,25,6,86,PASS,clean,True
+@aftereffectstips,After Effects,Niche #1,80000,2.0,30,25,25,6,86,PASS,clean,True
+@premiereprotips,Premiere Pro,Niche #1,70000,2.5,30,25,25,6,86,PASS,clean,True
+@coloristjournal,Color Grading,Niche #1,25000,3.0,30,25,25,6,86,PASS,clean,True
+@learnfilmmaking,Filmmaking,Niche #1,85000,2.5,30,25,20,10,85,PASS,clean,True
+@carlostigs,Cinematography,Niche #1,18000,14.7,30,25,20,10,85,PASS,clean,True
+@rank.sss,Motion Design,Niche #1,570000,93.2,30,10,25,20,85,AMBER,"too_large (570,000); engagement_suspect (93.2%)",True
+@if_only,AI Art,Niche #2,120000,2.5,28,22,25,10,85,PASS,clean,True
+@zhestkov.studio,3D Art,Niche #3,200000,2.0,28,22,25,10,85,PASS,clean,True
+@patrick_4d,3D Art,Niche #3,204000,2.0,28,22,25,10,85,PASS,clean,True
+@hayden_clay,3D Art,Niche #3,103000,2.5,28,22,25,10,85,PASS,clean,True
+@kbibwod,Game Art,Niche #3,55000,14.4,28,25,20,12,85,PASS,clean,True
+@eduard_ov,3D Art,Niche #3,220000,2.0,28,22,25,10,85,PASS,clean,True
+@pancake_manicure,Animation,Niche #1,22000,83.6,30,15,25,14,84,PASS,engagement_suspect (83.6%),True
+@albertomielgoart,Animation,Niche #1,678000,2.0,30,15,25,14,84,AMBER,"too_large (678,000)",True
+@libre777,AI Art,Niche #2,25000,4.0,28,25,25,6,84,PASS,clean,True
+@dakotadarkfire,AI Art,Niche #2,10000,2.0,28,25,25,6,84,PASS,clean,True
+@michaeltanzillo,3D Art,Niche #3,100000,2.0,28,25,25,6,84,PASS,clean,True
+@willurquhart3d,Blender,Niche #3,30000,4.0,28,25,25,6,84,PASS,clean,True
+@pvtrykbvbski,Blender,Niche #3,19000,5.0,28,25,25,6,84,PASS,clean,True
+@laliett,Blender,Niche #3,14000,3.5,28,25,25,6,84,PASS,clean,True
+@jonianmax,Blender,Niche #3,10000,4.0,28,25,25,6,84,PASS,clean,True
+@noc.art_,Blender,Niche #3,12000,3.0,28,25,25,6,84,PASS,clean,True
+@danielliang_1107,3D Art,Niche #3,16000,3.0,28,25,25,6,84,PASS,clean,True
+@bureaubruin,Blender,Niche #3,15000,4.0,28,25,25,6,84,PASS,clean,True
+@blender.tutorials,Blender,Niche #3,32000,2.5,28,25,25,6,84,PASS,clean,True
+@blendermania3d,Blender,Niche #3,32000,3.0,28,25,25,6,84,PASS,clean,True
+@blenderbros3d,Blender,Niche #3,25000,4.0,28,25,25,6,84,PASS,clean,True
+@benfearnley.studio,3D Art,Niche #3,52000,2.0,28,25,25,6,84,PASS,clean,True
+@jaieart,3D Art,Niche #3,44000,2.0,28,25,25,6,84,PASS,clean,True
+@tyrassic,3D Art,Niche #3,19000,5.8,28,25,25,6,84,PASS,clean,True
+@carsbykris,3D Art,Niche #3,11000,4.5,28,25,25,6,84,PASS,clean,True
+@screengeist,3D Art,Niche #3,31000,3.0,28,25,25,6,84,PASS,clean,True
+@marigoldff,3D Art,Niche #3,31000,2.5,28,25,25,6,84,PASS,clean,True
+@blansable,3D Art,Niche #3,56000,3.0,28,25,25,6,84,PASS,clean,True
+@darrion.c4d,Cinema 4D,Niche #3,5000,8.0,28,25,25,6,84,PASS,clean,True
+@robin.lundin,Houdini,Niche #3,20000,3.0,28,25,25,6,84,PASS,clean,True
+@tmrzv,3D Art,Niche #3,19000,4.0,28,25,25,6,84,PASS,clean,True
+@kaeptive,3D Art,Niche #3,47000,2.0,28,25,25,6,84,PASS,clean,True
+@madebystudiojq,3D Art,Niche #3,60000,2.5,28,25,25,6,84,PASS,clean,True
+@mikefranchina,Concept Art,Niche #3,90000,2.0,28,25,25,6,84,PASS,clean,True
+@leticiagillettart,3D Art,Niche #3,36000,5.0,28,25,25,6,84,PASS,clean,True
+@zavalalml,3D Art,Niche #3,40000,3.5,28,25,25,6,84,PASS,clean,True
+@georgehulldesign,Concept Art,Niche #3,15000,6.2,28,25,25,6,84,PASS,clean,True
+@dailyc4d,Cinema 4D,Niche #3,45000,3.0,28,25,25,6,84,PASS,clean,True
+@c4d_daily,Cinema 4D,Niche #3,60000,2.5,28,25,25,6,84,PASS,clean,True
+@evarcreation,3D Art,Niche #3,20000,5.0,28,25,25,6,84,PASS,clean,True
+@hutdieb,3D Art,Niche #3,19000,4.0,28,25,25,6,84,PASS,clean,True
+@andrewpprice,Blender,Niche #3,50000,2.0,28,25,25,6,84,PASS,clean,True
+@blandsable,3D Art,Niche #3,56000,3.0,28,25,25,6,84,PASS,clean,True
+@poetofcode,AI Art,Niche #2,25000,2.2,28,25,25,6,84,PASS,clean,True
+@niche.vfx,VFX,Niche #1,500,10.0,30,22,25,6,83,REJECT,too_small (500),False
+@tech.unicorn,AI Tools,Niche #2,341000,16.2,28,25,10,20,83,PASS,clean,True
+@kariimehabb,Video Editing,Niche #1,262000,1.8,30,17,25,10,82,PASS,clean,True
+@theeditorsmarket,Video Editing,Niche #1,205000,1.1,30,17,25,10,82,PASS,clean,True
+@thomaswellmann,Motion Design,Niche #1,267000,1.5,30,17,25,10,82,PASS,clean,True
+@britsketch,Animation,Niche #1,217000,1.0,30,17,25,10,82,PASS,clean,True
+@sidefx,Houdini,Niche #3,400000,1.5,28,17,25,12,82,PASS,clean,True
+@wannerstedt,3D Art,Niche #3,758000,2.0,28,15,25,14,82,AMBER,"too_large (758,000)",True
+@jigpx,3D Art,Niche #3,752000,2.0,28,15,25,14,82,AMBER,"too_large (752,000)",True
+@workmanmatt,Cinematography,Niche #1,182000,2.0,30,22,20,10,82,PASS,clean,True
+@davinciresolve,DaVinci Resolve,Niche #1,150000,1.5,30,17,25,10,82,PASS,clean,True
+@filmup.co,Filmmaking,Niche #1,45000,2.2,30,25,20,6,81,PASS,clean,True
+@jordan_orme,Video Editing,Niche #1,45000,1.8,30,20,25,6,81,PASS,clean,True
+@omareltakrori,Video Editing,Niche #1,96000,1.3,30,20,25,6,81,PASS,clean,True
+@dannijuhl,Filmmaking,Niche #1,51000,69.7,30,15,20,16,81,PASS,engagement_suspect (69.7%),True
+@pedrovazquezfilms,Video Editing,Niche #1,40000,1.3,30,20,25,6,81,PASS,clean,True
+@jakeinmotion,Motion Design,Niche #1,42000,1.8,30,20,25,6,81,PASS,clean,True
+@the.pinklemonade,Animation,Niche #1,2400000,1.0,30,10,25,16,81,AMBER,"too_large (2,400,000)",True
+@meetquak,Animation,Niche #1,2400000,1.0,30,10,25,16,81,AMBER,"too_large (2,400,000)",True
+@akelexone,3D Art,Niche #3,4400,6.0,28,22,25,6,81,REJECT,"too_small (4,400)",False
+@baxvisual,3D Art,Niche #3,4400,6.0,28,22,25,6,81,REJECT,"too_small (4,400)",False
+@siegmattel.visuals,Houdini,Niche #3,3300,8.0,28,22,25,6,81,REJECT,"too_small (3,300)",False
+@sebastianjern,Filmmaking,Niche #1,50000,3.0,30,25,20,6,81,PASS,clean,True
+@tomantos,Filmmaking,Niche #1,80000,2.5,30,25,20,6,81,PASS,clean,True
+@filmcourage,Filmmaking,Niche #1,9100,3.0,30,25,20,6,81,PASS,clean,True
+@blenderguru,Blender,Niche #3,133,10.0,28,22,25,6,81,REJECT,too_small (133),False
+@petermckinnon,Photography,Adjacent,3100000,3.5,18,17,25,20,80,AMBER,"too_large (3,100,000)",True
+@samkolder,Filmmaking,Niche #1,6200000,1.5,30,10,20,20,80,AMBER,"too_large (6,200,000)",True
+@blenderhub7,Blender,Niche #3,229000,1.5,28,17,25,10,80,PASS,clean,True
+@3dblendered,Blender,Niche #3,183000,1.8,28,17,25,10,80,PASS,clean,True
+@80level,3D Art,Niche #3,150000,1.5,28,17,25,10,80,PASS,clean,True
+@blenderartists,Blender,Niche #3,214000,1.5,28,17,25,10,80,PASS,clean,True
+@blender.community,Blender,Niche #3,300000,1.0,28,17,25,10,80,PASS,clean,True
+@frankly_built,3D Art,Niche #3,233000,1.3,28,17,25,10,80,PASS,clean,True
+@imma.gram,AI Art,Niche #2,393000,1.0,28,17,25,10,80,PASS,clean,True
+@maioka.co,Photography,Adjacent,54000,13.7,18,25,25,12,80,PASS,clean,True
+@paulzizkaphoto,Photography,Adjacent,180000,3.0,18,24,25,12,79,PASS,clean,True
+@ashthorp,Motion Design,Niche #1,1100000,1.5,30,10,25,14,79,AMBER,"too_large (1,100,000)",True
+@jonaspeterson,AI Art,Niche #2,81000,1.7,28,20,25,6,79,PASS,clean,True
+@blender.studio.official,Blender,Niche #3,71000,1.5,28,20,25,6,79,PASS,clean,True
+@perry__cooper,3D Art,Niche #3,58000,1.5,28,20,25,6,79,PASS,clean,True
+@slaterrobles.jpg,3D Art,Niche #3,11000,1.8,28,20,25,6,79,PASS,clean,True
+@nessgraphics,3D Art,Niche #3,54000,1.5,28,20,25,6,79,PASS,clean,True
+@thomberard,3D Art,Niche #3,52000,1.1,28,20,25,6,79,PASS,clean,True
+@edgykatrina,Graphic Design,Adjacent,355000,5.7,18,25,20,16,79,PASS,clean,True
+@taef0i,Graphic Design,Adjacent,257000,8.2,18,25,20,16,79,PASS,clean,True
+@yanarts,Game Art,Niche #3,11000,2.0,28,25,20,6,79,PASS,clean,True
+@vitalyyraskalov,Photography,Adjacent,266000,3.0,18,24,25,12,79,PASS,clean,True
+@doyoutravel,Photography,Adjacent,2700000,2.0,18,15,25,20,78,AMBER,"too_large (2,700,000)",True
+@jordi.koalitic,Photography,Adjacent,7300000,2.0,18,15,25,20,78,AMBER,"too_large (7,300,000)",True
+@rachelhau,Photography,Adjacent,85000,3.5,18,25,25,10,78,PASS,clean,True
+@joshjack,Photography,Adjacent,100000,2.5,18,25,25,10,78,PASS,clean,True
+@anton_in_nyc,Photography,Adjacent,80000,3.0,18,25,25,10,78,PASS,clean,True
+@filmmakersworld,Filmmaking,Niche #1,120000,1.8,30,17,20,10,77,PASS,clean,True
+@edwardleefilms,Filmmaking,Niche #1,174000,1.7,30,17,20,10,77,PASS,clean,True
+@cinematographydb,Cinematography,Niche #1,182000,1.5,30,17,20,10,77,PASS,clean,True
+@mattihaapoja,Filmmaking,Niche #1,150000,1.8,30,17,20,10,77,PASS,clean,True
+@misshattan,Photography,Adjacent,250000,2.5,18,22,25,12,77,PASS,clean,True
+@lindsayadler_photo,Photography,Adjacent,202000,2.5,18,22,25,12,77,PASS,clean,True
+@shootwithrobert,Photography,Adjacent,120000,3.0,18,24,25,10,77,PASS,clean,True
+@kaiziehl,Photography,Adjacent,281000,2.0,18,22,25,12,77,PASS,clean,True
+@lebackpacker,Photography,Adjacent,376000,2.0,18,22,25,12,77,PASS,clean,True
+@aliumeart,Digital Art,Adjacent,290000,6.2,18,25,20,14,77,PASS,clean,True
+@rowanfilms,Cinematography,Niche #1,20000,1.0,30,20,20,6,76,PASS,clean,True
+@macshoop,Filmmaking,Niche #1,40000,1.5,30,20,20,6,76,PASS,clean,True
+@gustafilms,Filmmaking,Niche #1,26000,1.8,30,20,20,6,76,PASS,clean,True
+@luminarycreative,Filmmaking,Niche #1,19000,1.3,30,20,20,6,76,PASS,clean,True
+@monaris_,Photography,Adjacent,1100000,3.0,18,17,25,16,76,AMBER,"too_large (1,100,000)",True
+@marvelousmaleia,Motion Design,Niche #1,25000,0.7,30,15,25,6,76,PASS,clean,True
+@loisvb,Animation,Niche #1,2600000,0.8,30,5,25,16,76,AMBER,"too_large (2,600,000)",True
+@blenderartwork,Blender,Niche #3,110000,1.5,28,17,25,6,76,PASS,clean,True
+@graphicdesigncentral,Graphic Design,Adjacent,357000,4.9,18,24,20,14,76,PASS,clean,True
+@minalimadesign,Graphic Design,Adjacent,400000,4.0,18,24,20,14,76,PASS,clean,True
+@kristy.thepinkpony,Graphic Design,Adjacent,326000,3.8,18,24,20,14,76,PASS,clean,True
+@djwrex,Music Production,Adjacent,339000,3.0,18,24,20,14,76,PASS,clean,True
+@marcadamus,Photography,Adjacent,200000,2.0,18,22,25,10,75,PASS,clean,True
+@jordanvoth,Photography,Adjacent,123000,2.5,18,22,25,10,75,PASS,clean,True
+@naolito,3D Art,Niche #3,519000,1.5,28,10,25,12,75,AMBER,"too_large (519,000)",True
+@jepharaujo,3D Art,Niche #3,526000,1.8,28,10,25,12,75,AMBER,"too_large (526,000)",True
+@brenzaart,Graphic Design,Adjacent,81000,11.8,18,25,20,12,75,PASS,clean,True
+@cocu_liu,Photography,Adjacent,150000,2.0,18,22,25,10,75,PASS,clean,True
+@samyoukilis,Photography,Adjacent,180000,2.0,18,22,25,10,75,PASS,clean,True
+@jackdavison_,Photography,Adjacent,120000,2.5,18,22,25,10,75,PASS,clean,True
+@juliadeblanc,Digital Art,Adjacent,168000,5.3,18,25,20,12,75,PASS,clean,True
+@vuhlandes,Photography,Adjacent,1300000,2.5,18,15,25,16,74,AMBER,"too_large (1,300,000)",True
+@stacykranitz,Photography,Adjacent,99000,2.0,18,25,25,6,74,PASS,clean,True
+@jdthecameraguy,Photography,Adjacent,1800000,2.0,18,15,25,16,74,AMBER,"too_large (1,800,000)",True
+@cassandracalin,Animation,Niche #1,2500000,0.5,30,5,25,14,74,AMBER,"too_large (2,500,000)",True
+@chriscarlsonart,3D Art,Niche #3,16000,0.8,28,15,25,6,74,PASS,clean,True
+@babakjamcg,3D Art,Niche #3,14000,0.7,28,15,25,6,74,PASS,clean,True
+@ronthekiller,3D Art,Niche #3,16000,0.8,28,15,25,6,74,PASS,clean,True
+@macklawrencestudio,3D Art,Niche #3,16000,0.7,28,15,25,6,74,PASS,clean,True
+@cj.cawley.design,Graphic Design,Adjacent,642000,5.0,18,20,20,16,74,AMBER,"too_large (642,000)",True
+@borovusha,Graphic Design,Adjacent,167000,4.1,18,24,20,12,74,PASS,clean,True
+@adam_theillustrator,Graphic Design,Adjacent,200000,3.0,18,24,20,12,74,PASS,clean,True
+@kepka,Photography,Adjacent,50000,3.5,18,25,25,6,74,PASS,clean,True
+@takinyerphoto,Photography,Adjacent,60000,2.5,18,25,25,6,74,PASS,clean,True
+@lindawisdomphotography,Photography,Adjacent,40000,3.0,18,25,25,6,74,PASS,clean,True
+@luuuuuuuiiiiiis,Photography,Adjacent,45000,2.0,18,25,25,6,74,PASS,clean,True
+@sendingstache,Photography,Adjacent,30000,4.0,18,25,25,6,74,PASS,clean,True
+@macro.viewpoint,Photography,Adjacent,25000,5.0,18,25,25,6,74,PASS,clean,True
+@skokowskipawel_nature,Photography,Adjacent,15000,6.0,18,25,25,6,74,PASS,clean,True
+@hofa_audio_engineering,Sound Design,Adjacent,14000,3.0,18,25,25,6,74,PASS,clean,True
+@diegostocco,Sound Design,Adjacent,50000,3.0,18,25,25,6,74,PASS,clean,True
+@richarddevine,Sound Design,Adjacent,30000,4.0,18,25,25,6,74,PASS,clean,True
+@defactosound,Sound Design,Adjacent,20000,3.0,18,25,25,6,74,PASS,clean,True
+@robertdudzic,Sound Design,Adjacent,15000,4.0,18,25,25,6,74,PASS,clean,True
+@pixar,Animation,Niche #1,5000000,0.3,30,5,25,14,74,AMBER,"too_large (5,000,000); low_engagement (0.3%)",True
+@indepthsounddesign,Sound Design,Adjacent,30000,3.0,18,25,25,6,74,PASS,clean,True
+@twok_hz,Sound Design,Adjacent,50000,2.5,18,25,25,6,74,PASS,clean,True
+@twentythousandhertz,Sound Design,Adjacent,80000,2.0,18,25,25,6,74,PASS,clean,True
+@hannaiwilson,Photography,Adjacent,19000,4.3,18,25,25,6,74,PASS,clean,True
+@_nyclive_,Photography,Adjacent,20000,2.4,18,25,25,6,74,PASS,clean,True
+@joe_ryba,Animation,Niche #1,123000,0.7,30,12,25,6,73,PASS,clean,True
+@thetecnil,Video Editing,Niche #1,218000,0.6,30,12,25,6,73,PASS,clean,True
+@texd41_art,Digital Art,Adjacent,19000,16.3,18,25,20,10,73,PASS,clean,True
+@itskoyel,Music Production,Adjacent,80000,3.0,18,25,20,10,73,PASS,clean,True
+@djwestbankred,Music Production,Adjacent,51000,4.0,18,25,20,10,73,PASS,clean,True
+@jazzwrld,Music Production,Adjacent,94000,3.0,18,25,20,10,73,PASS,clean,True
+@skeevaa,Digital Art,Adjacent,80000,3.0,18,25,20,10,73,PASS,clean,True
+@moya_arts,Digital Art,Adjacent,61000,5.0,18,25,20,10,73,PASS,clean,True
+@liivaliisastudio,Digital Art,Adjacent,24000,10.2,18,25,20,10,73,PASS,clean,True
+@stuartdunkel,Digital Art,Adjacent,71000,4.2,18,25,20,10,73,PASS,clean,True
+@interstellar_isabellar,Digital Art,Adjacent,78000,5.6,18,25,20,10,73,PASS,clean,True
+@posterlaboratory,Graphic Design,Adjacent,80000,3.0,18,25,20,10,73,PASS,clean,True
+@calsnape,Photography,Adjacent,785000,2.0,18,15,25,14,72,AMBER,"too_large (785,000)",True
+@daniel_ernst,Photography,Adjacent,350000,1.5,18,17,25,12,72,PASS,clean,True
+@iuriebelegurschi,Photography,Adjacent,500000,1.5,18,17,25,12,72,PASS,clean,True
+@domics,Animation,Niche #1,1800000,0.5,30,5,25,12,72,AMBER,"too_large (1,800,000)",True
+@graphicgang,Graphic Design,Adjacent,309000,2.0,18,22,20,12,72,PASS,clean,True
+@wejustclick.me,Graphic Design,Adjacent,246000,2.4,18,22,20,12,72,PASS,clean,True
+@vickimcgrathart,Digital Art,Adjacent,110000,3.8,18,24,20,10,72,PASS,clean,True
+@lilmiquela,AI Art,Niche #2,2400000,0.5,28,5,25,14,72,AMBER,"too_large (2,400,000)",True
+@angelrod_films,Cinematography,Niche #1,36000,0.5,30,15,20,6,71,PASS,clean,True
+@indcity.productions,Motion Design,Niche #1,22000,0.1,30,10,25,6,71,AMBER,low_engagement (0.1%),True
+@anthonyweirdesigns,Animation,Niche #1,33000,0.1,30,10,25,6,71,AMBER,low_engagement (0.1%),True
+@patricklawler,VFX,Niche #1,18000,0.4,30,10,25,6,71,AMBER,low_engagement (0.4%),True
+@borguinhobr,Graphic Design,Adjacent,747000,4.9,18,17,20,16,71,AMBER,"too_large (747,000)",True
+@noahcampdesign,Animation,Niche #1,48000,0.3,30,10,25,6,71,AMBER,low_engagement (0.3%),True
+@benlowy,Photography,Adjacent,229000,1.5,18,17,25,10,70,PASS,clean,True
+@ellenvonunwerth,Photography,Adjacent,482000,1.0,18,17,25,10,70,PASS,clean,True
+@jaiden_animations,Animation,Niche #1,1400000,0.3,30,5,25,10,70,AMBER,"too_large (1,400,000); low_engagement (0.3%)",True
+@baugasm,Graphic Design,Adjacent,180000,2.0,18,22,20,10,70,PASS,clean,True
+@chittco,Graphic Design,Adjacent,150000,2.5,18,22,20,10,70,PASS,clean,True
+@abstract_tutorials,Graphic Design,Adjacent,161000,2.4,18,22,20,10,70,PASS,clean,True
+@minimal.layout,Graphic Design,Adjacent,108000,2.0,18,22,20,10,70,PASS,clean,True
+@designeryash_,Graphic Design,Adjacent,159000,2.5,18,22,20,10,70,PASS,clean,True
+@tadcarpenter,Illustration,Adjacent,150000,2.0,18,22,20,10,70,PASS,clean,True
+@zigor,Digital Art,Adjacent,200000,2.0,18,22,20,10,70,PASS,clean,True
+@grand_chamaco,Digital Art,Adjacent,150000,2.5,18,22,20,10,70,PASS,clean,True
+@piaariverola,Photography,Adjacent,250000,1.5,18,17,25,10,70,PASS,clean,True
+@logolounge,Graphic Design,Adjacent,150000,2.0,18,22,20,10,70,PASS,clean,True
+@swiss_graphic_design,Graphic Design,Adjacent,180000,2.0,18,22,20,10,70,PASS,clean,True
+@graphicdesignlove,Graphic Design,Adjacent,120000,2.5,18,22,20,10,70,PASS,clean,True
+@brandonwoelfel,Photography,Adjacent,2100000,1.5,18,10,25,16,69,AMBER,"too_large (2,100,000)",True
+@alexstrohl,Photography,Adjacent,1800000,1.8,18,10,25,16,69,AMBER,"too_large (1,800,000)",True
+@hannes_becker,Photography,Adjacent,1750000,1.5,18,10,25,16,69,AMBER,"too_large (1,750,000)",True
+@chrisburkard,Photography,Adjacent,3800000,1.2,18,10,25,16,69,AMBER,"too_large (3,800,000)",True
+@jimmychin,Photography,Adjacent,3400000,1.0,18,10,25,16,69,AMBER,"too_large (3,400,000)",True
+@render_fruit,3D Art,Niche #3,35000,0.3,28,10,25,6,69,AMBER,low_engagement (0.3%),True
+@gensen_yt,3D Art,Niche #3,13000,0.4,28,10,25,6,69,AMBER,low_engagement (0.4%),True
+@robynleora,Digital Art,Adjacent,89000,2.0,18,25,20,6,69,PASS,clean,True
+@velvetspectrum,Graphic Design,Adjacent,100000,2.0,18,25,20,6,69,PASS,clean,True
+@wadejeffree,Graphic Design,Adjacent,80000,2.5,18,25,20,6,69,PASS,clean,True
+@neil_a_stevens,Graphic Design,Adjacent,45000,3.0,18,25,20,6,69,PASS,clean,True
+@joshua_ariza,Graphic Design,Adjacent,15000,2.2,18,25,20,6,69,PASS,clean,True
+@irene_neyman,Illustration,Adjacent,30000,4.0,18,25,20,6,69,PASS,clean,True
+@alexandrazutto,Illustration,Adjacent,50000,3.0,18,25,20,6,69,PASS,clean,True
+@musiciangoods_official,Music Production,Adjacent,14000,3.0,18,25,20,6,69,PASS,clean,True
+@drawbeatmaker,Music Production,Adjacent,8000,5.0,18,25,20,6,69,PASS,clean,True
+@vibra.electronicmusic,Music Production,Adjacent,5000,6.0,18,25,20,6,69,PASS,clean,True
+@windmilllanerecording,Music Production,Adjacent,12000,2.5,18,25,20,6,69,PASS,clean,True
+@mathiasschober_ofc,Music Production,Adjacent,8000,4.0,18,25,20,6,69,PASS,clean,True
+@be_twiin_music,Music Production,Adjacent,6300,5.0,18,25,20,6,69,PASS,clean,True
+@jakesilva,Music Production,Adjacent,23000,5.0,18,25,20,6,69,PASS,clean,True
+@djg_baby,Music Production,Adjacent,19600,6.0,18,25,20,6,69,PASS,clean,True
+@djsummer,Music Production,Adjacent,38000,5.0,18,25,20,6,69,PASS,clean,True
+@djshu_g,Music Production,Adjacent,518000,3.0,18,17,20,14,69,AMBER,"too_large (518,000)",True
+@baalti,Music Production,Adjacent,22000,5.0,18,25,20,6,69,PASS,clean,True
+@djtravella,Music Production,Adjacent,47000,4.0,18,25,20,6,69,PASS,clean,True
+@bellaclaxton,Music Production,Adjacent,33500,4.5,18,25,20,6,69,PASS,clean,True
+@lukealessi,Music Production,Adjacent,35300,4.0,18,25,20,6,69,PASS,clean,True
+@x3butterfly,Music Production,Adjacent,19400,5.0,18,25,20,6,69,PASS,clean,True
+@philipferrari,Music Production,Adjacent,6800,6.0,18,25,20,6,69,PASS,clean,True
+@jacksoren,Digital Art,Adjacent,21000,4.0,18,25,20,6,69,PASS,clean,True
+@suyaotian,Digital Art,Adjacent,80000,2.3,18,25,20,6,69,PASS,clean,True
+@dessalines_artistry,Digital Art,Adjacent,22000,4.6,18,25,20,6,69,PASS,clean,True
+@rachelpatrickart,Digital Art,Adjacent,29000,6.6,18,25,20,6,69,PASS,clean,True
+@rosedatocdall,Digital Art,Adjacent,16000,5.4,18,25,20,6,69,PASS,clean,True
+@annacarllart,Digital Art,Adjacent,38000,3.5,18,25,20,6,69,PASS,clean,True
+@chrisrogersart,Digital Art,Adjacent,19000,2.4,18,25,20,6,69,PASS,clean,True
+@influencer_hero,AI Tools,Niche #2,50000,2.0,28,25,10,6,69,PASS,clean,True
+@artofteaching,Digital Art,Adjacent,22000,5.2,18,25,20,6,69,PASS,clean,True
+@alexbenton.ux,UI/UX Design,Adjacent,80000,3.0,18,25,15,10,68,PASS,clean,True
+@brahmino,Photography,Adjacent,972000,1.8,18,10,25,14,67,AMBER,"too_large (972,000)",True
+@helloemilie,Photography,Adjacent,1300000,1.2,18,10,25,14,67,AMBER,"too_large (1,300,000)",True
+@ilhan1077,Photography,Adjacent,832000,1.5,18,10,25,14,67,AMBER,"too_large (832,000)",True
+@fursty,Photography,Adjacent,1200000,1.5,18,10,25,14,67,AMBER,"too_large (1,200,000)",True
+@danielkordan,Photography,Adjacent,1500000,1.0,18,10,25,14,67,AMBER,"too_large (1,500,000)",True
+@david_lachapelle,Photography,Adjacent,773000,1.8,18,10,25,14,67,AMBER,"too_large (773,000)",True
+@jasonpeterson,Photography,Adjacent,1000000,1.5,18,10,25,14,67,AMBER,"too_large (1,000,000)",True
+@mikekus,Photography,Adjacent,832000,1.8,18,10,25,14,67,AMBER,"too_large (832,000)",True
+@alanayoubi,Graphic Design,Adjacent,747000,2.0,18,15,20,14,67,AMBER,"too_large (747,000)",True
+@sketchfactory,Graphic Design,Adjacent,868000,2.0,18,15,20,14,67,AMBER,"too_large (868,000)",True
+@lorem.ipsum.designs,Graphic Design,Adjacent,323000,1.8,18,17,20,12,67,PASS,clean,True
+@bestbeatmakersworld,Music Production,Adjacent,390000,1.5,18,17,20,12,67,PASS,clean,True
+@billelis,Digital Art,Adjacent,500000,1.5,18,17,20,12,67,PASS,clean,True
+@jaysweatvisuals,Cinematography,Niche #1,15000,0.2,30,10,20,6,66,AMBER,low_engagement (0.2%),True
+@jordan.mix.engineer,Music Production,Adjacent,4300,7.0,18,22,20,6,66,REJECT,"too_small (4,300)",False
+@whose.music,Music Production,Adjacent,4200,6.0,18,22,20,6,66,REJECT,"too_small (4,200)",False
+@brendandekora,Music Production,Adjacent,3400,8.0,18,22,20,6,66,REJECT,"too_small (3,400)",False
+@javiergarzamix,Music Production,Adjacent,2700,10.0,18,22,20,6,66,REJECT,"too_small (2,700)",False
+@kcsounds,Music Production,Adjacent,4800,6.0,18,22,20,6,66,REJECT,"too_small (4,800)",False
+@pgstudio,Music Production,Adjacent,1700,10.0,18,22,20,6,66,REJECT,"too_small (1,700)",False
+@dk_producer,Music Production,Adjacent,1900,8.0,18,22,20,6,66,REJECT,"too_small (1,900)",False
+@legendarybeatz,Music Production,Adjacent,1700,9.0,18,22,20,6,66,REJECT,"too_small (1,700)",False
+@cruzumusic,Music Production,Adjacent,4500,5.0,18,22,20,6,66,REJECT,"too_small (4,500)",False
+@carlostheinventor,3D Art,Niche #3,179000,0.2,28,7,25,6,66,AMBER,low_engagement (0.2%),True
+@davidyarrow,Photography,Adjacent,516000,1.5,18,10,25,12,65,AMBER,"too_large (516,000)",True
+@reuben,Photography,Adjacent,800000,1.2,18,10,25,12,65,AMBER,"too_large (800,000)",True
+@realrileybrown,AI Tools,Niche #2,211000,1.0,28,17,10,10,65,PASS,clean,True
+@psguy2026,Digital Art,Adjacent,119000,1.8,18,17,20,10,65,PASS,clean,True
+@iamjesseshow,UI/UX Design,Adjacent,200000,2.0,18,22,15,10,65,PASS,clean,True
+@uxgoodies,UI/UX Design,Adjacent,120000,2.0,18,22,15,10,65,PASS,clean,True
+@typewolf,Graphic Design,Adjacent,200000,1.5,18,17,20,10,65,PASS,clean,True
+@abduzeedo,Graphic Design,Adjacent,500000,1.0,18,17,20,10,65,PASS,clean,True
+@designcuts,Graphic Design,Adjacent,400000,1.0,18,17,20,10,65,PASS,clean,True
+@thedieline,Graphic Design,Adjacent,500000,1.0,18,17,20,10,65,PASS,clean,True
+@shillingtonedu,Graphic Design,Adjacent,250000,1.5,18,17,20,10,65,PASS,clean,True
+@creativeboom,Graphic Design,Adjacent,400000,1.0,18,17,20,10,65,PASS,clean,True
+@stevemccurryofficial,Photography,Adjacent,3600000,0.8,18,5,25,16,64,AMBER,"too_large (3,600,000)",True
+@paulnicklen,Photography,Adjacent,7000000,0.5,18,5,25,16,64,AMBER,"too_large (7,000,000)",True
+@mooreartdigitally,Digital Art,Adjacent,74000,1.9,18,20,20,6,64,PASS,clean,True
+@karenhallionart,Digital Art,Adjacent,56000,1.4,18,20,20,6,64,PASS,clean,True
+@kckcrisxo,Digital Art,Adjacent,49000,1.8,18,20,20,6,64,PASS,clean,True
+@francogomezart,Digital Art,Adjacent,31000,1.4,18,20,20,6,64,PASS,clean,True
+@peggygou_,Music Production,Adjacent,4800000,1.0,18,10,20,16,64,AMBER,"too_large (4,800,000)",True
+@figma._.designer,UI/UX Design,Adjacent,50000,3.0,18,25,15,6,64,PASS,clean,True
+@ux.robin,UI/UX Design,Adjacent,58000,2.5,18,25,15,6,64,PASS,clean,True
+@dailycreativve.ux,UI/UX Design,Adjacent,57000,3.0,18,25,15,6,64,PASS,clean,True
+@saptarshiux,UI/UX Design,Adjacent,60000,2.5,18,25,15,6,64,PASS,clean,True
+@ux.mars,UI/UX Design,Adjacent,90000,2.0,18,25,15,6,64,PASS,clean,True
+@leonelrochaux,UI/UX Design,Adjacent,45000,3.5,18,25,15,6,64,PASS,clean,True
+@k_raeartworks,Digital Art,Adjacent,32000,1.4,18,20,20,6,64,PASS,clean,True
+@hillaryhoworthart,Digital Art,Adjacent,26000,1.0,18,20,20,6,64,PASS,clean,True
+@srosechicago,Digital Art,Adjacent,21000,1.8,18,20,20,6,64,PASS,clean,True
+@lizmurphystudio,Digital Art,Adjacent,29000,1.9,18,20,20,6,64,PASS,clean,True
+@yclavelouxart,Digital Art,Adjacent,20000,1.1,18,20,20,6,64,PASS,clean,True
+@robinolsenart,Digital Art,Adjacent,21000,1.1,18,20,20,6,64,PASS,clean,True
+@artbysarakay,Digital Art,Adjacent,19000,1.4,18,20,20,6,64,PASS,clean,True
+@alok,Music Production,Adjacent,28800000,0.5,18,5,20,20,63,AMBER,"too_large (28,800,000)",True
+@marshmello,Music Production,Adjacent,28000000,0.3,18,5,20,20,63,AMBER,"too_large (28,000,000); low_engagement (0.3%)",True
+@martingarrix,Music Production,Adjacent,15300000,0.5,18,5,20,20,63,AMBER,"too_large (15,300,000)",True
+@petesouza,Photography,Adjacent,2100000,0.8,18,5,25,14,62,AMBER,"too_large (2,100,000)",True
+@yamashitaphoto,Photography,Adjacent,1700000,0.8,18,5,25,14,62,AMBER,"too_large (1,700,000)",True
+@graphicdesignblg,Graphic Design,Adjacent,694000,1.8,18,10,20,14,62,AMBER,"too_large (694,000)",True
+@philipboelter,Digital Art,Adjacent,723000,1.5,18,10,20,14,62,AMBER,"too_large (723,000)",True
+@sarashakeel,Digital Art,Adjacent,1500000,1.0,18,10,20,14,62,AMBER,"too_large (1,500,000)",True
+@cellsdividing,Digital Art,Adjacent,129000,1.5,18,17,20,6,61,PASS,clean,True
+@cathynicholsart,Digital Art,Adjacent,110000,1.2,18,17,20,6,61,PASS,clean,True
+@mrsallainart,Digital Art,Adjacent,142000,1.3,18,17,20,6,61,PASS,clean,True
+@bleachfilm,Photography,Adjacent,2300000,0.3,18,5,25,12,60,AMBER,"too_large (2,300,000); low_engagement (0.3%)",True
+@graphicdesignersgroup,Graphic Design,Adjacent,650000,1.0,18,10,20,12,60,AMBER,"too_large (650,000)",True
+@logoawesome,Graphic Design,Adjacent,711000,1.2,18,10,20,12,60,AMBER,"too_large (711,000)",True
+@gurudesigners,Graphic Design,Adjacent,519000,1.4,18,10,20,12,60,AMBER,"too_large (519,000)",True
+@danibydsgn,Graphic Design,Adjacent,364000,0.7,18,12,20,10,60,PASS,clean,True
+@visualtimmy,Digital Art,Adjacent,66000,0.7,18,15,20,6,59,PASS,clean,True
+@miahobbes_,Digital Art,Adjacent,32000,0.9,18,15,20,6,59,PASS,clean,True
+@charlottedewittemusic,Music Production,Adjacent,5900000,0.8,18,5,20,16,59,AMBER,"too_large (5,900,000)",True
+@realblackcoffee,Music Production,Adjacent,5000000,0.5,18,5,20,16,59,AMBER,"too_large (5,000,000)",True
+@ui.ux_daily,UI/UX Design,Adjacent,100000,1.5,18,20,15,6,59,PASS,clean,True
+@artroomglitterfairy,Digital Art,Adjacent,50000,0.7,18,15,20,6,59,PASS,clean,True
+@2art.chambers,Digital Art,Adjacent,100000,0.6,18,15,20,6,59,PASS,clean,True
+@madspeteriversen_photography,Photography,Adjacent,1000000,0.3,18,5,25,10,58,AMBER,"too_large (1,000,000); low_engagement (0.3%)",True
+@howphotographyworks,Photography,Adjacent,2500000,0.1,18,5,25,10,58,AMBER,"too_large (2,500,000); low_engagement (0.1%)",True
+@smart.graphicss,Graphic Design,Adjacent,2200000,0.7,18,5,20,14,57,AMBER,"too_large (2,200,000)",True
+@bosslogic,Digital Art,Adjacent,2300000,0.5,18,5,20,14,57,AMBER,"too_large (2,300,000)",True
+@zanderwhitehurst,UI/UX Design,Adjacent,716000,1.5,18,10,15,14,57,AMBER,"too_large (716,000)",True
+@designboom,Graphic Design,Adjacent,3500000,0.3,18,5,20,14,57,AMBER,"too_large (3,500,000); low_engagement (0.3%)",True
+@insidergraphics,Graphic Design,Adjacent,189000,0.8,18,12,20,6,56,PASS,clean,True
+@aigadesign,Graphic Design,Adjacent,300000,0.5,18,12,20,6,56,PASS,clean,True
+@mariyanicolemvp,Photography,Adjacent,103000,0.3,18,7,25,6,56,AMBER,low_engagement (0.3%),True
+@obeygiant,Digital Art,Adjacent,1300000,0.5,18,5,20,12,55,AMBER,"too_large (1,300,000)",True
+@beeple,Digital Art,Adjacent,2500000,0.3,18,5,20,12,55,AMBER,"too_large (2,500,000); low_engagement (0.3%)",True
+@dribbble,Graphic Design,Adjacent,2000000,0.3,18,5,20,12,55,AMBER,"too_large (2,000,000); low_engagement (0.3%)",True
+@behance,Graphic Design,Adjacent,3000000,0.2,18,5,20,12,55,AMBER,"too_large (3,000,000); low_engagement (0.2%)",True
+@itsnicethat,Graphic Design,Adjacent,2000000,0.5,18,5,20,12,55,AMBER,"too_large (2,000,000)",True
+@kj_socials,AI Tools,Niche #2,33000,0.3,28,10,10,6,54,AMBER,low_engagement (0.3%),False
+@mintnftartworks,Digital Art,Adjacent,49000,0.3,18,10,20,6,54,AMBER,low_engagement (0.3%),False
+@hillarybutlerfineart,Digital Art,Adjacent,28000,0.4,18,10,20,6,54,AMBER,low_engagement (0.4%),False
+@creative_market,Graphic Design,Adjacent,800000,0.5,18,5,20,10,53,AMBER,"too_large (800,000)",False
+@designmilk,Graphic Design,Adjacent,1500000,0.3,18,5,20,10,53,AMBER,"too_large (1,500,000); low_engagement (0.3%)",False
+@graphicdesignjoint,Graphic Design,Adjacent,103000,0.1,18,7,20,6,51,AMBER,low_engagement (0.1%),False
