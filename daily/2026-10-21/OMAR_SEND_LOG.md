@@ -1,19 +1,9 @@
-# Omar Send Log — 2026-10-21
-
-**Sent:** 2026-10-21 ~14:0x UTC
-**To:** premiereprotutos@gmail.com
-**Thread:** 1a15281d992fe8e7 (in reply to 1a15ebdc65da0eb2)
-**Message ID:** 1a15ed85794a4724
-**Subject:** Re: partnership terms — I will build the whole thing
-**Content:** One-page outline (10 points) — FINAL TERMS verbatim, no lawyer language, research framing, 1%+25 gate
-**Status:** SENT, STARRED, Label_28 Shadow Hot
-**Next:** Await 'I'm in' → send 3 Story scripts
 
 ---
-## 2026-10-21 16:xx UTC — Trust Reply (IP blocker)
-**Message ID:** 1a15f551709a2f4a | **Thread:** 1a15281d992fe8e7 | **In-Reply-To:** CAPTpB6NRp0yr-gQHjNBPiMOMa=EOc0xw6U2n7ucRfQ0bJtO2=A@mail.gmail.com
+## 2026-10-21 ~12:40 UTC — Links Forwarded (He's In)
+**Message ID:** 1a15f63f66b2b861 | **Thread:** 1a15281d992fe8e7 | **In-Reply-To:** CAEe_n4ZkfdBhaNpqVHjatHjb_wUZykrWzqk8DSO7Yy6FpKastQ@mail.gmail.com
 **To:** premiereprotutos@gmail.com
-**Subject:** Re: partnership terms — I will build the whole thing
-**Type:** TRUST BUILDER + CLOSE (not FINAL TERMS redline)
-**Content:** 4-point IP protection ($10K transfer gate), Numinous Whop proof offer, 5 free transitions sample offer, 6 closing questions to lock "I'm in" → Stories
-**Status:** AWAITING "I'm in" — poll Shadow Hot daily
+**Type:** EXECUTION KIT — links + next steps
+**Links:** Master Folder 17KpzZCmxxz13vJfkKv96EZZ5e7KTft8G | Sample ZIP 1g6CvwqsZjyOshBklxGwI8tAVOGDhs4D1 | Blueprint PDF 1hSqfpeHjXNGMgxDI8_2hQxfqY_l71pVD | Spec Doc 1JkZy1fsUyTMOBzIOS_3Bd78GXOTMDsEk4zLenrGehtw
+**CTA:** Import sample tonight → Post Slide 1 tomorrow → Screenshot poll → Build 75+ Vault weighted to winner
+**Status:** AWAITING Slide 1 post + poll screenshot
