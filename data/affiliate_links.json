@@ -1,0 +1,14 @@
+{
+  "program": "Shadow Operation — AI Creator Workflow System",
+  "commission_rate": 0.40,
+  "cookie_duration_days": 30,
+  "payout_threshold_usd": 50,
+  "payout_method": "TBD",
+  "creators": {},
+  "total_links_generated": 0,
+  "total_clicks": 0,
+  "total_conversions": 0,
+  "total_revenue": 0,
+  "total_commissions_paid": 0,
+  "notes": "Links generated per creator upon 'YES' reply. Each link uniquely tracks the referring creator."
+}

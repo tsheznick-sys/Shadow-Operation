@@ -1,0 +1,105 @@
+{
+  "project": "Shadow Operation — Path 2: Digital Product",
+  "product": "The AI Creator Workflow System",
+  "target_niche": "Niche #2 (AI Tools/Workflows)",
+  "target_price": 27,
+  "upsell_price": 47,
+  "gumroad_url": "TBD",
+  "status": "PHASE 1: VALIDATION",
+  "phases": {
+    "phase_1_validation": {
+      "status": "IN PROGRESS",
+      "started": "2026-10-20",
+      "tasks": [
+        {"task": "Research Niche #2 creators (20 roster)", "status": "DONE", "date": "2026-10-20"},
+        {"task": "Market research: AI workflow products trending", "status": "DONE", "date": "2026-10-20"},
+        {"task": "Draft validation survey email", "status": "DONE", "date": "2026-10-20"},
+        {"task": "Design product blueprint (35+ prompts, 5 automations, Notion, videos)", "status": "DONE", "date": "2026-10-20"},
+        {"task": "Draft affiliate launch email (1,020 GREEN creators)", "status": "DONE", "date": "2026-10-20"},
+        {"task": "Set up affiliate tracking system", "status": "DONE", "date": "2026-10-20"},
+        {"task": "SEND survey to 12 GREEN Niche #2 creators", "status": "PENDING — AWAITING OPERATOR APPROVAL (Gate G4)"},
+        {"task": "Collect responses (minimum 5 to proceed)", "status": "NOT STARTED"}
+      ],
+      "gate_status": "G1 PASSED — written agreement received (validate_first option selected)"
+    },
+    "phase_2_build": {
+      "status": "NOT STARTED",
+      "prerequisites": ["5+ survey responses collected", "pain points validated"],
+      "tasks": [
+        {"task": "Write 35+ prompts based on survey insights", "status": "NOT STARTED"},
+        {"task": "Build 5 automation templates", "status": "NOT STARTED"},
+        {"task": "Create Notion dashboard template", "status": "NOT STARTED"},
+        {"task": "Record 5 video walkthroughs", "status": "NOT STARTED"},
+        {"task": "Write Gumroad sales copy", "status": "NOT STARTED"},
+        {"task": "Take product screenshots", "status": "NOT STARTED"}
+      ]
+    },
+    "phase_3_launch": {
+      "status": "NOT STARTED",
+      "prerequisites": ["Product built", "Gumroad listing live", "Affiliate links generated"],
+      "tasks": [
+        {"task": "Create Gumroad listing", "status": "NOT STARTED"},
+        {"task": "Generate affiliate links for 12 GREEN creators", "status": "NOT STARTED"},
+        {"task": "SEND affiliate offer to 12 GREEN creators", "status": "NOT STARTED"},
+        {"task": "SEND affiliate offer to remaining 1,008 GREEN creators", "status": "NOT STARTED"},
+        {"task": "Monitor sales and affiliate performance", "status": "NOT STARTED"}
+      ]
+    },
+    "phase_4_scale": {
+      "status": "NOT STARTED",
+      "prerequisites": ["First 10 sales achieved"],
+      "tasks": [
+        {"task": "Expand to Niche #1 (Video/VFX) with adapted product", "status": "NOT STARTED"},
+        {"task": "Expand to Niche #3 (3D/Concept) with adapted product", "status": "NOT STARTED"},
+        {"task": "Launch upsell tier ($47)", "status": "NOT STARTED"},
+        {"task": "Build email list from buyers for future products", "status": "NOT STARTED"}
+      ]
+    }
+  },
+  "conversion_projections": {
+    "niche_2_conservative": {
+      "creators": 12,
+      "audience": 986592,
+      "er_pct": 6.39,
+      "engaged": 63024,
+      "click_rate_pct": 1.5,
+      "clicks": 945,
+      "conv_rate_pct": 2.0,
+      "buyers": 19,
+      "price": 27,
+      "revenue": 513,
+      "commissions_40pct": 205,
+      "net_revenue": 308
+    },
+    "niche_2_moderate": {
+      "creators": 12,
+      "engaged": 63024,
+      "click_rate_pct": 2.5,
+      "clicks": 1576,
+      "conv_rate_pct": 3.5,
+      "buyers": 55,
+      "price": 27,
+      "revenue": 1485,
+      "commissions_40pct": 594,
+      "net_revenue": 891
+    },
+    "full_pool_conservative": {
+      "creators": 1020,
+      "audience": 147600000,
+      "engaged": 7080000,
+      "click_rate_pct": 0.5,
+      "clicks": 35400,
+      "conv_rate_pct": 1.5,
+      "buyers": 531,
+      "price": 27,
+      "revenue": 14337,
+      "commissions_40pct": 5735,
+      "net_revenue": 8602
+    }
+  },
+  "gate_compliance": {
+    "G1_build_before_agreement": "PASSED — validate_first selected by operator",
+    "G4_human_sends_only": "ACTIVE — all sends pending operator approval",
+    "G6_revenue_assumptions": "PASSED — all projections labeled ASSUMPTION"
+  }
+}
