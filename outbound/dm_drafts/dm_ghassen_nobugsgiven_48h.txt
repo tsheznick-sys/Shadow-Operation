@@ -1,0 +1,25 @@
+DM BACKUP — Ghassen / NoBugsGiven (48h after email re-bump)
+Email re-bump sent: 2026-10-21 (Thread: 1a0c835a469e8a76 / NoBugsGiventn@gmail.com)
+Trigger: ONLY send if no email reply by 2026-10-23 09:00 EAT
+
+---
+Platform: X (primary) / Instagram (fallback) — use where he lives
+Handle guess: @NoBugsGiventn / @NoBugsGiven — verify before sending (search NoBugsGiventn)
+
+OPTION A — X DM (240 chars max, preferred):
+Hey Ghassen — just bumped your email on the Linux Desktop Vault (thread: The breakdown). Last call on first-access before build + price goes up. Reply VAULT there or here and I'll lock you in. — Scott (@scott.428 on Signal if easier)
+
+OPTION B — Instagram DM:
+Hey Ghassen! 👋 Quick heads up — just sent you a bump on email about the Linux Desktop Vault (Re: The breakdown). Closing first-access before we kick off build. If you still want in, just reply VAULT to the email or here and I'll lock you in. — Scott / Signal: @scott.428
+
+OPTION C — Short nudge (if already seen email):
+Ghassen — email bump sent on the Vault. Still want first-access? Reply VAULT. If not, all good 👍 — just clearing list.
+
+---
+RULES:
+- Do NOT send before 2026-10-23 09:00 EAT (48h window)
+- Check Gmail thread 1a0c835a469e8a76 first — if he replied, SKIP DM and log as WARM
+- One DM only — no double follow-up on DM
+- If no handle found, skip; do not guess DM to wrong account
+- Log send in daily/2026-10-21 log + update data/gmail_outreach_complete.json status if sent
+

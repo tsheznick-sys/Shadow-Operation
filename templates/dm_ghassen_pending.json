@@ -1,0 +1,15 @@
+{
+  "handle": "@NoBugsGiventn",
+  "name": "Ghassen / NoBugsGiven",
+  "email": "NoBugsGiventn@gmail.com",
+  "thread_id": "1a0c835a469e8a76",
+  "subject": "Re: The breakdown — The Linux Desktop Vault",
+  "email_rebump_date": "2026-10-21",
+  "dm_earliest_date": "2026-10-23T09:00:00+03:00",
+  "dm_status": "STAGED — DO NOT SEND BEFORE 2026-10-23 09:00 EAT",
+  "platform_priority": ["X", "Instagram"],
+  "handle_guesses": ["@NoBugsGiventn", "@NoBugsGiven", "NoBugsGiventn"],
+  "dm_file": "outbound/dm_drafts/dm_ghassen_nobugsgiven_48h.txt",
+  "gate": "HARD RULE 8 — targeted DM only after 2 emails + bump with no reply",
+  "created": "2026-10-21"
+}
