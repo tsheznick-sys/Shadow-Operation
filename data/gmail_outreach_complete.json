@@ -11388,9 +11388,9 @@
     "email": "premiereprotutos@gmail.com",
     "followers": 164000,
     "er": 0,
-    "date": "2026-10-09",
+    "date": "2026-10-21",
     "gate": "AMBER (164K is 64% over the 100K cap; lead states they hold NO asset library)",
-    "status": "WARM (POSITIVE reply 2026-10-09; offer premise fails)",
+    "status": "FINAL_TERMS_DELIVERED_AGREEMENT_SENT_2026-10-21",
     "source": "TRACKER",
     "views": 0,
     "wave": "inbox_reply",
@@ -11399,7 +11399,8 @@
     "message_id": "1a159b9732ab4cae",
     "thread_id": "1a15281d992fe8e7",
     "reply_type": "full_audit_sent_plus_demand_test_plus_survey",
-    "notes": "Creator asked for free audit. Sent full 6-part audit: audience data, top 3 monetizable topics, revenue math (ASSUMPTION), product suggestion (Transition Pack $39), launch strategy, demand test scripts with pre-registered thresholds. Asked 5 validation questions."
+    "notes": "2026-10-21 14:xx UTC: Sent 1-page partnership outline (no lawyer) codifying FINAL TERMS 1a159d811ecf5c8e \u2014 60/40 Whop, store transfer $10K, IP with Operator, demand gate 1%+25, framed as research. Awaiting 'I'm in' to send Story scripts.",
+    "last_message_id": "1a15ed85794a4724"
   },
   {
     "handle": "know.programming",

@@ -92,3 +92,7 @@ Omar wants us to take all the risk (build everything from scratch). We flipped i
 
 ---
 Prepared: 2026-10-21 | References: SHADOW_OPERATION_RULES.md (Rules 1,2,3,7), REPLY_Omar_FINAL.md, DAILY_INBOX_WATCH.md
+
+
+---
+**UPDATE 2026-10-21:** Agreement sent 1a15ed85794a4724 on thread 1a15281d992fe8e7 per operator 'No Lawyers Here. Send it' — 1%+25 gate locked, research framing, no lawyer language.
