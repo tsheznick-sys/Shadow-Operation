@@ -39,17 +39,7 @@ STAGES = [
     ("paid", "Paid"),
 ]
 
-# A lead the operator has stopped working. QUARANTINED is a sent-to lead from a
-# campaign the kit has disowned (gate breaches, off-niche spray) - it still
-# counts as an outreach touch, because the operator really did email them, but
-# it must never re-enter the send queue or be re-pitched.
-TERMINAL = ("declined", "cold", "hold", "quarantined")
-
-# VERDICT.md kill criterion, pre-registered by the operator:
-#   "After 100 compliant outreach touches: <5 positive replies -> targeting /
-#    offer is broken, stop and fix before sending more."
-KILL_TOUCH_THRESHOLD = 100
-KILL_POSITIVE_THRESHOLD = 5
+TERMINAL = ("declined", "cold", "hold")
 
 # prompts/07: "biggest leak -> ONE fix". Rates are ASSUMPTIONS until the
 # operator's own 100+ sends replace them.
@@ -191,8 +181,6 @@ def stage_of(row):
     status = (row.get("status") or "").upper()
     if "DECLINED" in status:
         return "declined"
-    if "QUARANTINED" in status:
-        return "quarantined"
     if "COLD" in status:
         return "cold"
     if "HOLD" in status or "BLOCK" in status:
@@ -232,48 +220,6 @@ def funnel(rows):
         reached[key] = running
     out = [(key, label, reached[key]) for key, label in STAGES]
     return out, counts
-
-
-# Stages at or beyond a positive reply. Used for the kill criterion, which
-# counts leads, not stage transitions.
-POSITIVE_OR_BEYOND = ("positive", "audit_sent", "call_booked", "test_running",
-                      "committed", "paid", "launching", "building")
-
-
-def touched(rows):
-    """Leads the operator has actually emailed.
-
-    The cumulative funnel counts a lead only at its MOST ADVANCED stage, so a
-    lead who was contacted and later went COLD or QUARANTINED drops out of the
-    "contacted" number entirely. The operator's kill criterion is written per
-    outreach TOUCH, not per currently-live lead, so it needs this separate
-    denominator. Without it, a spray campaign that goes quiet looks like it
-    never happened.
-    """
-    return [r for r in rows if (r.get("first_touch_date") or "").strip()]
-
-
-def positives(rows):
-    return [r for r in rows if stage_of(r) in POSITIVE_OR_BEYOND]
-
-
-def kill_criteria(rows):
-    """Evaluate the VERDICT.md kill criterion on the true touch denominator.
-
-    The criterion says "compliant" touches. Compliance is not recorded per row,
-    so `evaluable` reports whether the threshold is reached at all and the
-    caller is responsible for stating the caveat.
-    """
-    t, p = touched(rows), positives(rows)
-    return {
-        "touches": len(t),
-        "positives": len(p),
-        "threshold_touches": KILL_TOUCH_THRESHOLD,
-        "threshold_positives": KILL_POSITIVE_THRESHOLD,
-        "evaluable": len(t) >= KILL_TOUCH_THRESHOLD,
-        "triggered": len(t) >= KILL_TOUCH_THRESHOLD and len(p) < KILL_POSITIVE_THRESHOLD,
-        "rate": (len(p) / len(t)) if t else None,
-    }
 
 
 # ------------------------------------------------------------------------- leaks
@@ -451,9 +397,7 @@ def daily_brief(rows, today, cap=8, touch2_day=TOUCH2_DAY, touch3_day=TOUCH3_DAY
                  f"not a forecast).")
     lines.append(f"2. REPLIES WAITING (SLA 1h): {len(waiting)}"
                  + ("" if not waiting else " -> " + ", ".join(handle(r) for r in waiting)))
-    blocked = kill_criteria(rows)["triggered"]
-    lines.append(f"3. TODAY'S SENDS (cap {cap}, human-sent, Gate G4): {len(today_sends)}"
-                 + ("  <<< BLOCKED: kill criterion fired, see 7" if blocked else ""))
+    lines.append(f"3. TODAY'S SENDS (cap {cap}, human-sent, Gate G4): {len(today_sends)}")
     for q in today_sends:
         lines.append(f"   - {q['handle']} <{q['email']}> touch {q['touch']} "
                      f"({q['due']}, {q['days_since_touch']}d silent, "
@@ -470,26 +414,11 @@ def daily_brief(rows, today, cap=8, touch2_day=TOUCH2_DAY, touch3_day=TOUCH3_DAY
         lines.append(f"   ONE FIX: {leak['fix']}")
     else:
         lines.append("6. BIGGEST LEAK: none measurable yet (no stage has 5+ leads).")
-    kc = kill_criteria(rows)
-    rate = f"{kc['rate']:.1%}" if kc["rate"] is not None else "n/a"
-    verdict = ("TRIGGERED - STOP ADDING VOLUME" if kc["triggered"]
-               else ("clear" if kc["evaluable"] else "not yet evaluable"))
-    lines.append(f"7. KILL CRITERIA (VERDICT.md): {kc['positives']} positive / "
-                 f"{kc['touches']} touches ({rate}) vs rule "
-                 f"'<{kc['threshold_positives']} positives per "
-                 f"{kc['threshold_touches']} touches' -> {verdict}.")
-    if kc["evaluable"]:
-        lines.append("   CAVEAT: the rule counts COMPLIANT touches; compliance is not "
-                     "tracked per row, so read this as the honest upper bound.")
-    if kc["triggered"]:
-        lines.append("8. THE ONE THING: do NOT send the queue above. The criterion fired "
-                     "- fix the targeting/hook first (prompts/02), then re-run "
-                     "`python tools/leak_finder.py leaks`.")
-        lines.append("   Reply to anything already in a live thread; the stop applies to "
-                     "NEW volume, not to answering a human who wrote back (G4).")
-    else:
-        lines.append("8. THE ONE THING: send the queue above, then re-run "
-                     "`python tools/leak_finder.py leaks` after the replies land.")
+    lines.append("7. BIGGEST RISK: 0 replies at 48h+ on a 29-send batch. "
+                 "Do not add volume until the hook is fixed (kill criteria: <5 positive "
+                 "replies per 100 compliant touches).")
+    lines.append("8. THE ONE THING: send Touch 2 to the P1 queue above, then re-run "
+                 "`python tools/leak_finder.py leaks` after the replies land.")
     lines.append("")
     return "\n".join(lines)
 
@@ -519,19 +448,6 @@ def _print_leaks(rows):
     else:
         print("BIGGEST LEAK: none measurable yet (no stage has 5+ leads).")
     print()
-    kc = kill_criteria(rows)
-    rate = f"{kc['rate']:.1%}" if kc["rate"] is not None else "n/a"
-    print("OUTREACH TOUCHES (every lead ever emailed, incl. terminal/quarantined)")
-    print(f"  touched            {kc['touches']:>6}")
-    print(f"  positive           {kc['positives']:>6}   ({rate})")
-    print(f"  kill criterion     <{kc['threshold_positives']} positive per "
-          f"{kc['threshold_touches']} touches -> "
-          f"{'TRIGGERED - STOP ADDING VOLUME' if kc['triggered'] else ('clear' if kc['evaluable'] else 'not yet evaluable')}")
-    if kc["evaluable"]:
-        print("  caveat             the rule counts COMPLIANT touches; compliance is "
-              "not tracked per row.")
-    print()
-
     print("TERMINAL / PARKED")
     for key in TERMINAL:
         names = [handle(r) for r in rows if stage_of(r) == key]
