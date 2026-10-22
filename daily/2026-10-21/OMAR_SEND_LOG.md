@@ -15,3 +15,12 @@
 **Type:** TRANSPARENCY ADDENDUM + TODAY CTA
 **Content:** Numinous 7.5K AI Mythic 0.26% RED locked (388→1) ≠ Omar Premiere Pro 164K — different buyer intent, 273 Whop products; VERDICT: niche results don't transfer; Omar's 3-story test = real proof. Urgency: Slide 1 today, 30 sec, data tomorrow, build overnight.
 **Status:** AWAITING Slide 1 TODAY
+
+---
+## 2026-10-21 ~20:0x UTC — STRICT ULTIMATUM: stop twisting, start working (read all before reply)
+**Message ID:** 1a1619f474f89110 | **Thread:** 1a15281d992fe8e7 | **In-Reply-To:** CAPTpB6PGSFeAa9Bg1R==0hvLv9svA6AHnBZZ5jbUbwoevd+1bg@mail.gmail.com
+**To:** premiereprotutos@gmail.com | **Subject:** Re: partnership terms — I will build the whole thing
+**Type:** STRICT ULTIMATUM — review all messages + answer 5 Qs + post TODAY or drop
+**Content:** Final deliverables 70+ files ZIP+Whop preview; PASS 1%+25 (Slide breakdown 150+/60%+/40+), RED=drop $0; Exit 3-option details $10K Net definition (only Whop fee+refund), before $10K no transfer, after 100% transfer, customers keep access, 60-day sell-off; Numinous ≠ proof; CTA: answer 5 Qs + commit Slide 1 today or pass, else close.
+**Status:** AWAITING 5 answers + Slide 1 TODAY screenshot — if RED or twist=DROP
+**IG:** https://instagram.com/premiereprotutos
