@@ -1020,23 +1020,21 @@ function createTop100Drafts() {
       Logger.log('✓ ' + (i+1) + '/' + MANIFEST.length + ' ' + m.handle + ' -> ' + m.email);
       created++;
       props.setProperty('top100_idx', (i+1).toString());
-      Utilities.sleep(1500); // 1.5s throttle
+      Utilities.sleep(1500);
     } catch(e) {
       Logger.log('✗ FAILED ' + m.handle + ' ' + m.email + ' : ' + e);
     }
   }
-  Logger.log('Done — created ' + created + ' drafts in this run. Next idx=' + props.getProperty('top100_idx'));
-  if (parseInt(props.getProperty('top100_idx')) >= MANIFEST.length) {
-    Logger.log('ALL 100 DRAFTS CREATED ✅');
-  }
+  Logger.log('Done — created ' + created + ' drafts. Next idx=' + props.getProperty('top100_idx'));
+  if (parseInt(props.getProperty('top100_idx')) >= MANIFEST.length) Logger.log('ALL 100 DRAFTS CREATED ✅');
 }
-
-function resetTop100() {
-  PropertiesService.getScriptProperties().deleteProperty('top100_idx');
-  Logger.log('Reset — next run starts at 0');
+function resetTop100(){PropertiesService.getScriptProperties().deleteProperty('top100_idx');Logger.log('Reset');}
+function showProgress(){Logger.log('Progress: '+(PropertiesService.getScriptProperties().getProperty('top100_idx')||'0')+'/100');}
+function forwardDraftsToInbox(){
+  const drafts=GmailApp.getDrafts();Logger.log('Found '+drafts.length+' drafts');
+  for(let i=0;i<drafts.length;i++){try{const t=drafts[i].getMessage().getThread();t.moveToInbox();Logger.log('✓ Inbox '+(i+1)+'/'+drafts.length);Utilities.sleep(300);}catch(e){Logger.log('✗ '+e);}}Logger.log('✅ Forwarded '+drafts.length+' drafts to Inbox');
 }
-
-function showProgress() {
-  const idx = PropertiesService.getScriptProperties().getProperty('top100_idx') || '0';
-  Logger.log('Progress: ' + idx + '/100 drafts created');
+function sendAllDrafts(){
+  const drafts=GmailApp.getDrafts();let sent=0;
+  for(let i=0;i<drafts.length&&sent<100;i++){try{drafts[i].send();sent++;Logger.log('Sent '+sent);Utilities.sleep(2000);}catch(e){Logger.log(e);}}Logger.log('✅ Sent '+sent);
 }
