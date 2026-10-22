@@ -1,0 +1,12 @@
+{
+  "forwarded_at": "2026-10-22T05:50:00Z",
+  "method": "gmail__batch_modify_messages add INBOX",
+  "drafts_created": 100,
+  "drafts_forwarded_to_inbox": 100,
+  "source": "templates/gmail_top100_manifest.json (100\u219279 score)",
+  "location": "scott.abuya@gmail.com DRAFT+INBOX (visible in both folders)",
+  "verification": "gmail__list_messages in:inbox subject:'Your content is next level' shows 100 new with label_ids [DRAFT, INBOX]",
+  "next_step": "Operator: open Gmail \u2192 Inbox (or Drafts) \u2192 review 100 drafts \u2192 Send (one-by-one, human gate). Or run gas/FORWARD_DRAFTS_TO_INBOX.gs forwardDraftsToInbox() if needed again. GAS also has sendAllDrafts() 100/day @2s delay for auto-send fallback.",
+  "manifest_range": "@tiny.party.hat katya@katyaross.com (100, 170K, 19.3% ER) \u2192 @___ryu_u kimsooryu@gmail.com (79, 53K, 12.2 ER)",
+  "log": "logs/gmail_top100_push_log.csv (100 CREATED with real r- IDs) + logs/gmail_top100_progress.json complete"
+}
