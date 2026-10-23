@@ -24,3 +24,18 @@
 **Content:** Final deliverables 70+ files ZIP+Whop preview; PASS 1%+25 (Slide breakdown 150+/60%+/40+), RED=drop $0; Exit 3-option details $10K Net definition (only Whop fee+refund), before $10K no transfer, after 100% transfer, customers keep access, 60-day sell-off; Numinous ≠ proof; CTA: answer 5 Qs + commit Slide 1 today or pass, else close.
 **Status:** AWAITING 5 answers + Slide 1 TODAY screenshot — if RED or twist=DROP
 **IG:** https://instagram.com/premiereprotutos
+
+---
+## 2026-10-23 09:15 EAT — FOLLOW-UP 1/4 SENT (one-by-one restart)
+**Message ID:** 1a16763c7f17c52e | **Thread:** 1a15281d992fe8e7 | **In-Reply-To:** CAPTpB6PGSFeAa9Bg1R==0hvLv9svA6AHnBZZ5jbUbwoevd+1bg@mail.gmail.com
+**To:** premiereprotutos@gmail.com | **Subject:** Re: partnership terms — I will build the whole thing
+**Body:** 1817c — Locked 3 points: (1) Final deliverables = 10-point outline (300+ Transitions + Whop store + fulfillment + 14-day assets, build after PASS 48h), (2) Demand-test criteria = 1% AND 25 replies (not 1.5%+20 typo, Outline single source, audience research framing), (3) Exit/IP vs blueprint = Point 4+10 final, I own IP, restricted license via shared Whop, $10K net (after Whop 2.7%+30¢ + refunds, Whop dashboard tracked) = full transfer, before $10K 60-day sell-off 60/40. Numinous proof = ship 48-72h + honor gate (388→1 0.26% RED stopped), not niche transfer. Next: Numinous Whop link + 5-transition sample drop.
+**CTA:** Reply "I'm in" → send 3 Stories that day
+**Status:** SENT via gmail__send_message, pr_open one-by-one mode — all connectors verified (Gmail 31959/21480 h2446366)
+---
+## 2026-10-23 17:5x UTC — FULL TAKE SENT (one consistent source) ✅
+**Message ID:** 1a169ef4c2d820fe | **Thread:** 1a15281d992fe8e7 | **In-Reply-To:** <CAPTpB6O7rKX5yb6VN0CRwExj5kdjQuTiY7pZsQmNr5YzmrMkqQ@mail.gmail.com> | **References:** +CAPTpB6O7rKX5yb...
+**To:** premiereprotutos@gmail.com | **Subject:** Re: partnership terms — I will build the whole thing
+**Type:** ONE FULL TAKE — supersedes all 4 docs, collapses deliverables 70files=300variants, Net Revenue defined, IP before $10K, Exit before $10K 60d sell-off, Transfer after $10K
+**Trigger:** Omar 1a169b7d3646a15c (23 Oct 17:03) — not refusing, wants consistent agreement before posting
+**Status:** SENT via gmail__send_message live | **Next:** Await "I'm in" → send 3 audience-research Stories same day; if redlines/tweaks → CLOSE per Hard Rule 3
