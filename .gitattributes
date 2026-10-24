@@ -1,0 +1,36 @@
+# Handle line endings: text files CRLF on commit, binary files untouched
+* text=auto
+
+# Explicit text files
+*.py text
+*.js text
+*.jsx text
+*.ts text
+*.tsx text
+*.json text
+*.md text
+*.txt text
+*.yml text
+*.yaml text
+*.html text
+*.css text
+*.sh text eol=lf
+
+# Binary files - never touch line endings, not editable in web UI (expected for videos/images)
+*.mp4 binary
+*.mov binary
+*.avi binary
+*.mkv binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.zip binary
+
+# Keep renders as binary LFS-style (but not LFS, just binary flag)
+outbound/renders/** binary
+app/outbound/renders/** binary
+*.mp4 binary
