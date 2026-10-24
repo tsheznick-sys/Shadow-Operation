@@ -84,6 +84,13 @@ app.include_router(whop.router, prefix="/webhooks/whop", tags=["Webhook — Whop
 
 @app.get("/")
 def root():
+    # If frontend built, serve SPA at / for E2B preview (fixes {"detail":"Not Found"} when visiting raw sandbox URL)
+    try:
+        from fastapi.responses import FileResponse as _FR
+        fd = pathlib.Path(__file__).resolve().parents[1] / "frontend" / "dist" / "index.html"
+        if fd.exists():
+            return _FR(str(fd))
+    except: pass
     return {
         "service": "Shadow Operation — Unified",
         "version": "2.0.0",
@@ -129,22 +136,28 @@ FRONTEND_DIST = pathlib.Path(__file__).resolve().parents[1] / "frontend" / "dist
 try:
     if FRONTEND_DIST.exists():
         app.mount("/assets", StaticFiles(directory=str(FRONTEND_DIST / "assets")), name="frontend_assets")
-        from fastapi.responses import FileResponse
+        from fastapi.responses import FileResponse, HTMLResponse
         @app.get("/app")
         def app_index():
             return FileResponse(str(FRONTEND_DIST / "index.html"))
         @app.get("/frontend")
         def frontend_alt():
             return FileResponse(str(FRONTEND_DIST / "index.html"))
-        # SPA fallback — serve frontend for all non-API routes (keeps /api, /docs, /health, /webhooks intact)
-        # This makes https://8000-{sandbox}.e2b.app/ open the app directly
-        print(f"✓ Frontend dist mounted from {FRONTEND_DIST} — /app + /assets on same port 8000")
+        @app.get("/api")
+        def api_info():
+            return {"service": "Shadow Operation — Unified API", "version": "2.0.0", "docs": "/docs", "frontend": "/app", "health": "/health"}
+        # SPA fallback — serve frontend for / and any non-API path (must be last route)
+        # Preserves /api, /docs, /openapi.json, /health, /webhooks, /renders, /assets
+        @app.get("/{full_path:path}")
+        def spa_fallback(full_path: str):
+            if full_path.startswith(("api/", "docs", "openapi.json", "redoc", "health", "webhooks/", "renders", "outbound/renders", "assets/")) or full_path in ("api","docs","openapi.json","health"):
+                from fastapi import HTTPException
+                raise HTTPException(status_code=404, detail="Not Found")
+            return FileResponse(str(FRONTEND_DIST / "index.html"))
+        print(f"✓ Frontend dist mounted from {FRONTEND_DIST} — /app + / + SPA fallback + /api on same port 8000")
     else:
         print(f"! Frontend dist not found at {FRONTEND_DIST} — run `cd app/frontend && npm run build`")
 except Exception as e:
     print(f"Frontend mount failed: {e}")
 
-@app.get("/api")
-def api_info():
-    return {"service": "Shadow Operation — Unified API", "version": "2.0.0", "docs": "/docs", "frontend": "/app", "health": "/health"}
 
