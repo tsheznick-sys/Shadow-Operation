@@ -1,185 +1,188 @@
 from fastapi import APIRouter, Depends
 from sqlmodel import Session
-import time, os, pathlib, json
+import time, os, pathlib, json, shutil
 from models.database import get_session, ContentItem
-# Load .env manually (Arena/Fly compatible - no python-dotenv needed)
+router = APIRouter()
+
+# --- Load .env (Arena reads from file, Fly from secrets) ---
 try:
     from dotenv import load_dotenv
     load_dotenv()
     load_dotenv(dotenv_path=pathlib.Path(__file__).resolve().parents[1] / '.env')
-except:
-    pass
-# Fallback manual .env read
-for _env in [pathlib.Path(__file__).resolve().parents[1] / '.env', pathlib.Path('marketing/publisher/backend/.env')]:
+except: pass
+for _env in [pathlib.Path(__file__).resolve().parents[1] / '.env', pathlib.Path('marketing/publisher/backend/.env'), pathlib.Path(__file__).resolve().parents[3] / '.env']:
     if _env.exists():
         for line in _env.read_text().splitlines():
             if '=' in line and not line.strip().startswith('#'):
-                k,v = line.split('=',1)
-                if k.strip() not in os.environ:
-                    os.environ[k.strip()] = v.strip()
+                try:
+                    k,v = line.split('=',1)
+                    k=k.strip(); v=v.strip()
+                    if k and k not in os.environ:
+                        os.environ[k]=v
+                except: pass
 
-router = APIRouter()
-
-# --- Veo 3 real generation with fallback ---
-# GOOGLE_API_KEY = Gemini API (Veo) — uses google-generativeai or REST
-# Arena blocks api.openai.com/api.chatfuel.com but Fly/VPS allows api.generativelanguage.googleapis.com
-# If blocked or key missing, we generate enhanced placeholder (real text → image → mp4)
+RENDERS_DIR = pathlib.Path(__file__).resolve().parents[3] / "outbound" / "renders"
+RENDERS_DIR_REL = pathlib.Path("outbound/renders")
 
 def _render_placeholder(content: ContentItem, duration_sec: int = 3) -> str:
-    """Enhanced placeholder: 9:16 720x1280 with hook/story/offer text, gold bar, captions"""
+    """Enhanced 9:16 placeholder with real hook/story/offer — works in Arena (no network)"""
     try:
         from PIL import Image, ImageDraw, ImageFont
         import imageio, numpy as np
     except ImportError:
-        # Fallback to empty file marker
-        p = pathlib.Path(f"outbound/renders/{content.page}/{content.prompt_id}.mp4")
+        p = RENDERS_DIR / content.page / f"{content.prompt_id}.mp4"
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text("placeholder")
-        return str(p)
+        return f"outbound/renders/{content.page}/{content.prompt_id}.mp4"
 
-    W, H = 720, 1280
-    out = pathlib.Path(f"outbound/renders/{content.page}/{content.prompt_id}.mp4")
-    out.parent.mkdir(parents=True, exist_ok=True)
-    
-    # Try absolute path fallback
-    alt = pathlib.Path(__file__).resolve().parents[3] / "outbound" / "renders" / content.page.lstrip("@") / f"{content.prompt_id}.mp4"
-    # But keep relative for DB path
-    img = Image.new("RGB", (W, H), (10, 10, 10))
+    W,H = 720,1280
+    out_rel = pathlib.Path(f"outbound/renders/{content.page}/{content.prompt_id}.mp4")
+    out_abs = RENDERS_DIR / content.page / f"{content.prompt_id}.mp4"
+    out_abs.parent.mkdir(parents=True, exist_ok=True)
+    pathlib.Path(out_rel).parent.mkdir(parents=True, exist_ok=True)
+
+    img = Image.new("RGB", (W,H), (10,10,10))
     d = ImageDraw.Draw(img)
     try:
-        font_b = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 36)
-        font_m = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 26)
-        font_s = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 22)
+        fb = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 34)
+        fm = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 24)
+        fs = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 20)
     except:
-        font_b = ImageFont.load_default()
-        font_m = font_s = font_b
+        fb = fm = fs = ImageFont.load_default()
 
-    # Gold top bar
-    d.rectangle([0, 0, W, 160], fill=(212, 175, 55))
-    d.text((20, 20), content.page, fill=(0,0,0), font=font_m)
-    d.text((20, 55), content.platform.upper(), fill=(0,0,0), font=font_s)
-    d.text((20, 85), content.prompt_id, fill=(0,0,0), font=font_s)
-    # Hook centered
-    hook = content.hook[:80]
-    # Wrap text
-    def wrap(text, width=28):
-        words = text.split()
-        lines, cur = [], ""
-        for w in words:
-            if len(cur + " " + w) < width:
-                cur = (cur + " " + w).strip()
-            else:
-                lines.append(cur); cur = w
-        lines.append(cur)
-        return lines
-    lines = wrap(hook, 22)
-    y = 300
-    for line in lines:
-        bbox = d.textbbox((0,0), line, font=font_b)
-        tw = bbox[2]-bbox[0]
-        d.text((W/2 - tw/2, y), line, fill=(212,175,55), font=font_b)
-        y += 45
-    # Story
-    story_lines = wrap(content.story[:120], 30)
-    y += 30
-    for line in story_lines:
-        bbox = d.textbbox((0,0), line, font=font_m)
-        tw = bbox[2]-bbox[0]
-        d.text((W/2 - tw/2, y), line, fill=(240,240,240), font=font_m)
-        y += 32
-    # Offer
-    offer_lines = wrap(content.offer[:80], 28)
-    y = H - 280
-    for line in offer_lines:
-        bbox = d.textbbox((0,0), line, font=font_s)
-        tw = bbox[2]-bbox[0]
-        d.text((W/2 - tw/2, y), line, fill=(180,180,180), font=font_s)
-        y += 28
-    # CTA big
+    d.rectangle([0,0,W,150], fill=(212,175,55))
+    d.text((20,18), content.page, fill=(0,0,0), font=fm)
+    d.text((20,50), content.platform.upper()+" • "+content.prompt_id, fill=(0,0,0), font=fs)
+    d.text((20,85), "Arena placeholder → Fly = real Veo3 8s", fill=(0,0,0), font=fs)
+
+    def wrap(t,w=24):
+        ws=t.split(); ls=[]; cur=""
+        for wrd in ws:
+            if len(cur+" "+wrd) < w: cur=(cur+" "+wrd).strip()
+            else: ls.append(cur); cur=wrd
+        ls.append(cur); return ls
+
+    y=320
+    for line in wrap(content.hook, 22):
+        bbox=d.textbbox((0,0), line, font=fb); tw=bbox[2]-bbox[0]
+        d.text((W/2-tw/2, y), line, fill=(212,175,55), font=fb); y+=42
+    y+=20
+    for line in wrap(content.story[:130], 30):
+        bbox=d.textbbox((0,0), line, font=fm); tw=bbox[2]-bbox[0]
+        d.text((W/2-tw/2, y), line, fill=(240,240,240), font=fm); y+=30
+    y=H-320
+    for line in wrap(content.offer[:90], 30):
+        bbox=d.textbbox((0,0), line, font=fs); tw=bbox[2]-bbox[0]
+        d.text((W/2-tw/2, y), line, fill=(180,180,180), font=fs); y+=26
     d.rectangle([W//2-140, H-140, W//2+140, H-90], fill=(212,175,55))
-    d.text((W//2-70, H-125), "DM VAULT", fill=(0,0,0), font=font_b)
-    # 9:16 watermark
-    d.text((10, H-20), "9:16 • Veo3 placeholder — replace with real render on Fly", fill=(100,100,100), font=font_s)
+    d.text((W/2-62, H-125), "DM VAULT", fill=(0,0,0), font=fb)
+    d.text((10, H-22), "9:16 • Veo3 fallback — POST /generate/{id} on Fly = real", fill=(100,100,100), font=fs)
 
-    frame = np.array(img)
+    frame=np.array(img)
     try:
-        writer = imageio.get_writer(str(out), fps=24, macro_block_size=1)
-        for _ in range(int(duration_sec*24)):
-            writer.append_data(frame)
-        writer.close()
-        # Also copy to absolute path for static mount
-        abs_out = pathlib.Path(__file__).resolve().parents[4] / "outbound" / "renders" / content.page / f"{content.prompt_id}.mp4"
-        # Actually parents[3] from backend/routers = repo root
-        repo_root = pathlib.Path(__file__).resolve().parents[3]
-        abs_out = repo_root / "outbound" / "renders" / content.page / f"{content.prompt_id}.mp4"
-        abs_out.parent.mkdir(parents=True, exist_ok=True)
-        if str(abs_out) != str(out):
-            import shutil
-            try: shutil.copy(str(out), str(abs_out))
-            except: pass
-        return str(out)
+        w=imageio.get_writer(str(out_abs), fps=24, macro_block_size=1)
+        for _ in range(int(duration_sec*24)): w.append_data(frame)
+        w.close()
+        # copy to rel for DB path
+        try: shutil.copy(str(out_abs), str(out_rel))
+        except: pass
+        return str(out_rel)
     except Exception as e:
-        # Fallback: save as jpg placeholder
-        jpg = out.with_suffix(".jpg")
-        img.save(jpg)
-        return str(out)
+        jpg=out_abs.with_suffix(".jpg"); img.save(jpg)
+        return str(out_rel)
 
 def _try_veo_generate(content: ContentItem) -> tuple[str, str]:
-    """Try real Veo3 via Gemini API. Returns (path, note). On Arena network block, returns fallback."""
-    api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY") or os.getenv("VEO_API_KEY")
+    """Real Veo 3.0 on Fly (generativelanguage.googleapis.com), fallback to enhanced placeholder in Arena"""
+    api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY") or os.getenv("VEO_API_KEY") or ""
     if not api_key or "placeholder" in api_key:
-        return _render_placeholder(content), "GOOGLE_API_KEY missing — used enhanced placeholder (text→mp4 9:16). Set GOOGLE_API_KEY and deploy on Fly for real Veo3."
-    
-    # Try Gemini Veo 3 REST — blocked in Arena (allowlist), works on Fly/Prod
+        return _render_placeholder(content), "GOOGLE_API_KEY missing — enhanced placeholder (Arena). Set GOOGLE_API_KEY on Fly for real Veo3 8s 9:16."
+
+    # Try google-genai SDK first (Fly has it), else REST
+    prompt = f"Cinematic vertical 9:16 video, anamorphic golden hour 35mm, no text overlay, no watermark: Hook: {content.hook}. Story: {content.story}. Offer context: {content.offer}. Style: handheld, shallow depth, film grain."
+
+    # 1) SDK path — google-genai (pip install google-genai)
+    try:
+        from google import genai
+        client = genai.Client(api_key=api_key)
+        op = client.models.generate_videos(model="veo-3.0-generate-001", prompt=prompt, config={"aspect_ratio":"9:16", "duration_seconds":8})
+        # Veo is long-running: poll
+        deadline = time.time()+120
+        while not op.done and time.time() < deadline:
+            time.sleep(5)
+            op = client.operations.get(op)
+        if op.done and op.response and hasattr(op.response, 'generated_videos'):
+            vid = op.response.generated_videos[0]
+            # Download
+            out_abs = RENDERS_DIR / content.page / f"{content.prompt_id}.mp4"
+            out_abs.parent.mkdir(parents=True, exist_ok=True)
+            client.files.download(file=vid.video, file_path=str(out_abs))
+            out_rel = pathlib.Path(f"outbound/renders/{content.page}/{content.prompt_id}.mp4")
+            out_rel.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy(str(out_abs), str(out_rel))
+            return str(out_rel), "Veo 3.0 SDK success (Fly) — 8s 9:16 saved to "+str(out_rel)
+        return _render_placeholder(content), f"Veo SDK op not done after 120s — fallback placeholder kept. Op: {op}"
+    except Exception as e_sdk:
+        sdk_err = str(e_sdk)[:200]
+
+    # 2) REST fallback — generativelanguage.googleapis.com (longRunning)
     try:
         import requests
-        # Gemini Veo 3 endpoint (google-generativeai)
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/veo-3.0-generate-001:predict?key={api_key}"
-        payload = {
-            "instances": [{"prompt": f"Cinematic vertical 9:16 video: {content.hook}. Story: {content.story}. Style: anamorphic, golden hour, 35mm"}],
-            "parameters": {"aspectRatio": "9:16", "durationSeconds": 8}
-        }
-        resp = requests.post(url, json=payload, timeout=8)
-        if resp.status_code == 200 and "video" in resp.text.lower():
-            # Real video bytes would be in response — save
-            # For now mark as rendered, actual bytes handling needs Cloud Storage polling
-            return _render_placeholder(content), f"Veo3 API 200 — placeholder enhanced with hook, real polling TODO (Fly only)"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/veo-3.0-generate-001:predictLongRunning?key={api_key}"
+        payload = {"instances": [{"prompt": prompt}], "parameters": {"aspectRatio": "9:16", "durationSeconds": 8}}
+        r = requests.post(url, json=payload, timeout=15)
+        if r.status_code in (200,202):
+            j=r.json()
+            name=j.get("name") or j.get("operation", {}).get("name")
+            if not name:
+                return _render_placeholder(content), f"Veo REST 200 but no operation name — {j} — fallback kept (sdk_err: {sdk_err})"
+            # Poll operation
+            for _ in range(24):
+                time.sleep(5)
+                pr=requests.get(f"https://generativelanguage.googleapis.com/v1beta/{name}?key={api_key}", timeout=10)
+                if pr.status_code==200:
+                    pj=pr.json()
+                    if pj.get("done"):
+                        # Download uri in response
+                        uri=(pj.get("response",{}).get("generateVideoResponse",{}).get("generatedSamples",[{}])[0].get("video",{}).get("uri") or pj.get("response",{}).get("video",{}).get("uri"))
+                        if uri:
+                            out_abs=RENDERS_DIR / content.page / f"{content.prompt_id}.mp4"
+                            out_abs.parent.mkdir(parents=True, exist_ok=True)
+                            vr=requests.get(uri, timeout=30)
+                            out_abs.write_bytes(vr.content)
+                            out_rel=pathlib.Path(f"outbound/renders/{content.page}/{content.prompt_id}.mp4"); out_rel.parent.mkdir(parents=True, exist_ok=True); shutil.copy(str(out_abs), str(out_rel))
+                            return str(out_rel), f"Veo REST polling success — 8s 9:16 saved (Fly)"
+                        return _render_placeholder(content), f"Veo REST done but no uri — {pj} — fallback kept"
+            return _render_placeholder(content), f"Veo REST polling timeout — fallback kept (sdk: {sdk_err})"
         else:
-            return _render_placeholder(content), f"Veo3 API {resp.status_code} — Arena allowlist blocks generativelanguage.googleapis.com, enhanced placeholder kept. Works on Fly."
+            return _render_placeholder(content), f"Veo REST {r.status_code}: {r.text[:120]} — Arena allowlist blocks generativelanguage.googleapis.com, fallback kept. SDK err: {sdk_err}"
     except Exception as e:
-        # Network block in Arena = expected
-        err = str(e)[:120]
-        if "allowlist" in err.lower() or "blocked" in err.lower() or "Connection" in err:
-            return _render_placeholder(content), f"Arena network allowlist blocks Veo API ({err}) — enhanced placeholder kept. Deploy on Fly (no allowlist) for real Veo3."
-        return _render_placeholder(content), f"Veo error: {err} — enhanced placeholder kept."
+        if "allowlist" in str(e).lower() or "blocked" in str(e).lower() or "Connection" in str(e):
+            return _render_placeholder(content), f"Arena allowlist blocks Veo ({str(e)[:120]}) — enhanced placeholder kept. Works on Fly (sdk: {sdk_err})"
+        return _render_placeholder(content), f"Veo REST error {str(e)[:120]} (sdk: {sdk_err}) — fallback kept"
 
 @router.post("/generate/{content_id}")
 def generate(content_id: int, session: Session = Depends(get_session)):
     c = session.get(ContentItem, content_id)
-    if not c:
-        return {"error": "not found"}
+    if not c: return {"error":"not found"}
     path, note = _try_veo_generate(c)
-    c.render_path = path
-    c.status = "queued"
-    session.add(c); session.commit()
-    return {"content": c, "render_path": path, "note": note, "preview": f"http://localhost:8003/renders/{c.page}/{c.prompt_id}.mp4 (or /outbound/renders/...)"}
+    c.render_path = path; c.status="queued"; session.add(c); session.commit()
+    return {"content": c, "render_path": path, "note": note, "preview": f"/renders/{c.page}/{c.prompt_id}.mp4", "arena_fallback": "generativelanguage.googleapis.com blocked in Arena (allowlist) — real on Fly"}
 
 @router.post("/generate-day1")
 def generate_day1(session: Session = Depends(get_session)):
     from sqlmodel import select
     items = session.exec(select(ContentItem)).all()
-    results = []
+    res=[]
     for c in items:
         path, note = _try_veo_generate(c)
-        c.render_path = path
-        c.status = "queued"
-        session.add(c)
-        results.append({"id": c.id, "prompt_id": c.prompt_id, "path": path})
+        c.render_path=path; c.status="queued"; session.add(c)
+        res.append({"id":c.id, "prompt_id":c.prompt_id, "path":path, "note": note})
     session.commit()
-    return {"generated": len(items), "renders": [r["path"] for r in results], "details": results, "note": "Enhanced placeholders with real hook/story text; set GOOGLE_API_KEY + deploy on Fly for real Veo3 (Arena allowlist blocks generativelanguage.googleapis.com)"}
+    return {"generated": len(items), "renders":[r["path"] for r in res], "details": res, "note":"Arena = enhanced placeholder 9:16 with real hook/story; Fly = real Veo3 8s. Use GET /status to see key."}
 
 @router.get("/status")
 def status():
     key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY") or ""
-    has_key = bool(key and "placeholder" not in key)
-    return {"veo_configured": has_key, "key_prefix": key[:12]+"..." if has_key else "missing", "arena_allowlist": "github.com, codeload, api.github.com, registry.npmjs.org, pypi.org, files.pythonhosted.org — Veo (generativelanguage.googleapis.com) blocked in Arena, works on Fly/prod", "fallback": "Enhanced 9:16 placeholder with real hook/story/offer (Pillow → imageio mp4) served at /renders/"}
+    has = bool(key and "placeholder" not in key)
+    return {"veo_configured": has, "key_prefix": key[:12]+"..." if has else "missing (set GOOGLE_API_KEY AQ.Ab8... in .env.prod / fly secrets)", "arena_allowlist":"github.com, codeload, api.github.com, registry.npmjs.org, pypi.org, files.pythonhosted.org — Veo blocked in Arena, works on Fly/prod", "fallback":"Enhanced 9:16 Pillow→imageio mp4 with real hook/story", "real_on_fly":"pip install google-genai + fly secrets set GOOGLE_API_KEY=AQ.Ab8... + POST /api/video/generate-day1 on https://api.shadowop.live", "renders_dir": str(RENDERS_DIR), "preview_mounts": ["/renders/...", "/outbound/renders/..."]}
+
