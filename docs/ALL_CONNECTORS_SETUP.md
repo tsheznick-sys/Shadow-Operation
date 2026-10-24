@@ -1,4 +1,5 @@
-# All Connectors — Full Step-by-Step (12 Platforms) + Live Verify
+# All Connectors — Full Step-by-Step (LIVE 2026-10-24 — 1PY pulled: OPENAI + CHAT_FUEL_CLI)
+ (12 Platforms) + Live Verify
 
 All ENV keys are already pasted from your **Google Doc 1PY** → `auth/backend/.env` + `marketing/manychat/backend/.env` + `marketing/funnel/backend/.env` + `marketing/publisher/backend/.env` are LIVE. Below is where each came from, what it powers, and the 1-line curl to prove it.
 
@@ -80,7 +81,7 @@ curl http://localhost:8001/health
 
 ## 11) OpenAI (AI Agent fallback)
 
-- `OPENAI_API_KEY=sk-placeholder` → https://platform.openai.com/api-keys → paste into `manychat` + `funnel` + `publisher` `.env`; used by `apps/ai_agent.py` KB when Gemini unavailable.
+- `OPENAI_API_KEY=sk-proj-taCQeNJ8... ✅ LIVE 2026-10-24 from 1PY` → https://platform.openai.com/api-keys → paste into `manychat` + `funnel` + `publisher` `.env`; used by `apps/ai_agent.py` KB when Gemini unavailable.
 
 ## 12) Stripe (fallback checkout)
 

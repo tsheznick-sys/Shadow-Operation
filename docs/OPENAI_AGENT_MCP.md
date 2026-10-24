@@ -5,7 +5,7 @@
 ### 1) Where the key lives
 ```ini
 # marketing/funnel/backend/.env
-OPENAI_API_KEY=sk-proj-...   # paste your real key (currently sk-placeholder)
+OPENAI_API_KEY=sk-proj-taCQeNJ8...   # ✅ LIVE from Google Doc 1PY 2026-10-24 — funnel/manychat/publisher/auth .env
 # same key is read from manychat/publisher/auth/.env fallback
 ```
 After paste, restart funnel: `python -m uvicorn main:app --host 0.0.0.0 --port 8001 --reload`
@@ -71,5 +71,5 @@ python scripts/openai_agent_session.py
 - Self-hosted env `/workspace` maps to `capabilities/skills` — in Arena this is `Shadow-Operation/capabilities/skills` (create if missing).
 - Whop remains primary checkout; Stripe keys empty per your `Use whop in place of Stripe` instruction.
 
-### 5) Dry-run today
-`OPENAI_API_KEY` is still `sk-placeholder` → script does **validation only** (no API call) ✅ `py_compile ok`. Paste real key to go live.
+### 5) Status 2026-10-24
+`OPENAI_API_KEY` ✅ LIVE `sk-proj-taCQe...` in all 4 .env (funnel/manychat/publisher/auth) — verified `python scripts/openai_agent_session.py` dry-run → API blocked only by Arena allowlist (api.openai.com not in allowlist), will work on Fly deploy. `CHAT_FUEL_CLI=8d2124c60ddacc2...` also LIVE in `chatfuel-app/.env` as `CHATFUEL_TOKEN`.
