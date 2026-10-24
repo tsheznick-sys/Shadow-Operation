@@ -1,0 +1,5 @@
+@import "tailwindcss";
+:root { color-scheme: dark; }
+.gold { color: #d4af37; }
+.bg-gold { background: #d4af37; }
+.border-gold { border-color: rgba(212,175,55,0.3); }

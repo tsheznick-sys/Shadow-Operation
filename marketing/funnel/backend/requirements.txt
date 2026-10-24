@@ -1,0 +1,1 @@
+fastapi==0.110.0\nuvicorn[standard]==0.29.0\nSQLModel==0.0.16\npython-dotenv==1.0.1\n

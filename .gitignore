@@ -14,3 +14,8 @@ templates/backups/
 .venv/
 venv/
 .env
+data.db
+app/frontend/node_modules/
+app/backend/outbound/
+app/outbound/
+outbound/renders/

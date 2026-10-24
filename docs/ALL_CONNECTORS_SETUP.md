@@ -56,7 +56,7 @@ curl http://localhost:8001/health
 
 ## 5) Gemini (Veo3 video) + Google
 
-- `GEMINI_API_KEY=AQ.Ab8RN6LMT56...qw` → `marketing/funnel/.env:GEMINI_API_KEY` + `marketing/publisher/.env:GOOGLE_API_KEY` ✅
+- `GEMINI_API_KEY=AQ.Ab8***MASKED***LMT56...qw` → `marketing/funnel/.env:GEMINI_API_KEY` + `marketing/publisher/.env:GOOGLE_API_KEY` ✅
 - `GOOGLE_API_KEY` same; Publisher uses Veo3 for 6/day Reels; `YOUTUBE_API_KEY` placeholder → https://console.cloud.google.com → Enable YouTube Data v3 + Veo3 API → Create API key
 
 ## 6) Telegram
