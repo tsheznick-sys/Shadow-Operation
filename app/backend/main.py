@@ -122,3 +122,21 @@ def health_publisher(): return {"status":"ok","posts_day":6}
 def health_funnel(): return {"status":"ok","parity":"ClickFunnels + Brunson"}
 @app.get("/health/manychat")
 def health_manychat(): return {"status":"ok","gates":"G4,G8,Hard Rules"}
+
+# ===== Full-stack single-port serving (fixes 403 traffic token) =====
+# Serve built frontend at / (one sandbox, one port 8000). If dist not built, show helpful JSON.
+try:
+    FRONTEND_DIST = pathlib.Path(__file__).resolve().parents[1] / "frontend" / "dist"
+    if FRONTEND_DIST.exists():
+        app.mount("/assets", StaticFiles(directory=str(FRONTEND_DIST / "assets")), name="frontend_assets")
+        # Serve index.html for SPA fallback (must be after API mounts)
+        from fastapi.responses import FileResponse, HTMLResponse
+        @app.get("/app")
+        def app_index():
+            return FileResponse(str(FRONTEND_DIST / "index.html"))
+        print(f"✓ Frontend dist mounted from {FRONTEND_DIST}")
+    else:
+        print(f"! Frontend dist not found at {FRONTEND_DIST} — run `cd app/frontend && npm run build`")
+except Exception as e:
+    print(f"Frontend mount failed: {e}")
+
