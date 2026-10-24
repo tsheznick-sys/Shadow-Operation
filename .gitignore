@@ -14,3 +14,4 @@ templates/backups/
 .venv/
 venv/
 .env
+data.db
