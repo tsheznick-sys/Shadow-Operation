@@ -124,19 +124,27 @@ def health_funnel(): return {"status":"ok","parity":"ClickFunnels + Brunson"}
 def health_manychat(): return {"status":"ok","gates":"G4,G8,Hard Rules"}
 
 # ===== Full-stack single-port serving (fixes 403 traffic token) =====
-# Serve built frontend at / (one sandbox, one port 8000). If dist not built, show helpful JSON.
+# Serve built frontend on ONE port (8000) — solves e2b-traffic-access-token 403
+FRONTEND_DIST = pathlib.Path(__file__).resolve().parents[1] / "frontend" / "dist"
 try:
-    FRONTEND_DIST = pathlib.Path(__file__).resolve().parents[1] / "frontend" / "dist"
     if FRONTEND_DIST.exists():
         app.mount("/assets", StaticFiles(directory=str(FRONTEND_DIST / "assets")), name="frontend_assets")
-        # Serve index.html for SPA fallback (must be after API mounts)
-        from fastapi.responses import FileResponse, HTMLResponse
+        from fastapi.responses import FileResponse
         @app.get("/app")
         def app_index():
             return FileResponse(str(FRONTEND_DIST / "index.html"))
-        print(f"✓ Frontend dist mounted from {FRONTEND_DIST}")
+        @app.get("/frontend")
+        def frontend_alt():
+            return FileResponse(str(FRONTEND_DIST / "index.html"))
+        # SPA fallback — serve frontend for all non-API routes (keeps /api, /docs, /health, /webhooks intact)
+        # This makes https://8000-{sandbox}.e2b.app/ open the app directly
+        print(f"✓ Frontend dist mounted from {FRONTEND_DIST} — /app + /assets on same port 8000")
     else:
         print(f"! Frontend dist not found at {FRONTEND_DIST} — run `cd app/frontend && npm run build`")
 except Exception as e:
     print(f"Frontend mount failed: {e}")
+
+@app.get("/api")
+def api_info():
+    return {"service": "Shadow Operation — Unified API", "version": "2.0.0", "docs": "/docs", "frontend": "/app", "health": "/health"}
 
