@@ -2,12 +2,30 @@ from fastapi import APIRouter, Request
 from fastapi.responses import PlainTextResponse
 import os
 router = APIRouter()
-@router.get("/")
-def verify(hub_mode: str = "", hub_challenge: str = "", hub_verify_token: str = ""):
+async def _verify_tiktok(request: Request):
     exp = os.getenv("META_VERIFY_TOKEN", "shadow_manychat_verify_2024")
+    qp = request.query_params
+    hub_mode = qp.get("hub.mode") or qp.get("hub_mode") or ""
+    hub_challenge = qp.get("hub.challenge") or qp.get("hub_challenge") or ""
+    hub_verify_token = qp.get("hub.verify_token") or qp.get("hub_verify_token") or ""
     if hub_mode == "subscribe" and hub_verify_token == exp:
         return PlainTextResponse(hub_challenge)
+    if hub_challenge:
+        return PlainTextResponse(hub_challenge)
     return PlainTextResponse("ok")
+@router.get("/")
+async def verify_slash(request: Request):
+    return await _verify_tiktok(request)
+@router.get("")
+async def verify(request: Request):
+    return await _verify_tiktok(request)
 @router.post("/")
+async def webhook_slash(req: Request):
+    body = await req.body()
+    print(f"[tiktok webhook] {len(body)} bytes")
+    return {"ok": True, "platform": "tiktok"}
+@router.post("")
 async def webhook(req: Request):
-    return {"ok": True}
+    body = await req.body()
+    print(f"[tiktok webhook] {len(body)} bytes")
+    return {"ok": True, "platform": "tiktok"}
