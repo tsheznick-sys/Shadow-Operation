@@ -11,6 +11,7 @@ from routers import content, publisher, video_gen
 from routers import funnels, pages, checkout, analytics, brunson
 from routers import flows, subscribers, broadcasts
 from routers import auth
+from routers import questions
 from routers import messenger, instagram, whatsapp, telegram, tiktok, x_dm, youtube, discord, whop
 
 # Ensure renders directory exists (shared across Publisher)
@@ -78,6 +79,7 @@ app.include_router(x_dm.router, prefix="/webhooks/x", tags=["Webhook — X"])
 app.include_router(youtube.router, prefix="/webhooks/youtube", tags=["Webhook — YouTube"])
 app.include_router(discord.router, prefix="/webhooks/discord", tags=["Webhook — Discord"])
 app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
+app.include_router(questions.router, prefix="/api/questions", tags=["Questions — Every Run"])
 app.include_router(whop.router, prefix="/webhooks/whop", tags=["Webhook — Whop"])
 
 @app.get("/")
@@ -95,7 +97,7 @@ def root():
             "auth": ["POST /api/auth sync (CreatorAccount)"],
         },
         "renders": ["/renders/...", "/outbound/renders/..."],
-        "env": "Whop replaces Stripe, OPENAI+GEMINI from Doc 1PY, single DB sqlite → shadow_ops postgres"
+        "env": "Whop replaces Stripe, GEMINI from Doc 1PY, single DB sqlite → shadow_ops postgres"
     }
 
 @app.get("/health")

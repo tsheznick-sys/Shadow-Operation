@@ -1,11 +1,13 @@
 
 import React, { useState } from "react";
-import Publisher from "./pages/Publisher.jsx";
-import Funnel from "./pages/Funnel.jsx";
-import ManyChat from "./pages/ManyChat.jsx";
-import Auth from "./pages/Auth.jsx";
+import Publisher from "../pages/Publisher.jsx";
+import Funnel from "../pages/Funnel.jsx";
+import ManyChat from "../pages/ManyChat.jsx";
+import Auth from "../pages/Auth.jsx";
+import Questions from "../pages/Questions.jsx";
 
 const tabs = [
+  { id: "questions", label: "Questions", icon: "❓", desc: "Every Run • MCQ • Add" },
   { id: "publisher", label: "Publisher", icon: "🎬", desc: "6 HSO • Veo3 • Queue" },
   { id: "funnel", label: "Funnel", icon: "🔗", desc: "Tripwire • Whop • Pages" },
   { id: "manychat", label: "ManyChat", icon: "💬", desc: "Flows • 8 platforms" },
@@ -13,7 +15,7 @@ const tabs = [
 ];
 
 export default function Shell() {
-  const [active, setActive] = useState("publisher");
+  const [active, setActive] = useState("questions");
   const [health, setHealth] = React.useState(null);
   React.useEffect(()=>{ fetch("/health").then(r=>r.json()).then(setHealth).catch(()=>{}); },[]);
   return (
@@ -42,6 +44,7 @@ export default function Shell() {
         </div>
       </aside>
       <main className="flex-1 bg-gradient-to-b from-neutral-950 to-black">
+        {active==="questions" && <Questions />}
         {active==="publisher" && <Publisher />}
         {active==="funnel" && <Funnel />}
         {active==="manychat" && <ManyChat />}

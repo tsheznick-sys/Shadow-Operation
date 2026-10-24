@@ -1,4 +1,3 @@
-
 from sqlmodel import SQLModel, create_engine, Session, Field
 from typing import Optional
 import os
@@ -134,4 +133,17 @@ class CreatorAccount(SQLModel, table=True):
     niche: Optional[str] = None
     whop_user_id: Optional[str] = None
     status: str = "active"
+    created_at: str = ""
+
+# ===== Questions — appears every run, Question Tab + Multiple Choices + Addition Tab =====
+class Question(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    question: str
+    option_a: str
+    option_b: str
+    option_c: str
+    option_d: str
+    correct: str = Field(default="A")  # A/B/C/D
+    category: str = "general"
+    run_id: Optional[str] = None  # track which run created it
     created_at: str = ""
