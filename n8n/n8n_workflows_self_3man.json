@@ -1,0 +1,168 @@
+{
+  "name": "Jarvis SELF 3-Man Content Jarvis - 9 Workflows (WF8 Retention 1-2% + WF9 Proof Loop + Entitlement wired)",
+  "workflows": [
+    {
+      "id": "wf1_research_grok",
+      "name": "WF1 - Research Best Monetizable Weekly (Grok + Social Blade) - Mon 08:00 EAT",
+      "trigger": "cron 0 8 * * 1 (Mon 08:00 EAT)",
+      "nodes": [
+        "Postgres SELECT 50 creators: SELECT handle,platform,followers,avg_comments,buyer_pool_x3,ratio,er,gate FROM creators WHERE gate='GREEN' ORDER BY buyer_pool_x3*er DESC LIMIT 50 (1,462 GREEN)",
+        "HTTP Request Social Blade + HypeAuditor + NotJustAnalytics/Picuki + Grok X trending (xAI GROK_API_KEY) - buyer_pool_x3,ratio,ER live",
+        "IF ER>{{$env.THRESHOLD_ER_GREEN || 3}}% && ratio<{{$env.THRESHOLD_RATIO_GREEN || 50}} && buyer_pool_x3>{{$env.THRESHOLD_BUYER_POOL_MIN || 3000}} => GREEN (8-Gate) \u2014 thresholds from config/adaptable.json env THRESHOLD_*",
+        "Claude Code node (Claude Pro/Max CLAUDE_API_KEY): prompt 'Rank top5 most monetizable for self content vault $27'",
+        "Telegram + Gmail nodes: Sir top5 monetizable domains 1) Psych Hack 8.2K pool 5.1% ER...",
+        "Postgres UPDATE solo_domains SET top5=[...]"
+      ],
+      "sql": "SELECT handle, platform, followers, avg_comments, buyer_pool_x3, ratio, er, gate FROM creators WHERE gate='GREEN' ORDER BY buyer_pool_x3*er DESC LIMIT 50"
+    },
+    {
+      "id": "wf2_longform_tubegen",
+      "name": "WF2 - Longform Make TubeGen 30min (daily 02:00 while sleep) - Claude auto-scripts",
+      "trigger": "cron 0 2 * * * (02:00 EAT while you sleep)",
+      "nodes": [
+        "Postgres SELECT top5 FROM solo_domains (scalable {{$env.PAGES_COUNT || 5}} pages adaptable)",
+        "Claude Code (Claude Max): Generate 6 scripts/domain (3x8s short +2x32s long +1x60s deep -> 4500 words for 30min) Butler tone JSON {title,script,captions,hashtags}",
+        "HTTP Request TubeGen API (TUBEGEN_API_KEY) generate 30min faceless longform per domain \u2014 OR fallback WAN_T4_URL (Colab free) if TubeGen missing \u2014 OpusClip only cannot make source",
+        "Drive Upload to NUMINOUS_WHOP_DEPLOY/17KpzZCm/ - p01_32s_9x16.mp4 Katana if needed via ffmpeg",
+        "Postgres INSERT publisher_queue38_longform (date, video_url, status='clip_pending')",
+        "Telegram Sir 6 TubeGen longforms ready 02:15 EAT - Linear SHA"
+      ],
+      "output": "publisher_queue38_longform pending clip"
+    },
+    {
+      "id": "wf3_autoclip_virality",
+      "name": "WF3 - Auto-Clip OpusClip virality + captions (direct to queue38)",
+      "trigger": "Webhook TubeGen finished -> auto",
+      "nodes": [
+        "Webhook TubeGen finished per domain",
+        "ffmpeg Katana p01_32s_9x16.mp4->queue70 if needed -> Drive upload",
+        "Postgres INSERT publisher_queue38 (date,caption,video_url,status='pending_G4') queue70 schedule38",
+        "Linear Create Issue SHA '6 clips ready content guy G4' + Telegram for content guy"
+      ],
+      "flow_tier": "Wan T4 free engine + OpusClip virality (incentivized: Lite manual, Pro auto per-clip $0.08)"
+    },
+    {
+      "id": "wf4_seo_publisher_buffer",
+      "name": "WF4 - SEO (Claude Max) + Publisher + Buffer Team unlimited (Content G4 -> Social autopublish)",
+      "trigger": "queue38 pending_G4 -> Content guy G4 approve + Social manager approve",
+      "nodes": [
+        "Vercel /content pending_G4 view -> Content guy initial G4 approve once (not in improve loop per lock) -> Postgres status=content_approved",
+        "Claude Code SEO pack per platform: IG hashtags vs TikTok hooks vs YT titles + buyer_pool_x3 targeting",
+        "Vercel /content pending_G4 view -> Content guy G4 approve swipe (edit caption/hashtag/LUT) -> Postgres status='content_approved'",
+        "Vercel /social Buffer Team queue view -> Social manager single frontend analytics + Buffer queue preview -> gives Jarvis approval -> Postgres status='social_approved'",
+        "HTTP Buffer API (BUFFER_TOKEN Team $12/ch) schedule {{$env.BUFFER_SERIOUS_DAILY || 6}}/day serious (IG/TikTok/YT) + {{$env.BUFFER_X_DAILY || 2}}/day X discovery per domain unlimited (env PLATFORMS+X_MODE) -> Publisher fallback",
+        "Telegram Sir 6/day live via Buffer - Linear Done SHA"
+      ],
+      "rule": "Content G4 + Social autopublish \u2014 X discovery filler 1-2/day not counted in 6/day serious"
+    },
+    {
+      "id": "wf5_demand_whop_chatfuel",
+      "name": "WF5-GREEN - Demand FAST-CLOSE (GREEN <50+5%+ -> Comments->DM->Whop same day, 3-email cap->FINAL TERMS)",
+      "trigger": "cron 0 9 * * * + comment webhook IG/TikTok/YT (X ignored via PLATFORMS env) \u2014 GREEN fast path adaptable",
+      "nodes": [
+        "HTTP IG/TikTok/YT analytics ONLY (X views ignored) views+replies last 3 posts + Social Blade alternatives HypeAuditor/NotJustAnalytics/Picuki daily ER check",
+        "IF ratio<{{$env.THRESHOLD_RATIO_GREEN || 50}} && er>={{$env.THRESHOLD_ER_GREEN || 5}} (STRICT GREEN via THRESHOLD_RATIO_GREEN+ER_GREEN) && buyer_pool_x3 gate GREEN -> GREEN else check AMBER \u2014 adaptable via Vercel env",
+        "IF GREEN: ChatFuel IG&TikTok + ManyChat YT auto-DM VAULT keyword within 2min (ManyChat YT because ChatFuel cannot YT) -> Comments->DM->Whop superfast",
+        "Shadow hard-close: 3-email cap -> FINAL TERMS one-pager 10pts sign only after PASS (no free audit, Hard Rule2 R9) -> Whop Create Product Vault $27+$9+$79+$19/mo ladder grant scott.abuya@gmail.com + info.wolf@gmail.com Buffer Team",
+        "ChatFuel Push 8ch IG&TikTok + ManyChat YT Push Whop funnel -> n8n Jarvis DM auto social manager reviews Vercel one-app ChatFuel IG&TikTok + ManyChat YT",
+        "Gmail Sir PASS GREEN fast-close vault live - Telegram all 3 pods"
+      ],
+      "rule": "GREEN Comments->DM->Whop Purchase prioritized \u2014 FINAL TERMS same day \u2014 no 14-day \u2014 R9 no Whop before PASS + R10 strict 1%+25 IG/TikTok/YT only"
+    },
+    {
+      "id": "wf5a_amber_14day",
+      "name": "WF5A-AMBER - 14-Day Nurture (AMBER 50-70+3-5% -> ChatFuel IG&TikTok + ManyChat YT drip Day1-14 then Whop)",
+      "trigger": "AMBER branch from WF5 09:00 daily -> enroll contacts who commented but ratio 50-70 + ER 3-5%",
+      "nodes": [
+        "IF AMBER: ratio {{$env.THRESHOLD_RATIO_GREEN || 50}}-{{$env.THRESHOLD_RATIO_AMBER_MAX || 70}} && er {{$env.THRESHOLD_ER_AMBER_MIN || 3}}-{{$env.THRESHOLD_ER_AMBER_MAX || 5}}% (STRICT AMBER via env) -> enroll Comments->DM->14-day->Whop (prioritized second to GREEN)",
+        "ChatFuel {{$env.CHATFUEL_SCOPE || IG&TikTok}} + ManyChat YT enroll: Day1-3 Value Proof (1 script moving to {{$env.THRESHOLD_RATIO_GREEN || 50}}+{{$env.THRESHOLD_ER_GREEN || 5}}%+ + value clip WF3 proof), Day4-7 DM scripts+teardown quietwolfzz 514K case + GS variants, Day8-14 DM close + Whop ${{$env.TIER_CIRCLE_PRICE || 19}}/mo Circle \u2014 same shadow conversion tempo daily CTA",
+        "IF reply YES any day 1-14 -> EXIT 14-day -> goto WF5-GREEN fast-close FINAL TERMS 10pts (both to advantage)",
+        "Both AMBER+GREEN share Whop ladder $27+$9+$79+$19/mo \u2014 AMBER exits to GREEN fast-close on YES",
+        "Post-14d no YES -> HOLD -> WF6 leak finder + WF1 weekly re-rank \u2014 improve loop: A/B OpusClip virality 9.2 + daily ER Social Blade alternatives + weekly Grok 1000 niches re-rank + Whop ladder A/B (no G4 per lock)"
+      ],
+      "rule": "AMBER Comments->DM->14-day->Whop \u2014 daily CTA, not 3-email cap. Both GREEN+AMBER prioritize Comments->DM->Whop->Purchase."
+    },
+    {
+      "id": "wf6_brand_daily_leak",
+      "name": "WF6 - Brand Gmail + Daily Leak Finder -> Weekly Expand + Daily Brief 05:45 (leak->expand superfast)",
+      "trigger": "Gmail Trigger brand@* + cron 45 5 * * * + daily leak check",
+      "nodes": [
+        "Gmail Trigger brand@* adaptable NICHES_POOL {{$env.NICHES_POOL}} -> Claude Max classify brand deal -> Telegram Sir brand deal inbound",
+        "ManyChat YT + ChatFuel IG&TikTok webhook new subscriber -> Postgres replies -> Whop entitlement -> Telegram New vault buyer $27",
+        "Cron 45 5 * * * Telegram+Gmail Shadow Hot+Signal all 3: Sir 6 videos live 2.1K views 18 replies 1 Whop $27 - n8n spent $1.20 Claude today + leak_finder biggest leak in operator_context via /api/cron/daily-brief \u2014 env NICHES_POOL + THRESHOLD_* adaptable",
+        "Weekly Expand Mon 08:00: WF1 Grok re-rank top5 monetizable -> if GREEN pool expands -> auto-expand to 5 pages template big_run_1000.py + WF9 pods"
+      ],
+      "rule": "leak_expand you chose: daily leak via operator_context + weekly re-rank expand \u2014 superfast to Whop"
+    },
+    {
+      "id": "wf7_jive_vesper_broadcast",
+      "name": "WF7 - Jive One Permanent Broadcast + Vesper Feedback (Vapi + Voiceflow) - 5min online WebRTC -> PSTN offline",
+      "trigger": "Webhook from WF6 emergency + manual Hey Jarvis / /parallel / Big Red Button in /admin",
+      "nodes": [
+        "Webhook WF6 timer emergency detection -> JIVE_JARVIS_NUMBER=+25418XXXX710 secure env only",
+        "Vapi SIP Jive permanent One number -> Parallel broadcast 3 legs simultaneously - Leg1 Owner All, Leg2 Content content only, Leg3 Social account only - Voiceflow Creator 3 KBs live via n8n webhook to Neon",
+        "Vapi voice = Vesper 20yo playful witty joke - custom per role intro: Owner Hey Sir it's Vesper! Social Hey love! Content Hey star! - ElevenLabs voice-00 via Vapi",
+        "Whisper transcribe each leg -> Neon save transcript + Drive HQ 17KpzZCm/calls/ recording + Linear SHA + /admin log",
+        "Claude Pro generates 3 fixes -> Voiceflow presents via Vesper 20yo",
+        "Vapi feedback call to Owner ONLY via same Jive permanent number - Vesper reads fixes: Say Apply or press 1 -> Admin Big Red Button optional double-confirm -> Execute via n8n"
+      ],
+      "cost": "Vapi $0 free WebRTC + PSTN $0.06-0.22/min emergency only",
+      "security": "JIVE_JARVIS_NUMBER env only not in docs/commit"
+    },
+    {
+      "id": "wf8_retention_1_2",
+      "name": "WF8 - Retention 1-2% Save Engine (Pause/Downgrade/50% off + Alias Wise Pay) + Entitlement sync",
+      "trigger": "Whop webhook membership_cancelled + membership_payment_failed + cron 0 6 * * * churn check + manual /retention save click + ManyChat inactive 3d",
+      "nodes": [
+        "Webhook Whop membership_cancelled (WHOP_API_KEY) -> payload user_id, plan $19, reason, cancel_click_at \u2014 BEFORE final cancel",
+        "IF user in retention_events where last_save_offer <30d -> skip (1 save/30d max)",
+        "Postgres SELECT user_vault scripts_count, streak, pod_id, last_agent_use, entitlement tier from checkEntitlement",
+        "HTTP Whop API GET /api/v1/memberships/{id} -> verify active, get card_last4",
+        "Claude Code: personalized save copy via Vesper 20yo tone: Sir you have 47 scripts + Day 4 streak + pod Red needs you \u2014 Pause $5 keeps all vs Cancel deletes in 7d",
+        "Telegram + Chatfuel DM + ManyChat 8ch push save offer card: [Pause $5 keep vault] [50% off ${{($env.TIER_CIRCLE_PRICE||19)/2}} next mo] [Downgrade ${{$env.TIER_LITE_PRICE||9}} Lite] \u2014 one-click via Whop API \u2014 TIER_* env adaptable",
+        "Webhook user choice -> HTTP Whop API POST \u2014 IF pause/discount/downgrade -> Postgres INSERT retention_events saved, Neon saved_rate++, Telegram Sir saved + Linear SHA + Jive Vesper voice note optional",
+        "ELSE cancel confirmed -> Postgres churn increment, IF churn7d>2.5% -> WF7 Jive broadcast emergency Sir churn 3.1% trigger win clip + office hour",
+        "Entitlement sync: Whop active -> update Neon entitlements tier=pro/lite for jarvis-app/lib/entitlement.ts has_access",
+        "ALIAS PAY: Cron 0 8 1 * * * (1st 08:00) -> HTTP YouTube Analytics + TikTok + Whop revenue_last_month -> Neon revenue_log -> Wise API POST /v1/batch-transfers alias with Social Manager: propose pay Jarvis $108 + community $500 from Wise USD, Social approves in /retention -> Wise executes"
+      ],
+      "cost": "Whop API $0 + Wise batch $0.43% + Neon $0 \u2014 saves 40% cancels, recovers 30% failed payments",
+      "rule": "Whop pause_membership first option, churn only counts if all 3 offers declined \u2014 paused = active 0% churn. Entitlement wired: lib/entitlement.ts mirrors Whop state"
+    },
+    {
+      "id": "wf9_proof_loop",
+      "name": "WF9 - Proof Loop WWS Sun 09:00 + Leaderboard 05:45 + Pod Accountability",
+      "trigger": "cron 0 9 * * 0 WWS (Sun 09:00 EAT) + cron 45 5 * * * leaderboard + webhook new win + cron 0 19 * * 4 teardown Thu 19:00",
+      "nodes": [
+        "Cron Sun 09:00 -> Postgres SELECT Whop memberships new, Buffer analytics top views, Neon streaks, user_vault wins -> Claude summary WWS deck: 12 wins $340 new, @wolf_ke $90 with Agent",
+        "HTTP OpusClip per-clip auto fine-tune proof screenshot -> Drive HQ proofs/ + Postgres proof_queue \u2014 uses finish only, needs OpusClip virality source",
+        "Vercel /social Buffer Team auto queue proof clip Tue/Fri 18:00 -> Chatfuel DM proof to inactive 3d -> ManyChat 8ch WWS announcement Whop Announcements",
+        "Cron 05:45 daily -> Buffer analytics top 3 views -> Postgres leaderboard -> Telegram + Whop Chat all pods: Top today @psych_mind 12k #2 you 4k Pod Red 28 vs Blue 22 keep streak?",
+        "Webhook member win submit -> Verify via Whop API + screen -> Neon wins table -> Queue Fri proof clip -> Leaderboard +1",
+        "Pod auto-assign on join: ManyChat assigns 5-pod via Whop Chat app -> Postgres pods(pod_id,user_id,streak)",
+        "Thu 19:00 teardown Zoom Whop Event -> Vapi Vesper transcribes -> Neon vault -> Clip 32s teaser -> Buffer next day"
+      ],
+      "metrics": "WWS replay target 40% base, activation 85% in 7d, DAU 60%, save 45% \u2014 alerts if churn >2.5% 7d rolling"
+    }
+  ],
+  "creds_needed": [
+    "n8n Cloud $20/mo embedded Vercel /n8n",
+    "DATABASE_URL Neon free",
+    "CLAUDE_API_KEY Claude Pro/Max main brain",
+    "GROK_API_KEY xAI Grok speciality",
+    "TUBEGEN_API_KEY 2h $29/mo OR WAN_T4_URL free Colab fallback \u2014  cannot replace engine",
+    "OPUSCLIP_API_KEY $15/mo free tier fallback \u2014  cannot clip",
+    "BUFFER_TOKEN Team $12/channel approval unlimited \u2014 Publisher fallback if missing",
+    "WHOP_API_KEY 27+9+79+19 ladder + WHOP_PRODUCT_LITE_ID / PRO_ID for entitlement lib/entitlement.ts",
+    "WHOP_WEBHOOK membership_cancelled + membership_payment_failed \u2192 /webhook/retention",
+    "WISE_API_KEY batch-transfers alias pay",
+    "CHATFUEL_TOKEN + MANYCHAT_API_KEY 8ch",
+    "TELEGRAM_BOT_TOKEN + SIGNAL_API all 3",
+    "Gmail OAuth2 gmail.modify 500/day",
+    "Drive OAuth2 HQ 17KpzZCm",
+    "R2 $5/mo backup",
+    "LINEAR_API_KEY SHA"
+  ],
+  "total_cost": "MVP 1 domain WWS+Retention+Entitlement: Vercel $0 + Neon $0 + n8n $20 + Claude $20 + Grok $16 + Wan T4 free + OpusClip free + Buffer Free 3ch = $56/mo \u2014 direct publish no LUT \u2192 scale 5 domains: +TubeGen $29 + OpusClip $15 + Buffer Team $60 = $189/mo \u2014 3 Whop sales $81 covers MVP, 7 sales $189 covers scale",
+  "next_step": "n8n Cloud Import this JSON -> add WHOP_API_KEY + WHOP_PRODUCT_LITE_ID/PRO_ID + WISE_API_KEY -> Vercel env same + set Whop webhooks membership_cancelled/payment_failed -> test /api/entitlement?whop_user_id=xxx -> WF8 retention save",
+  "self_only": "3-man core self-only scalable 5 domains \u2014 content guy G4 queue38 \u2014 social manager single frontend Buffer Team + Chatfuel \u2014 admin whole pipeline 24/7 Claude Max \u2014 direct OpusClip to Buffer + Grok research - Vercel embeds n8n+Buffer+Chatfuel one app \u2014 entitlement wired"
+}

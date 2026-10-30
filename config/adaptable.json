@@ -1,0 +1,122 @@
+{
+  "version": "1.0.0",
+  "description": "Fully Adaptable System \u2014 all niches, thresholds, paywalls, pages, voices are config-driven, no hardcode",
+  "meta": {
+    "created": "2026-10-30",
+    "branch": "arena/6c47af3d-shadow-operation",
+    "status": "pr_open"
+  },
+  "niches": {
+    "strategy": "Grok weekly re-rank via WF1, not hardcoded",
+    "default_pool": [
+      "Psychology",
+      "Dark Psychology",
+      "Marketing History",
+      "Mindset",
+      "Wolf Mindset",
+      "Consumerism",
+      "Self-Improvement",
+      "Finance Behavior"
+    ],
+    "custom_own": "Add any niche via ADMIN_EMAIL in /admin \u2192 Create Niche (writes to Neon solo_domains top5)",
+    "faceless_db": "data/creator_db_faceless_1000_FINAL.csv (1,000 verified via Social Blade alternatives \u2014 use this as seed, not hardcode)",
+    "source": "GROK_API_KEY + HypeAuditor + NotJustAnalytics + Picuki (not Social Blade alone)"
+  },
+  "thresholds": {
+    "comment_note": "All thresholds env-overridable via JARVIS_* in .env.example \u2014 no code change needed",
+    "ratio_green": 50,
+    "ratio_amber_max": 70,
+    "er_green": 5,
+    "er_amber_min": 3,
+    "er_amber_max": 5,
+    "er_red_min": 2,
+    "buyer_pool_min": 3000,
+    "demand_percent": 1,
+    "demand_min_replies": 25,
+    "comment_to_dm_window_hours": 2,
+    "stuck_detector_hours": 48
+  },
+  "content": {
+    "engine": "Wan 1.3B T4 free Colab fallback WAN_T4_URL + TubeGen $29 auto \u2014 direct to OpusClip, no LUT step (removed per Content Guy)",
+    "scripts_per_domain": 6,
+    "words_per_longform": 4500,
+    "clip_targets": "3x8s short + 2x32s long + 1x60s deep from 30m p01_32s_9x16.mp4 Katana queue70",
+    "publish": "Buffer Team $12/ch 6/day serious IG/TikTok/YT + X 1-2/day discovery filler (configurable via BUFFER_DAILY_LIMIT)",
+    "channels": [
+      "X",
+      "IG",
+      "TikTok",
+      "YT"
+    ],
+    "x_mode": "discovery only 1-2/day filler, no gate, no ChatFuel (user lock)",
+    "seo": "Claude Max per platform: IG hashtags vs TikTok hooks vs YT titles + buyer_pool_x3 targeting",
+    "engine_alternatives": {
+      "primary": "Wan 1.3B T4 free WAN_T4_URL + TubeGen $29 auto",
+      "alternatives": {
+        "pictory": "$25 annual $29 monthly 200mins 30m cap script->stock \u2014 Marketing History/Consumerism",
+        "fliki": "$21 annual $28 monthly 2000+ voices 15m Standard \u2014 Dark Psych/Wolf/Mindset narration",
+        "invideo": "$17 annual blog/prompt->video \u2014 Finance Behavior",
+        "heygen": "$24 annual Creator avatar \u2014 Wolf avatar option",
+        "frameloop": "$19 120 faceless/$39 daily shorts budget"
+      },
+      "switch_env": "ENGINE_PROVIDER=wan|tubegen|pictory|fliki|invideo|heygen|frameloop + paired API key, fallback WAN_T4_URL auto"
+    }
+  },
+  "conversion": {
+    "dual": {
+      "green_fast_close": "Comments\u2192DM\u2192Whop\u2192Purchase same day via ChatFuel IG&TikTok + ManyChat YT \u2014 3-email cap \u2192 FINAL TERMS 10pts (Hard Rule 2/3)",
+      "amber_14day": "Comments\u2192DM\u219214-day\u2192Whop\u2192Purchase via ChatFuel IG&TikTok + ManyChat YT drip Day1-3 value proof, Day4-7 teardown, Day8-14 close + Whop $19/mo Circle \u2014 daily CTA (no FINAL TERMS), AMBER YES any day exits to fast-close",
+      "priority": "Comments\u2192DM\u2192Whop\u2192Purchase prioritized over feed \u2014 both to advantage",
+      "red_hold": "ratio >70 or ER <3% HOLD \u2014 improve loop (see improve loop, no G4 per lock)"
+    },
+    "chatfuel": "IG & TikTok only (user lock) \u2014 CHATFUEL_TOKEN",
+    "manychat": "YT only fallback if MANYCHAT_API_KEY set (8ch optional) \u2014 YT comments cannot ChatFuel",
+    "yt_triage": "YT comments \u2192 Gmail GMAIL_* triage if no ManyChat",
+    "hard_rules": "R1 no manual, R2 no free audit before YES, R3 IP gate, R4 human-send, R5 no fabrication, R6 math discipline, R7 3-email\u2192FINAL TERMS, R8 data hygiene, R9 no Whop before PASS, R10 strict 1%+25 IG/TikTok/YT only, R11 personalize voice"
+  },
+  "improve_loop": {
+    "excluded": "G4 queue38 tweaks \u2014 per user lock All above aside for the G4 (Content Guy approves once, not in loop)",
+    "loops": [
+      "A/B Hook/CTA via Higgsfield/OpusClip virality 9.2 ranked",
+      "Daily ER check Social Blade alternatives + weekly Grok re-rank 1000 faceless via WF1",
+      "Whop ladder $27+$9+$79+$19/mo ladder A/B + DM script variants via GMAIL_G4_SEND_200_VERIFIED.gs"
+    ]
+  },
+  "paywalls": {
+    "ladder": "$27 + $9 bump + $79 Pro + $19/mo Circle (env WHOP_LADDER_PRICES)",
+    "good_better_best": {
+      "GOOD": "$27 Starter Pillow+Wan manual \u2014 no auto",
+      "BETTER": "$79 Pro TubeGen+OpusClip presets \u2014 Lite $9 unlocks 1 domain 3 clips/day",
+      "BEST": "$79+$29/mo Vault+Agent Pro full stack $189 auto LUT 5 domains 6/day \u2014 Pro unlocks",
+      "Circle": "$19/mo Continuity pod streak WWS"
+    },
+    "entitlement": "lib/entitlement.ts Lite $9 (30 runs, 1d, 3c/d) / Pro $29 (9999, 5d, 6c/d) via WHOP_PRODUCT_LITE_ID/PRO_ID/TEAM_ID + Whop API v2/memberships",
+    "take": "Whop 3%+2.7%+$0.30 per sale (~$4.70 on $79)"
+  },
+  "retention": {
+    "target": "1.1-1.4% churn \u2192 1-2% lock",
+    "save": "WF8 Pause $5 / 50% off $9.50 / Downgrade $9 Lite \u2014 44% save, 1 save/30d max, paused=0% churn",
+    "pods": "WF9 \u22645 auto smallest pod via /api/pods ManyChat\u2192Whop Chat \u2014 Pod Red 28 vs Blue 22 daily 05:45, Vesper DM 3d inactive Hey love it's Vesper \u2014 Pod Red misses you via Jive +25418XXXX710 voice-00",
+    "proof": "WWS Sun 09:00 + Tue/Fri proof clips + Leaderboard + Thu 19:00 teardown \u2192 Neon vault \u2192 32s teaser",
+    "upgrade": "all_three triggers Day3 win + Day7 streak + Leaderboard Top3 \u2192 Lite $9\u2192Pro $29 POST /api/whop/upgrade Whop change_plan"
+  },
+  "shadow_pattern": "leak_expand: Daily 05:45 leak finder biggest leak in operator_context via /api/cron/daily-brief + weekly Grok re-rank top5 expand \u2192 auto-expand to 5 pages template big_run_1000.py + WF9 pods \u2014 superfast to Whop",
+  "scale": {
+    "mvp": "$61/mo \u2192 $732/yr 1 YT brand 6/day (Wan free + OpusClip free + Higgsfield manual + Buffer Free 3ch)",
+    "scale_5": "$189/mo \u2192 $2,268/yr + ~$60 PSTN = $2,328 Year1 pocket (you locked) + TubeGen $29 + OpusClip $15 + Higgsfield $29 + Buffer Team $60) + brain $36 \u2014 7 sales $189 covers scale, 3 sales $81 covers MVP",
+    "year1": "Pocket $189/mo\u00d712=$2,268 \u2192 Net $1K/mo for 3 bros 30/20/50 \u2192 100K gross before re-tool \u2014 docs/YEAR1_POCKET_TO_100K_SCALE.md",
+    "adaptable_pages": "Env PAGES_COUNT 5 (scalable any N) \u2014 no code change, WF1-9 loop domains",
+    "languages": "English default, extendable via CLAUDE_LOCALE env + Grok X trending locale"
+  },
+  "accounts": {
+    "admin_master": "scott.abuya@gmail.com (Vercel/Neon/n8n/Claude/Whop/Wise/Linear/Telegram/Jive env only)",
+    "social_master": "info.wolf@gmail.com (5 YT brands TT/IG/X via Buffer Team + Drive 17KpzZCm HQ NUMINOUS_WHOP_DEPLOY)",
+    "split": "Split kept per your Sure \u2014 never combine"
+  },
+  "voice": {
+    "vesper": "Vapi SIP Jive One +25418XXXX710 secure env only 3 legs parallel not conference \u2014 voice-00 Vesper 20yo playful witty adaptive per role intro + ElevenLabs + Africa's Talking $0.06 \u2192 Twilio $0.22 fallback + Whisper transcribe \u2192 Neon/Drive 17KpzZCm/calls + Linear",
+    "jarvis": "ElevenLabs briefing 08:45 + PWA mic Whisper via Grok",
+    "bundle": "audio/vesper_voice_*.mp3 + audio/jarvis_voice_* + jarvis-app/lib/voice.ts + docs/JARVIS_VESPER_VOICE_WIRED.md"
+  },
+  "live_links": "docs/LIVE_LINKS_SETUP.md \u2014 all https:// live (console.anthropic.com, console.x.ai, vercel.com/new, neon.tech, n8n.cloud, whop.com/dashboard, buffer.com, chatfuel.com, vapi.ai, elevenlabs.io, console.cloud.google.com)"
+}
