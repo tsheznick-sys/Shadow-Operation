@@ -1,0 +1,246 @@
+{
+  "name": "WF6 Chatfuel DM",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "### WF6 — Chatfuel DM reply\nChatfuel's comment automation fires this webhook with the inbound event:\n\n```json\n{ \"surface\": \"facebook\", \"conversation_id\": \"…\", \"text\": \"…\" }\n```\n\n1. **Normalise** — trim, lower-case the surface, refuse anything that is not\n   facebook, instagram or tiktok (YouTube has no DM channel in Chatfuel at all).\n2. **POST /api/chatfuel/dm** — the token stays in the app.\n3. **The link is built by the app** — `lib/whop-links.ts` turns a tier and a page into a\n   whop.com checkout or community link. This workflow never types a URL, and the app\n   refuses to send a DM carrying any other.\n4. **Wrong?** — Telegram. A DM that silently did not send is a member who asked a\n   question and never heard back.\n\nChatfuel answers **200 with `status: Failed` and a per-message `errors` array** for a\nDM it did not deliver, so the route refuses those (`CF04`, `CF05`) — this workflow\nonly has to read `ok`.\n\n**Requires:** `JARVIS_BRAIN_URL`, `CRON_SECRET`, `TELEGRAM_CHAT_ID`.",
+        "height": 360,
+        "width": 420,
+        "color": 4
+      },
+      "id": "c22823ce-2ae6-544a-8f86-5865d48eb889",
+      "name": "README",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chatfuel-dm",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "8ddd120f-aaf5-53ca-88e1-98282710acb9",
+      "name": "Chatfuel fires",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = $json.body ?? $json;\nconst surface = String(b.surface || '').trim().toLowerCase();\nconst conversation_id = String(b.conversation_id || b.conversationId || '').trim();\nconst comment_id = String(b.comment_id || b.commentId || '').trim();\n// The comment's own timestamp, not now: the 7-day window is measured from it.\nconst inbound_at = String(b.inbound_at || b.timestamp || b.created_time || '').trim();\nconst tier = String(b.tier || 'free').trim().toLowerCase();\nconst page_ref = String(b.page_ref || b.page || 'unknown_page').trim();\nconst kind = b.kind === 'reply' ? 'reply' : 'private_reply';\nconst allowed = ['facebook','instagram','tiktok'];\nconst why = !allowed.includes(surface) ? `surface ${surface || '(none)'} has no Chatfuel DM`\n  : !conversation_id ? 'no conversation_id — a DM is a reply, not a broadcast'\n  : !inbound_at ? 'no inbound_at — the messaging window cannot be proven'\n  : kind === 'private_reply' && !comment_id ? 'no comment_id — one private reply per comment'\n  : null;\nreturn [{ json: { valid: why === null, why, surface, conversation_id, comment_id, inbound_at, tier, page_ref, kind } }];"
+      },
+      "id": "3ac15624-5e23-5d05-9d28-d6b89f43d1c2",
+      "name": "Normalise",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        230,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "c5823235-c503-5c30-a556-84ec90210d89",
+      "name": "Sendable?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        460,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $vars.JARVIS_BRAIN_URL }}/api/chatfuel/dm",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $vars.CRON_SECRET }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ surface: $json.surface, conversation_id: $json.conversation_id, kind: $json.kind, comment_id: $json.comment_id, inbound_at: $json.inbound_at, tier: $json.tier, page_ref: $json.page_ref }) }}",
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "id": "da4db81f-e0b1-5be5-904e-9b0bd05439cc",
+      "name": "POST chatfuel/dm",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        690,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "592787f6-9d7a-5631-8d25-e277ba64e31b",
+      "name": "Delivered?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        920,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+        "text": "=Chatfuel DM did not send.\nsurface: {{ $('Normalise').item.json.surface }}\nreason: {{ $json.error || 'unknown' }}\ndetail: {{ ($json.reason || '').toString().slice(0, 200) }}",
+        "additionalFields": {}
+      },
+      "id": "a6ff38bb-d51a-5056-a000-bc9fd36cb373",
+      "name": "DM failed",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1150,
+        -160
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_TELEGRAM",
+          "name": "Jarvis Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+        "text": "=Chatfuel event dropped: {{ $json.why }}",
+        "additionalFields": {}
+      },
+      "id": "f9c20564-05b1-53a3-bd5a-db6a48387a23",
+      "name": "Dropped",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        690,
+        140
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_TELEGRAM",
+          "name": "Jarvis Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Chatfuel fires": {
+      "main": [
+        [
+          {
+            "node": "Normalise",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalise": {
+      "main": [
+        [
+          {
+            "node": "Sendable?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sendable?": {
+      "main": [
+        [
+          {
+            "node": "POST chatfuel/dm",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Dropped",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST chatfuel/dm": {
+      "main": [
+        [
+          {
+            "node": "Delivered?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delivered?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "DM failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

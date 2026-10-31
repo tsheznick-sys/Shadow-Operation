@@ -1,0 +1,1165 @@
+{
+  "version": "1.0.0",
+  "description": "Fully Adaptable System — all niches, thresholds, paywalls, pages, voices are config-driven, no hardcode",
+  "meta": {
+    "created": "2026-10-30",
+    "branch": "arena/6c47af3d-shadow-operation",
+    "status": "pr_open",
+    "updated": "2026-10-31 MARKET SCAN APPLIED: Finance dropped (policy), Circle $26->$44 & Pro $44->$53, 6 channels/niche (2 YT + TikTok + IG + FB + X), dual output (raw->Whop, edited->socials), two ledgers (community/team), rule-based verification on every step, three separate 98% targets, daily market watch."
+  },
+  "niches": {
+    "strategy": "Grok weekly re-rank via WF1, not hardcoded",
+    "default_pool": [
+      "Psychology",
+      "Dark Psychology",
+      "Marketing History",
+      "Mindset",
+      "Wolf Mindset",
+      "Consumerism",
+      "Self-Improvement"
+    ],
+    "custom_own": "Add any niche via ADMIN_EMAIL in /admin → Create Niche (writes to Neon solo_domains top5)",
+    "faceless_db": "data/creator_db_faceless_1000_FINAL.csv (1,000 verified via Social Blade alternatives — use this as seed, not hardcode)",
+    "source": "GROK_API_KEY + HypeAuditor + NotJustAnalytics + Picuki (not Social Blade alone)",
+    "research_cadence": "daily 08:00 EAT (cron 0 8 * * *) — was weekly Mon",
+    "internet_scan": "whole-internet strategy scan daily: X trending + Reddit + YouTube + Google Trends + competitor channels -> Claude extracts every strategy that works now",
+    "action_plan": "Claude emits a per-niche action plan each morning: 3 angles, hook, CTA, posting day, proof asset",
+    "policy_rule": "NEVER a finance, health, legal or medical page. YouTube's inauthentic-content clarification (16 Jul 2026) names 'AI personas giving advice on sensitive topics — health, finance, legal' as a permanent-removal risk. Stickman Finance was dropped as the main page on 2026-10-31 for this reason.",
+    "primary": "Consumerism",
+    "primary_why": "Business-adjacent RPM without being advice. Consumerism and Marketing History keep the high-value audience that finance attracts, without sitting in the sensitive-topic bucket.",
+    "banned_topics": [
+      "personal finance advice",
+      "investing",
+      "credit/debt guidance",
+      "health",
+      "medical",
+      "legal"
+    ],
+    "banned_why": "the named bucket in the July 2026 policy — it is a strike ladder ending in removal from the Partner Program, not a bad week",
+    "page_law": "ONE PAGE = ONE NICHE. The 6 channels are surfaces of that page, not 6 pages. 5 pages x 6 channels = 30 channels. A clone copies the system (prompt, character lock, hook bank, cadence) and must ORIGINATE its own niche, audience, angle and visual world. Enforced by solo_domains_niche_uniq + lib/pages.ts, not by good intentions.",
+    "overlap_warning": "Psychology / Dark Psychology / Mindset / Wolf Mindset / Self-Improvement are 4-5 labels on 2 readers. Mindset and Wolf Mindset are retired as separate pages — they are the Self-Improvement reader after midnight.",
+    "page_slots": [
+      {
+        "id": "p1",
+        "niche": "Stickman",
+        "cluster": "behavior",
+        "status": "assigned",
+        "note": "page 1 — runs alone until it posts a GREEN week"
+      },
+      {
+        "id": "p2",
+        "niche": "Consumerism",
+        "cluster": "price",
+        "status": "queued"
+      },
+      {
+        "id": "p3",
+        "niche": "Marketing History",
+        "cluster": "case",
+        "status": "queued"
+      },
+      {
+        "id": "p4",
+        "niche": "Self-Improvement",
+        "cluster": "system",
+        "status": "queued"
+      },
+      {
+        "id": "p5",
+        "niche": "Dark Psychology",
+        "cluster": "power",
+        "status": "queued"
+      },
+      {
+        "id": "p6",
+        "niche": "—",
+        "cluster": "unassigned",
+        "status": "held",
+        "reason": "a sixth page needs a sixth reader proven by the daily scan, not a sixth label"
+      }
+    ],
+    "sequence": {
+      "start_with": "Stickman",
+      "one_page_at_a_time": true,
+      "rule": "a page must post a GREEN week before the next page is argued for",
+      "next_niche_chosen_by": "Content Guy's expertise + WF1 daily market scan + a 3-of-3 board vote",
+      "never": "launch page 2 in the same week as page 1",
+      "supersedes": "the earlier 'all 5 pages at once' lock — revised 2026-10-31"
+    }
+  },
+  "thresholds": {
+    "comment_note": "All thresholds env-overridable via JARVIS_* in .env.example — no code change needed",
+    "ratio_green": 50,
+    "ratio_amber_max": 70,
+    "er_green": 5,
+    "er_amber_min": 3,
+    "er_amber_max": 5,
+    "er_red_min": 2,
+    "buyer_pool_min": 3000,
+    "demand_percent": 1,
+    "demand_min_replies": 25,
+    "comment_to_dm_window_hours": 2,
+    "stuck_detector_hours": 48
+  },
+  "content": {
+    "engine": "Stickman EVERY page (stickman_all): kaomei/stickman-video-director free renders 30m longform + Shorts on all PAGES_COUNT pages → OpusClip virality 9.2 → Higgsfield polish BOTH longform + shorts $0.08/clip (no teal/purple LUT). TubeGen $29 kept only as fallback if stickman render fails",
+    "scripts_per_domain": 6,
+    "words_per_longform": 4500,
+    "clip_targets": "3x8s short + 2x32s long + 1x60s deep from 30m p01_32s_9x16.mp4 Katana queue70",
+    "publish": "Buffer Team 6/day serious per brand (IG + TikTok + YT-Shorts) + longform 3x/week to YT-Long (configurable BUFFER_SERIOUS_DAILY / LONGFORM_PUBLISH_DAYS). X removed 2026-10-31: five surfaces, not six. The agent books these slots via lib/schedule.ts.",
+    "channels": [
+      "YT",
+      "TikTok",
+      "IG",
+      "FB"
+    ],
+    "x_mode": "removed 2026-10-31 — X is not a surface this operation runs",
+    "seo": "Claude Max per platform: IG hashtags vs TikTok hooks vs YT titles + buyer_pool_x3 targeting",
+    "engine_alternatives": {
+      "primary": "Wan 1.3B T4 free WAN_T4_URL + TubeGen $29 auto",
+      "alternatives": {
+        "pictory": "$25 annual $29 monthly 200mins 30m cap script->stock — Marketing History/Consumerism",
+        "fliki": "$21 annual $28 monthly 2000+ voices 15m Standard — Dark Psych/Wolf/Mindset narration",
+        "invideo": "$17 annual blog/prompt->video — Finance Behavior",
+        "heygen": "$24 annual Creator avatar — Wolf avatar option",
+        "frameloop": "$19 120 faceless/$39 daily shorts budget"
+      },
+      "switch_env": "ENGINE_PROVIDER=wan|tubegen|pictory|fliki|invideo|heygen|frameloop + paired API key, fallback WAN_T4_URL auto"
+    },
+    "engine_hybrid": {
+      "mode": "stickman_all",
+      "longform": "stickman-video-director free — 30m scene-per-beat render ($0) -> p01_32s_9x16.mp4 -> queue38",
+      "shorts": "stickman-video-director free — same character lock -> OpusClip 9.2 -> 6 clips per longform",
+      "polish": "Higgsfield $0.08/clip cleans BOTH the 30m longform master AND every short before Buffer (per 2026-10-31 answer)",
+      "fallback": "TubeGen $29 / Wan T4 free — only if stickman render fails or times out",
+      "brand_lock": "Stickman Finance: one master prompt + one reference frame per page — replaces teal/purple LUT + watermark"
+    },
+    "gates": {
+      "g4_content": true,
+      "g5_social": false,
+      "note": "G5 social review removed 2026-10-31 — G4 approve auto-schedules to Buffer; /social stays read-only analytics"
+    },
+    "longform_publish": "render daily 02:00 (free) but PUBLISH 3x/week Mon/Wed/Fri per page — extras bank as backlog (Round2 answer)",
+    "longform_render": "daily 02:00 — all pages stickman free",
+    "storage": {
+      "canonical": "Cloudflare R2 ($5/mo, 10GB free egress) — longform masters, shorts, sequence slides",
+      "metadata_index": "Neon Postgres table sequence_assets + publisher_queue38 (row per asset — cheaper than object storage for metadata)",
+      "drive": "deliverables + docs only (bundle, proofs, call recordings) — NOT content masters (owner 2026-10-31)",
+      "note": "if Neon approaches free-tier limit, index moves to a single jsonb column per cycle before any paid tier"
+    },
+    "monthly_sequence": {
+      "cadence": "monthly — 1st of month built 07:00 EAT, Day 1 = 2nd of month",
+      "guide": "Shadow_Operation_Playbook.pdf (Consulting.com Growth Operator training) — MAIN GUIDE",
+      "guide_drive_id": "1c7H10-d4QgjomCoUNhox3pEE00mqsP0V",
+      "phases": {
+        "warm_up": "days 1-3 — attention and trust, no selling",
+        "value_delivery": "days 4-9 — teach and prove, seed the problem",
+        "money_days": "days 10-14 — open offer, answer objections, close"
+      },
+      "buy_buttons": [
+        "reciprocity",
+        "commitment",
+        "social proof",
+        "authority",
+        "scarcity",
+        "urgency",
+        "specificity",
+        "loss aversion",
+        "identity",
+        "ease-of-use",
+        "risk reversal"
+      ],
+      "asset_gen": "Higgsfield renders each slide in the page operation style — stickman character lock, 1080x1350 feed / 1080x1920 story",
+      "publish": "R2 upload -> G4 once per cycle in /content -> Buffer (IG carousel + TikTok, gated)",
+      "follower_gate": "removed 2026-10-31 — metrics qualify, not follower count",
+      "demand_test": "3-slide carousel in Stories only, read after 72h — 50+ comments GREEN, 25-49 AMBER, <25 RED hold",
+      "docs": "docs/GROWTH_OPERATOR_14DAY_SEQUENCE.md",
+      "gate": "DEMAND-TEST GATE (replaces follower count): run the 3-slide carousel in Stories, read at 72h — 50+ comments = PASS -> proceed with the full sequence immediately; 25-49 = AMBER -> warm up and retest; <25 = RED -> hold. Scans update the DB every cycle."
+    },
+    "channels_per_brand": 6,
+    "channels_per_niche": {
+      "youtube_longform": {
+        "role": "PAGE 1 — the source. Everything else is cut from it",
+        "posts": "3x/week Mon/Wed/Fri",
+        "content": "edited, policy-safe"
+      },
+      "youtube_shorts": {
+        "role": "clips of the longform — same asset, second life",
+        "posts": "6/day",
+        "content": "edited, policy-safe"
+      },
+      "tiktok": {
+        "role": "discovery",
+        "posts": "3/day",
+        "content": "edited"
+      },
+      "instagram": {
+        "role": "community + DMs",
+        "posts": "2/day + Stories",
+        "content": "edited"
+      },
+      "facebook": {
+        "role": "reels + older audience",
+        "posts": "2/day",
+        "content": "edited"
+      }
+    },
+    "channel_count_note": "2 YouTube (Shorts + Longform) + TikTok + IG + FB + X = 6 channels per niche. 5 niches = 30 channels.",
+    "dual_output": {
+      "rule": "every asset is cut twice from the same script: RAW and EDITED",
+      "raw": {
+        "destination": "Whop private community only",
+        "why": "no platform to demonetise — so it can be direct, unfinished and honest",
+        "edits": "none. unlisted, unedited, includes the mistakes",
+        "value": "this is the reason to pay: the unfiltered version does not exist anywhere public"
+      },
+      "edited": {
+        "destination": "YouTube + TikTok + IG + FB + X",
+        "why": "must survive the inauthentic-content policy",
+        "edits": "polished, original commentary, varied format, AI disclosed, no advice phrasing",
+        "gate": "policy check runs BEFORE publish and can block the asset"
+      },
+      "split_point": "the edit decision happens in WF3, not WF4 — raw is archived to the community bucket before any platform sees it",
+      "env": "DUAL_OUTPUT=true · RAW_DESTINATION=whop · POLICY_GATE=true"
+    },
+    "channels_per_page": 5,
+    "channels_total_at_5_pages": 25,
+    "x_removed": "2026-10-31 — X dropped: worst reach per hour for a faceless animation page. 5 channels compound; 6 with one chore does not."
+  },
+  "conversion": {
+    "dual": {
+      "green_fast_close": "Comments→DM→Whop→Purchase same day via ChatFuel IG&TikTok + ManyChat YT — 3-email cap → FINAL TERMS 10pts (Hard Rule 2/3)",
+      "amber_14day": "Comments→DM→14-day→Whop→Purchase via ChatFuel IG&TikTok + ManyChat YT drip Day1-3 value proof, Day4-7 teardown, Day8-14 close + Whop $26/mo Circle — daily CTA (no FINAL TERMS), AMBER YES any day exits to fast-close",
+      "priority": "Comments→DM→Whop→Purchase prioritized over feed — both to advantage",
+      "red_hold": "ratio >70 or ER <3% HOLD — improve loop (see improve loop, no G4 per lock)"
+    },
+    "chatfuel": "Facebook, Instagram and TikTok (Chatfuel schema has facebookTextMessageSend, instagramTextMessageSend, tiktokTextMessageSend; no YouTube/X) — CHATFUEL_TOKEN + CHATFUEL_BOT_ID",
+    "manychat": "YT only fallback if MANYCHAT_API_KEY set (8ch optional) — YT comments cannot ChatFuel",
+    "yt_triage": "YT comments → Gmail GMAIL_* triage if no ManyChat",
+    "hard_rules": "R1 no manual, R2 no free audit before YES, R3 IP gate, R4 human-send, R5 no fabrication, R6 math discipline, R7 3-email→FINAL TERMS, R8 data hygiene, R9 no Whop before PASS, R10 strict 1%+25 IG/TikTok/YT only, R11 personalize voice",
+    "amber_sequence": "AMBER nurture = the MONTHLY 14-day Growth Operator sequence (Warm-Up 1-3 / Value 4-9 / Money 10-14) with Higgsfield slides pushed to Buffer — IG + TikTok gated at 1K followers",
+    "demand_test": {
+      "green": 50,
+      "amber": 25,
+      "red_below": 25,
+      "window_hours": 72,
+      "placement": "Stories only — never a feed post"
+    }
+  },
+  "improve_loop": {
+    "excluded": "G4 queue38 tweaks — per user lock All above aside for the G4 (Content Guy approves once, not in loop)",
+    "loops": [
+      "A/B Hook/CTA via Higgsfield/OpusClip virality 9.2 ranked",
+      "Daily ER check Social Blade alternatives + weekly Grok re-rank 1000 faceless via WF1",
+      "Whop A/B across the three agent tiers ($44/$53/$62) + the one-time ladder ($28/$17/$35/$89) + DM script variants via GMAIL_G4_SEND_200_VERIFIED.gs"
+    ],
+    "leak_expand": "keep daily leak finder + weekly Monday expand (owner 2026-10-31)"
+  },
+  "paywalls": {
+    "profile": "numerology_8",
+    "rule": "First shot is $28 (2+8=10 -> 1: the Leader, a deliberate opening move). Every other price reduces to 8 — the Life Path 8 ladder. Shortcut: an 8-aligned price satisfies n % 9 == 8.",
+    "reduces_to": {
+      "28": 1,
+      "17": 8,
+      "35": 8,
+      "89": 8,
+      "44": 8,
+      "53": 8,
+      "62": 8,
+      "710": 8
+    },
+    "first_shot": {
+      "name": "First Shot",
+      "price": 28,
+      "cadence": "one-time",
+      "what": "14 days all-access: all 5 domains, 6 posts/day, character lock, sequence slides, vault",
+      "after_14_days": "upgrade to Circle $44/mo or any one-time build — no auto-charge, no card kept on file",
+      "why_28": "reduces to 1 — the opening move; the only non-8 in the system, by design",
+      "env": "TIER_FIRST_SHOT_PRICE"
+    },
+    "ladder": "$28 first shot -> $17 Lite/mo -> $35 GOOD -> $89 BETTER -> $44 Circle/mo -> $53 Pro/mo -> $62 Team (env WHOP_LADDER_PRICES)",
+    "good_better_best": {
+      "GOOD": "$35 Starter Pillow+Wan manual — no auto (was $27)",
+      "BETTER": "$89 one-time build — no recurring agent access",
+      "BEST": "$89 one-time build + $53/mo Pro for the recurring agent — the build is bought, the agent is rented",
+      "Circle": "$44/mo Continuity pod streak WWS (was $26 — raised to cut churn, not to chase revenue)",
+      "Team": "$62 three seats (was $59)"
+    },
+    "floor": "nothing advertised below $17 — the $8 save pause is the only sub-17 price and only for an existing member",
+    "hidden_test_tier": "$9/mo — never advertised, never in the ladder; private A/B control to prove the $17 floor is not leaving money on the table",
+    "save_prices": {
+      "pause": 8,
+      "discount_rate_pct": 0,
+      "discount_price": 0,
+      "discount_months": 0,
+      "downgrade": 17
+    },
+    "save_math": "No percentage discount. At $44 every clean rate lands off-pattern: 35% = $28.60 (a 2), 36% = $28.16 (a 2), 44% = $24.64 (a 7). The save menu is now PAUSE $8 or DOWNGRADE to Lite $17 — both 8s, both honest, and neither teaches a member that the price was negotiable.",
+    "entitlement": "lib/tiers.ts is the ONLY product-to-tier map. Three agent products: WHOP_PRODUCT_CIRCLE_ID ($44) / WHOP_PRODUCT_PRO_ID ($53) / WHOP_PRODUCT_TEAM_ID ($62), resolved through lib/entitlement.ts against Whop API v1. A product id that matches nothing resolves to FREE, never to a guessed tier.",
+    "take": "Whop 3%+2.7%+$0.30 per sale (~$3.11 on $53, ~$2.81 on $44)",
+    "consult_owner": "Jarvis never reprices without the owner — it presents live market data and waits for a decision",
+    "code": "jarvis-app/lib/numerology.ts (digitalRoot, nextEight, LADDER) + scripts/check_numerology.py",
+    "docs": "docs/PRICING_NUMEROLOGY.md",
+    "change_log": "2026-10-31 Circle $26 -> $44. Price is the single biggest lever on churn: curated high-ticket communities run 2-3% monthly vs 8-12% in the $27-97 band, and $26 sat in that band while targeting 2%. Pro moved $44 -> $53 to stay above Circle (it collided at 44). Both reduce to 8.",
+    "agent_tiers": {
+      "rule": "three products, one per agent tier — 44 / 53 / 62, all reduce to 8",
+      "circle": {
+        "env": "WHOP_PRODUCT_CIRCLE_ID",
+        "price": 44,
+        "runs_window": 40,
+        "runs_month": 600,
+        "watermark": false,
+        "vault": true
+      },
+      "pro": {
+        "env": "WHOP_PRODUCT_PRO_ID",
+        "price": 53,
+        "runs_window": 80,
+        "runs_month": 1200,
+        "watermark": false,
+        "vault": true,
+        "direct_publish": true
+      },
+      "team": {
+        "env": "WHOP_PRODUCT_TEAM_ID",
+        "price": 62,
+        "seats": 3,
+        "runs_window": 80,
+        "runs_month": 1200,
+        "watermark": false,
+        "vault": true
+      },
+      "broke_on": "2026-10-31 — webhook read WHOP_PRODUCT_CIRCLE_ID that .env.example never declared, so a $44 buyer was recorded as FREE; entitlement had no circle tier at all; the upgrade route looked up WHOP_PRODUCT_GOOD_ID/BETTER_ID which never existed. Single registry + declared-env test now."
+    }
+  },
+  "retention": {
+    "target": "1.1-1.4% churn → 1-2% lock",
+    "save": "WF8 Pause $8 / 35% off -> $17 for 3 months / Downgrade Lite $17 — 1 save/30d max, paused=0% churn",
+    "pods": 5,
+    "proof": "WWS Sun 09:00 + Tue/Fri proof clips + Leaderboard + Thu 19:00 teardown → Neon vault → 32s teaser",
+    "upgrade": "all_three triggers Day3 win + Day7 streak + Leaderboard Top3 -> Lite $17->Pro $44 POST /api/whop/upgrade Whop change_plan",
+    "churn_alert_weekly_pct": 2.0,
+    "save_offers": [
+      "pause $8/mo (counts active — the only sub-$17 price)",
+      "35% off -> $17/mo for 3 months (rate and price both reduce to 8)",
+      "downgrade Lite $17"
+    ],
+    "data_retention": {
+      "masters": "delete after 30 days (lean storage)",
+      "published_assets": "keep forever (shorts, slides, longform finals)",
+      "transcripts": "12 months",
+      "index": "Neon keeps rows + hashes after the object is deleted",
+      "docs": "docs/SIGNALS_CONTROLS_RETENTION.md"
+    }
+  },
+  "shadow_pattern": "leak_expand: Daily 05:45 leak finder biggest leak in operator_context via /api/cron/daily-brief + weekly Grok re-rank top5 expand → auto-expand to 5 pages template big_run_1000.py + WF9 pods — superfast to Whop",
+  "scale": {
+    "mvp": "$61/mo → $732/yr 1 page 6/day (stickman free + OpusClip free + Higgsfield manual + Buffer Free 3ch)",
+    "scale_5": "$165/mo → $1,980/yr + ~$60 PSTN (stickman $0 engine + OpusClip $15 + Higgsfield $29 longform+shorts+sequence slides + Buffer Team $60 + R2 $5 + brain $36 + TubeGen $29 fallback only) — 2 BETTER $89 sales cover scale",
+    "year1": "Pocket $189/mo×12=$2,268 → Net $1K/mo for 3 bros 30/20/50 → 100K gross before re-tool — docs/YEAR1_POCKET_TO_100K_SCALE.md",
+    "adaptable_pages": "PAGES_COUNT 1 live (Stickman) + 4 queued + 1 held",
+    "languages": "English default, extendable via CLAUDE_LOCALE env + Grok X trending locale",
+    "channels_per_page": 5,
+    "channels_total": 25
+  },
+  "accounts": {
+    "admin_master": "scott.abuya@gmail.com (Vercel/Neon/n8n/Claude/Whop/Wise/Linear/Telegram/Jive env only)",
+    "social_master": "info.wolf@gmail.com (5 YT brands TT/IG/X via Buffer Team + Drive 17KpzZCm HQ NUMINOUS_WHOP_DEPLOY)",
+    "split": "Split kept per your Sure — never combine"
+  },
+  "voice": {
+    "vesper": "Vapi SIP Jive One +25418XXXX710 secure env only 3 legs parallel not conference — voice-00 Vesper 20yo playful witty adaptive per role intro + ElevenLabs + Africa's Talking $0.06 → Twilio $0.22 fallback + Whisper transcribe → Neon/Drive 17KpzZCm/calls + Linear",
+    "jarvis": "ElevenLabs briefing 08:45 + PWA mic Whisper via Grok",
+    "bundle": "audio/vesper_voice_*.mp3 + audio/jarvis_voice_* + jarvis-app/lib/voice.ts + docs/JARVIS_VESPER_VOICE_WIRED.md",
+    "jive_legs": [
+      "owner all",
+      "content only",
+      "social only"
+    ]
+  },
+  "live_links": "docs/LIVE_LINKS_SETUP.md — all https:// live (console.anthropic.com, console.x.ai, vercel.com/new, neon.tech, n8n.cloud, whop.com/dashboard, buffer.com, chatfuel.com, vapi.ai, elevenlabs.io, console.cloud.google.com)",
+  "team": {
+    "seats": 3,
+    "roles": {
+      "owner": "scott.abuya@gmail.com — admin, money, approvals",
+      "content": "content@shadow.local — G4, scripts, character lock",
+      "social": "info.wolf@gmail.com — DMs, Buffer, sequences"
+    },
+    "auth": "Google OAuth via next-auth (only the 3 seeded emails may sign in) + email/password fallback; 6-digit 2FA required on /money and /admin; HMAC-SHA256 shadow_session cookie, edge middleware role gate",
+    "permissions": {
+      "owner": "*",
+      "content": [
+        "/content",
+        "/pods",
+        "/onboarding",
+        "/team",
+        "/money",
+        "/drafts",
+        "/jarvis",
+        "/n8n"
+      ],
+      "social": [
+        "/social",
+        "/pods",
+        "/onboarding",
+        "/team",
+        "/money",
+        "/drafts",
+        "/jarvis",
+        "/n8n",
+        "/retention"
+      ]
+    },
+    "interview": "18 questions per seat (9 shared + 9 role) — each carries a 'why', min-length enforced, autosaves to Neon team_profiles; second-pass follow-ups can be added per seat",
+    "digest": "WF12 weekly Mon 07:30 — completeness per seat; a seat under 60% does not get unsupervised authority",
+    "docs": "docs/TEAM_ONBOARDING_AUTH.md",
+    "autonomy": {
+      "target": "80-90% of the operation autonomous",
+      "matrix": {
+        "research": 95,
+        "render": 80,
+        "clip_polish": 90,
+        "publish": 70,
+        "dm_green": 75,
+        "sequence": 85,
+        "retention": 90,
+        "money": 40,
+        "voice": 60
+      },
+      "rule": "money never recommended above 40% (prepare + approve); publish stays 70% until 30 clean G4 approvals",
+      "env": "AUTONOMY_<LANE> overrides any lane, clamped to its floor",
+      "docs": "docs/AUTONOMY_MATRIX.md"
+    }
+  },
+  "community_funding": {
+    "model": "self-funding — Circle carries tools first, then prizes, then annual fund, then reserve",
+    "circle_price": 44,
+    "tools_monthly": 165,
+    "prize_target": 710,
+    "annual_bills": 1596,
+    "annual_fund_per_month": 133,
+    "break_even_members": 26,
+    "recommended_members": 35,
+    "break_even_raw": 22,
+    "recommended_raw": 27,
+    "math": "Circle $44 -> net $41.19 after 3%+2.7%+$0.30. break-even (165+710)/41.19 = 21.24 -> 22 -> snap UP to 26. recommended (165+710+133)x1.10/41.19 = 26.92 -> 27 -> snap UP to 35. At 26: net $1,070.94 - $165 - $710 = $195.94. At 35: net $1,441.65 - $165 - $710 - $133 = $433.65. The nesting is the point: full price 26/35, median ARPU 35/44, 25th pct 44/53 - every level an 8.",
+    "why_710": "closest 8 to the old $750 cap (750 -> 746 is nearer but unreadable; 710 keeps a round prize number and 7+1+0=8)",
+    "order": [
+      "tools",
+      "prizes",
+      "annual_fund",
+      "reserve"
+    ],
+    "prize_rule": "prize pool = max(0, circle revenue - tools), cap 710 — scales with members, never a fixed promise",
+    "ledger": "Neon funding_ledger",
+    "docs": "docs/COMMUNITY_FUNDING_MODEL.md",
+    "decide_from_data": "final floor from 60 days of real churn + ARPU data — not from a model",
+    "net_per_member": 41.19,
+    "processor_fees": "3% Whop + 2.7% Stripe + $0.30 = $1.78 on a $26 charge -> $24.22 net",
+    "previous_error": "The $35 break-even was computed on GROSS revenue and ignored processor fees. At 35 members net revenue is $847.6 - $165 = $682.6, which is $27 SHORT of the $710 prize pool. Fixed 2026-10-31 by solving on net. Off by 9 members.",
+    "note_53": "53 is also the challenge cohort size — the room that produces the next 53 members is the one that funds it.",
+    "arpu_scenarios": {
+      "full_price": {
+        "arpu": 44.0,
+        "net": 41.19,
+        "break_even": 26,
+        "recommended": 35
+      },
+      "median_71_2pct": {
+        "arpu": 31.33,
+        "net": 29.24,
+        "break_even": 35,
+        "recommended": 44
+      },
+      "p25_53_2pct": {
+        "arpu": 23.41,
+        "net": 21.77,
+        "break_even": 44,
+        "recommended": 53
+      }
+    },
+    "price_rationale": "Raised $26 -> $44 because price is the strongest known lever on community churn: curated high-ticket communities run 2-3%/mo while the $27-97 band runs 8-12%. At $26 we were priced in the churn band while targeting 2%. $44 buys the retention the funding model already assumed."
+  },
+  "autopay": {
+    "state_default": "not_granted",
+    "rule": "Jarvis proposes only until the owner grants authority in /money; granting writes audit_log and starts next cycle, never retroactive",
+    "annual_resubscribe": "annual renewal fund accumulates $133/mo, converts TubeGen/Higgsfield/Buffer/OpusClip to annual once funded",
+    "env": [
+      "AUTOPAY_AUTHORITY",
+      "WISE_API_KEY",
+      "AUTOPAY_HOLD_UNTIL"
+    ]
+  },
+  "signals": {
+    "daily_email": "daily feedback email to all 3 seats — from Jarvis Agent (Vessy)",
+    "in_app": "in-app updates on the phone (PWA) for the same update",
+    "sms_offline": "SMS when a seat is offline / unreachable (Africa's Talking primary, Twilio fallback)",
+    "escalation": "no reply within 10 minutes -> voice call to that seat",
+    "sender": "Vessy (Vesper) — every message signed as the Jarvis Agent",
+    "order": [
+      "daily email all 3",
+      "in-app PWA",
+      "SMS if offline",
+      "call after 10 min no reply"
+    ],
+    "env": [
+      "AFRICASTALKING_* or TWILIO_*",
+      "email provider",
+      "VAPI for the callback"
+    ]
+  },
+  "controls": {
+    "big_red_button": "GLOBAL PAUSE — stops every outbound workflow (publish, DM, voice, money). Nothing resumes until the owner undoes it",
+    "triggers": [
+      "/admin Big Red Button",
+      "Vapi 'press 1'",
+      "/api/control Global pause"
+    ],
+    "resume": "owner only, audit_log row written on pause and resume",
+    "env": "CONTROL_STATE=running|paused"
+  },
+  "operations": {
+    "offline_mode": "keep running at full autonomy when the owner is away; daily SMS feedback to all 3 seats",
+    "golive": "all 5 pages at once — import 13 workflows, start every page",
+    "phase2": "after the Shadow Operation role converts clients to the required number, build the whole backend and give it the full pipeline to run, monetise the pages and make sales",
+    "first_week": "all 5 pages live · 30 clips out · first 3 Circle members",
+    "challenge": {
+      "workflow": "WF14",
+      "audience": "operators — community members only",
+      "gate": "14 days paid tenure · entry fee \\$0 (membership is the ticket)",
+      "daily_send": "06:00",
+      "cohort": "monthly, cap 53",
+      "completion_target": "60%+ of active",
+      "finisher_rule": "10 of 14 days + day-13 verdict",
+      "verify": "api_numbers — claimed vs real, reject >20% mismatch",
+      "finisher": "PASS -> First Shot \\$28 -> Circle \\$26 -> operator seat",
+      "non_finisher": "day 15 -> Lite \\$17",
+      "autonomy": "AUTONOMY_SEQUENCE 85% — may send/score/rank; may NOT admit to paid tier without owner",
+      "env": "CHALLENGE_COHORT_SIZE / CHALLENGE_MIN_COMPLETION / CHALLENGE_MIN_TENURE_DAYS / CHALLENGE_MISMATCH_LIMIT"
+    },
+    "ledger": {
+      "workflow": "WF9",
+      "write": "06:00 daily (audited rows)",
+      "daily_lag_hours": 24,
+      "totals_refresh_seconds": 900,
+      "public": [
+        "views",
+        "er",
+        "comments",
+        "replies",
+        "posts",
+        "churn",
+        "days"
+      ],
+      "revenue": "admin only · per-brand opt-in to publish",
+      "failures_shown": true,
+      "surfaces": [
+        "/ledger",
+        "/proof",
+        "GET /api/ledger"
+      ],
+      "env": "PROOF_PUBLIC / PROOF_LAG_HOURS / PROOF_INCLUDE_FAILURES / LEDGER_REFRESH_SECONDS"
+    },
+    "market_watch": {
+      "workflow": "WF1 (extended)",
+      "cadence": "daily 08:00 before the action plan",
+      "watches": [
+        "YouTube inauthentic-content enforcement",
+        "platform policy changes",
+        "niche saturation",
+        "competitor offers and pricing",
+        "Whop/Stripe fee changes",
+        "churn and ARPU benchmarks"
+      ],
+      "output": "a dated diff: what changed since yesterday, what it threatens, what Jarvis recommends",
+      "trigger": "any policy change touching our niches -> Red Button review notice to all 3 seats within the hour",
+      "env": "MARKET_WATCH=true · MARKET_WATCH_ALERT=policy"
+    }
+  },
+  "trust": {
+    "model": "trust is removed, not given — each engine kills one specific belief that blocks the buy",
+    "doctrine": "free at SCALE (1-to-many broadcast content, costs nothing extra). NEVER free at 1:1 (audits, decks, strategy calls) — that is where extraction happens",
+    "hard_rule_kept": "R2 — no free audit before YES. Validated by the Omar thread, not by preference",
+    "why_free_is_not_enough": "In 2026 free value is not scarce. Every competitor in this niche gives away 100+ niches, 300+ prompts, full AI stacks and workflows for free. AI made information worthless, so free information no longer signals anything. What is scarce is a verifiable outcome.",
+    "evidence": {
+      "own_funnel": "371 cold emails -> 4 replies (1.1%) -> 3 active (0.8%) -> 0 signed",
+      "own_free_audit": "Omar (@premiereprotutos, 164K): a full free 6-part audit was delivered Oct 20 (Transition Pack, revenue model, 14-day launch, 3 story scripts). Result: he stalled, then asked for a strategy deck 'for research purposes'. Free work produced extraction, not conversion.",
+      "own_proof_request": "Anu (@its.anu.sharma, 222K) asked 'can you show case studies?' — she did not want more free value, she wanted verifiable proof. Proof was the blocker, not generosity.",
+      "skool_freemium": "2-5% free->paid typical on Skool, 8-10% only when highly engaged",
+      "skool_challenge": "8-15% of active members convert via a structured challenge vs 0.3-0.8% via a direct pitch — a 4-6x difference",
+      "hormszi_reference": "4.5% free->paid at 100,000 free members (Hormozi model) — free scales by volume, not by conversion rate",
+      "free_audit_market": "free audits attract tire-kickers, are valued less, and devalue execution; a small PAID tripwire credited toward the build converts far better"
+    },
+    "competitors": {
+      "youtube_automation_hub": "FREE: 'Ultimate Faceless YouTube OS' — 100+ high-RPM niches, full AI stack (research/script/voice/edit/thumb), viral title frameworks, 300+ prompts, automation workflows, monetization playbook. Gated by follow + like + repost + comment 'YT'.",
+      "virovate_academy": "FREE: 7-day trial of exact niches, scripts and faceless workflow.",
+      "uploados": "$116/week with a 1-day trial — upload automation, templates, weekly Q&A.",
+      "wheellsverse": "$47/mo with a 3-day trial — faceless frameworks, AI tools, monthly challenges with prizes.",
+      "benjamin_hubner": "FREE Quickstart PDF + referral unlocks, then a low-ticket suite from $17.",
+      "the_gap": "All five give away TEMPLATES, PROMPTS or TIME-BOXED ACCESS. Not one of them gives away PROOF. Screenshots are fakeable; a live channel with a public ledger is not. That is the only defensible ground in the niche."
+    },
+    "engines": {
+      "show": {
+        "name": "THE OPEN LEDGER",
+        "kills": "'I don't believe your numbers'",
+        "mechanic": "Publish the real numbers of all 5 pages every day — views, ER, comments, replies, revenue, churn, and the failures — on a public /proof page fed straight from Neon. 24h lag, nothing hand-edited, no cherry-picking.",
+        "why_it_wins": "An audit can be invented. A channel can be checked. When a prospect can verify the claim before talking to us, the case-study objection (Anu) dies before it is raised.",
+        "competitor_status": "nobody in the niche does this — every competitor shows screenshots",
+        "env": "PROOF_PUBLIC=true · PROOF_LAG_HOURS=24 · PROOF_INCLUDE_FAILURES=true",
+        "built": {
+          "page": "/ledger (global live) + /proof (per brand)",
+          "api": "/api/ledger",
+          "table": "public_ledger",
+          "writer": "WF9 06:00"
+        },
+        "exposure": {
+          "public": [
+            "views",
+            "er_pct",
+            "comments",
+            "replies",
+            "posts",
+            "churn_pct",
+            "days_live"
+          ],
+          "revenue": "admin only by default — every brand or member chooses OPTIONALLY whether to publish their own results and revenue",
+          "opt_in": "share_revenue flag per brand; default OFF. Nothing is published on someone's behalf without them turning it on.",
+          "why": "publishing someone else's revenue without consent is not transparency, it is a leak. Opt-in keeps the ledger honest AND safe.",
+          "owner_view": "owner sees exact revenue for all brands on /money and /ledger?owner=1",
+          "env": "LEDGER_SHOW_REVENUE=false · LEDGER_ALLOW_OPT_IN=true"
+        },
+        "cadence": {
+          "model": "live totals, audited daily rows",
+          "totals_refresh_seconds": 900,
+          "totals_lag": "none — cumulative counters only, never a single day",
+          "daily_rows_lag_hours": 24,
+          "why": "a cumulative total cannot be gamed by picking a good hour; a single day can. So totals feel live and the audited rows stay sealed for 24h."
+        },
+        "ledgers": {
+          "community": {
+            "who": "members + prospects",
+            "shows": "views, ER, comments, replies, posts, churn, days live",
+            "revenue": "per-brand opt-in only",
+            "policy_events": "hidden — a demonetisation scare on a sales page destroys trust for no gain"
+          },
+          "team": {
+            "who": "the 3 seats + owner",
+            "shows": "everything in community PLUS policy strikes, demonetisation risk, raw-vs-edited performance gap, cost per clip, margin",
+            "why": "the team needs the wound; the prospect does not",
+            "surface": "/ledger?scope=team (owner/team only)"
+          },
+          "rule": "two ledgers, one database. Scope decides what renders, never what is recorded."
+        }
+      },
+      "do": {
+        "name": "THE 14-DAY CHALLENGE",
+        "kills": "'I don't believe it works in MY niche'",
+        "mechanic": "The existing monthly 14-day sequence becomes a cohort challenge: free to join, one action per day (Warm-Up 1-3 / Value 4-9 / Money 10-14), ending in THEIR OWN 72h demand test. Completion is tracked and ranked.",
+        "why_it_wins": "8-15% conversion vs 0.3-0.8% for a direct pitch. They trust it because they produced their own result — not because we handed them a PDF. 'Free to join, expensive to finish.'",
+        "success_metric": "completion rate 60%+ is the strongest predictor of upgrade",
+        "env": "CHALLENGE_COHORT_SIZE=53 · CHALLENGE_MIN_COMPLETION=60",
+        "challenge": {
+          "name": "THE 14-DAY CHALLENGE",
+          "status": "LIVE — free to join, one action per day, ends in the member's own 72h demand test",
+          "why_it_converts": "8-15% of active members vs 0.3-0.8% for a direct pitch. They trust it because they produced their own number, not because we explained ours.",
+          "doctrine": "free to join, expensive to finish — the work is the qualification",
+          "cohort_size": 53,
+          "min_completion": 60,
+          "phases": {
+            "warm-up": "days 1-3 · pick the niche, audit a rival, write 3 hooks",
+            "value": "days 4-9 · post daily, reply within 15 min, run the comment audit",
+            "money": "days 10-14 · 3-slide Stories, 72h clock, read it, decide"
+          },
+          "scoring": {
+            "checkin": "+1 per day completed with a deliverable",
+            "streak": "+1 per consecutive day — breaks at midnight local",
+            "verify": "+2 when Jarvis can open the link and confirm the post exists",
+            "penalty": "-1 for a checked-in day with no link when one is required",
+            "finisher": "10 of 14 days + the day-13 result logged = finisher"
+          },
+          "upgrade_trigger": "finisher + PASS on the day-13 demand test -> First Shot $28 -> Circle $26, and offered an operator seat running their own page",
+          "no_upgrade": "AMBER -> another cycle at no cost. RED -> a different niche, not a discount",
+          "jarvis_role": "creates the cohort, sends the daily action at 06:00, verifies links, ranks, flags quitters at day 5, writes the ledger, invites finishers",
+          "autonomy": "runs at AUTONOMY_SEQUENCE (85%) — it may send, score and rank unsupervised; it may NOT admit a finisher to the paid tier without the owner until autonomy lifts",
+          "days": [
+            {
+              "day": 1,
+              "phase": "warm-up",
+              "action": "Pick your niche and name the buyer",
+              "deliverable": "one sentence: who buys, what they already comment",
+              "why": "a niche you cannot describe in one line cannot be monetised"
+            },
+            {
+              "day": 2,
+              "phase": "warm-up",
+              "action": "Audit one rival page in your niche",
+              "deliverable": "3 numbers: followers, avg comments, like:comment ratio",
+              "why": "comments are the only trusted metric — likes lie"
+            },
+            {
+              "day": 3,
+              "phase": "warm-up",
+              "action": "Write 3 hooks in your own voice",
+              "deliverable": "3 hooks, 1 line each",
+              "why": "the hook is the whole product; the video is packaging"
+            },
+            {
+              "day": 4,
+              "phase": "value",
+              "action": "Post 1 piece of value — no ask",
+              "deliverable": "post URL",
+              "why": "warm-up exists so day 10 does not feel like a jump-scare"
+            },
+            {
+              "day": 5,
+              "phase": "value",
+              "action": "Post again and reply to every comment within 15 min",
+              "deliverable": "post URL + reply count",
+              "why": "the reply is where the buyer is revealed"
+            },
+            {
+              "day": 6,
+              "phase": "value",
+              "action": "Run the comment audit on your own post",
+              "deliverable": "comments, replies, buyer pool x3",
+              "why": "you must be able to read your own signal before you sell"
+            },
+            {
+              "day": 7,
+              "phase": "value",
+              "action": "Post the teardown: what worked, what flopped",
+              "deliverable": "post URL + 1 lesson",
+              "why": "public honesty is the cheapest trust you will ever buy"
+            },
+            {
+              "day": 8,
+              "phase": "value",
+              "action": "Ask your audience one question they answer in one word",
+              "deliverable": "the question + top answers",
+              "why": "their words become your sales copy verbatim"
+            },
+            {
+              "day": 9,
+              "phase": "value",
+              "action": "Post the best answer back to them as content",
+              "deliverable": "post URL",
+              "why": "proof you listen, which is rarer than proof you know"
+            },
+            {
+              "day": 10,
+              "phase": "money",
+              "action": "Build the 3-slide Stories demand test",
+              "deliverable": "3 slides + the CTA word",
+              "why": "Stories only — a feed post poisons the test"
+            },
+            {
+              "day": 11,
+              "phase": "money",
+              "action": "Publish the Stories and start the 72h clock",
+              "deliverable": "publish time + CTA word",
+              "why": "72h is the honest window; longer is a wish"
+            },
+            {
+              "day": 12,
+              "phase": "money",
+              "action": "Reply to every response, log objections",
+              "deliverable": "objection list",
+              "why": "objections are the product roadmap"
+            },
+            {
+              "day": 13,
+              "phase": "money",
+              "action": "Read the 72h result at the same hour you posted",
+              "deliverable": "comments count + PASS/AMBER/RED",
+              "why": "50+ PASS · 25–49 AMBER · <25 RED — no reinterpretation"
+            },
+            {
+              "day": 14,
+              "phase": "money",
+              "action": "Decide: build the offer, or fix the niche",
+              "deliverable": "your decision + what you will do next",
+              "why": "the decision is the deliverable, not the revenue"
+            }
+          ],
+          "env": "CHALLENGE_COHORT_SIZE=53 · CHALLENGE_MIN_COMPLETION=60 · CHALLENGE_MIN_TENURE_DAYS=14 · CHALLENGE_ENTRY_FEE=0 · CHALLENGE_MISMATCH_LIMIT=20",
+          "audience": "OPERATORS — people who want to run a page like ours using this system. The challenge is a recruitment and activation funnel, not a product funnel.",
+          "audience_note": "A finisher does not just buy a subscription — they become a Shadow Operator running their own page on this stack. That is Phase 2 funding itself.",
+          "gate": {
+            "who": "community members only — no public sign-ups",
+            "tenure_days": 14,
+            "why_tenure": "14 days of membership is the filter money cannot buy: tourists do not stay two weeks and pay for it",
+            "entry_fee": 0,
+            "entry_note": "NO extra charge. The membership IS the ticket. Asking a $26 member for a $28 deposit to join a task would make entry $54 and empty the room.",
+            "qualifies": [
+              "First Shot $28 (14-day all-access pass — those 14 days ARE the tenure)",
+              "Circle $26/mo after 14 days"
+            ],
+            "not_eligible": "anyone who is not a paying member, regardless of how badly they want in"
+          },
+          "verification": {
+            "level": "api_numbers",
+            "method": "Jarvis opens the submitted link AND pulls the post's real view/comment count from the platform API",
+            "reconcile": "compare claimed vs verified; a mismatch above 20% is rejected and the day does not count until corrected",
+            "mismatch_limit_pct": 20,
+            "missing_api": "if a platform key is absent, the day is marked unverified_api_missing — counted, but flagged and excluded from the leaderboard top 3",
+            "never": "never silently accept a number. A member who inflates once is warned; twice is removed from the cohort."
+          },
+          "non_finishers": {
+            "path": "downgrade",
+            "what": "day 15: offered Lite $17/mo instead of the First Shot",
+            "why": "they failed the completion standard, so they do not get the premium door — but they are still a paying member, and Lite $17 is 1+7=8",
+            "copy": "'You did not finish, so I will not pretend you did. Here is the cheaper door — same tools, one domain, 3/day.'",
+            "never": "no guilt copy, no third message, no shaming on the board"
+          }
+        },
+        "built": {
+          "page": "/challenge",
+          "api": "/api/challenge",
+          "tables": [
+            "challenge_members",
+            "challenge_checkins",
+            "challenge_scores"
+          ],
+          "writer": "WF14 06:00"
+        }
+      },
+      "bet": {
+        "name": "SKIN IN THE GAME",
+        "kills": "'I don't believe I'll get my money's worth'",
+        "mechanic": "The $28 First Shot carries a written guarantee: if the 72h demand test does not reach 50 comments, $28 comes back AND they keep every asset built. The operator carries the risk, not the buyer.",
+        "why_it_wins": "Risk transfer is the strongest trust signal available and it fits the Life Path 8 posture — confidence, never discounting. It also keeps the paid tripwire (which the market data says beats free) instead of collapsing to a free trial.",
+        "cap": "guarantee capped at the 72h demand test only — never a satisfaction guarantee on revenue",
+        "env": "FIRST_SHOT_GUARANTEE=true · GUARANTEE_THRESHOLD=50"
+      }
+    },
+    "sequence": "SHOW before DO, DO before BET — a stranger must be able to verify before being asked to act, and must have acted before being asked to pay.",
+    "never": [
+      "never a free 1:1 audit, deck or strategy call",
+      "never a keyword-comment gate (follow/like/repost/comment 'YT') — it inflates comments and poisons the trusted metric",
+      "never a free trial longer than 7 days",
+      "never fake or borrowed case studies — niche results do not transfer"
+    ],
+    "docs": "docs/TRUST_ENGINE.md",
+    "env_summary": "PROOF_PUBLIC / PROOF_LAG_HOURS / PROOF_INCLUDE_FAILURES / CHALLENGE_COHORT_SIZE / CHALLENGE_MIN_COMPLETION / FIRST_SHOT_GUARANTEE / GUARANTEE_THRESHOLD"
+  },
+  "learning": {
+    "purpose": "Jarvis improves itself, then the operation, then the money — in that order, and only with evidence.",
+    "law": "no change without a measured before and after. A hunch may be TESTED, never SHIPPED.",
+    "cycle": "weekly: observe -> hypothesise -> test 1 variable -> read the result -> promote or kill -> write the playbook",
+    "order_why": "Self first: a system that cannot correct its own output will scale its mistakes. Each stage only unlocks when the previous one is measurably working.",
+    "stages": {
+      "1_self": {
+        "what": "Jarvis grades its own work against what the market did — hook retention, ER, comment quality, objection rate",
+        "gate_to_next": "3 consecutive cycles where the promoted change beat the incumbent on the same metric",
+        "cannot": "cannot grade itself on revenue alone, and cannot promote a change it also scored — WF15 recomputes independently"
+      },
+      "2_operation": {
+        "what": "The same loop applied to throughput: render pass rate, G4 rejection rate, publish cadence, cost per clip, DQ rate",
+        "gate_to_next": "cost per shipped clip falls for 2 cycles AND G4 rejection below 10%"
+      },
+      "3_money": {
+        "what": "Then the loop touches pricing, offers, sequences and the save menu — the only stage where money moves",
+        "gate_to_next": "a full month above the recommended member floor (53) with churn at or under 2.0%"
+      }
+    },
+    "sample_rules": {
+      "min_sample": 30,
+      "min_days": 7,
+      "one_variable": "exactly one thing changes per test; two changes and the result is unreadable",
+      "holdout": "20% of each page's posts keep the incumbent so the comparison has a control",
+      "confidence": "a change wins only if it beats the incumbent by more than 10% and does not lose the primary metric"
+    },
+    "playbook": {
+      "what": "what works, per niche — hooks, lengths, posting times, CTAs, objection answers, thumbnails",
+      "promotion": "a tactic enters the playbook after 2 independent wins on 2 different pages",
+      "demotion": "a tactic leaves after 2 consecutive losses; it is archived, not deleted, so the same dead idea is not retried",
+      "decay": "every tactic re-tested every 60 days — what works in October is not guaranteed in January"
+    },
+    "writes_to": "config/adaptable.json -> learning.promoted (read-only at runtime), Neon playbook table, and the page template used for duplication",
+    "autonomy": "AUTONOMY_RESEARCH 95% for testing; promoting a tactic into the playbook is automatic; changing a PRICE is never automatic",
+    "env": "LEARN_MIN_SAMPLE=30 · LEARN_MIN_DAYS=7 · LEARN_HOLDOUT_PCT=20 · LEARN_WIN_MARGIN=10 · LEARN_DECAY_DAYS=60",
+    "workflow": "WF15"
+  },
+  "scaleout": {
+    "purpose": "Prove one page, then duplicate it in parallel — never duplicate an unproven one.",
+    "law": "a page earns the right to be copied. Cloning before proof multiplies losses at the same speed it multiplies wins.",
+    "graduation": {
+      "name": "PAGE GRADUATION",
+      "must_hold_all": [
+        "demand test PASS (50+ comments at 72h)",
+        "30 days live",
+        "ER >= 5% rolling 7 days",
+        "buyer pool x3 >= 3,000",
+        "at least 3 paying buyers from that page",
+        "churn at or under 2.0%",
+        "cost per shipped clip at or under the plan"
+      ],
+      "then": "the page becomes a TEMPLATE: its prompts, character lock, hook bank, posting times and playbook slice are frozen as a version"
+    },
+    "duplication": {
+      "what_copies": "template version: master prompt, character lock, hook bank, cadence, playbook slice",
+      "what_never_copies": "the audience, the comments, the credibility. A clone starts at zero and is told so publicly",
+      "parallel_cap": 3,
+      "ramp": "3 live pages maximum until the third one graduates; then 6; then 10 — the cap only lifts on proof, never on ambition",
+      "isolation": "one credential set, one R2 prefix, one Buffer channel group and one budget per page — a bad page cannot poison the others",
+      "niche_distance": "a new page must be at least 2 niches away from an existing one until the playbook has 5 proven hooks per niche",
+      "kill_rule": "a clone that fails its 72h demand test twice is archived, not nursed — the sunk cost is bounded by design"
+    },
+    "money_model": {
+      "per_page": "one graduating page supports the Circle that funds the tools; the second and third pages are the margin",
+      "portfolio": "revenue is read per page, not in aggregate — an average hides a dead page",
+      "reinvest": "new pages are funded from graduated pages, never from the owner's pocket",
+      "ceiling": "lanes stop at 10 pages because 10 pages x 10 channels is the most one owner can supervise at 80% autonomy"
+    },
+    "autonomy": "duplication runs at AUTONOMY_SEQUENCE 85% once a template exists; creating a NEW template needs the owner",
+    "env": "SCALE_PARALLEL_CAP=3 · SCALE_MAX_PAGES=10 · SCALE_GRAD_MIN_DAYS=30 · SCALE_GRAD_MIN_BUYERS=3 · SCALE_KILL_AFTER_FAILS=2",
+    "workflow": "WF16"
+  },
+  "reliability": {
+    "policy": "98% reported as THREE SEPARATE numbers. A single 98% headline hides which part is failing.",
+    "targets": {
+      "correct_or_caught": {
+        "target_pct": 98,
+        "metric": "% of outbound actions that are correct OR stopped before shipping",
+        "industry_baseline": "91% (silent failure 9%, GaaS 2026)",
+        "achievable": "yes — this is a system property, not a model property"
+      },
+      "end_to_end": {
+        "target_pct": 98,
+        "metric": "% of full 17-step runs that complete correctly",
+        "math": "98% per step x 17 = 70.9%. Needs 99.881% per step, or the chain cut to 8 verified stages.",
+        "plan": "group the 17 workflows into 8 verified stages so the target is reachable"
+      },
+      "money": {
+        "target_pct": 100,
+        "metric": "prices, payouts, entitlements, refunds, ledger rows",
+        "note": "0 tolerance. Not 98 — 100, behind a human gate."
+      }
+    },
+    "verify_engine": "rule-based on EVERY step: schema, range, link resolves, number reconciles, price matches config, math agrees",
+    "why_rules": "most real failures are format and fact, not judgment — rules catch those cheaply and deterministically",
+    "escalation": "a rule failure retries once, then escalates to a human. It never silently passes.",
+    "env": "RELIABILITY_TARGET_CORRECT=98 · RELIABILITY_TARGET_E2E=98 · RELIABILITY_MONEY_GATE=human"
+  },
+  "standard": {
+    "name": "price to performance, in the long term, at speed, with the value held",
+    "applies_to": "every tool, page, workflow, hire and price change — no exceptions for enthusiasm",
+    "ratios": {
+      "cost_per_asset": {
+        "max": 3.0,
+        "unit": "$",
+        "note": "render cheaper than the edit"
+      },
+      "payback": {
+        "max": 12,
+        "unit": "members",
+        "note": "stack / net per member"
+      },
+      "ltv_cac": {
+        "min": 3.0,
+        "unit": "x",
+        "note": "unmeasurable is not a pass"
+      },
+      "gated_speed": {
+        "min": 2.0,
+        "unit": "shipped per human hour",
+        "note": "blocked assets score zero"
+      },
+      "leverage": {
+        "min": 3,
+        "unit": "surfaces per asset",
+        "note": "one scan, one script, two cuts, six surfaces"
+      },
+      "stack_share_of_revenue": {
+        "max": 0.3,
+        "unit": "share",
+        "note": "past 30% the tools own the upside"
+      }
+    },
+    "verdict_rule": "any failed ratio means it does not ship — not that it ships with a warning",
+    "portfolio_rule": "worst page decides; averages are how a dead page hides behind four alive ones",
+    "value_rule": "the member must get >= 3x the price in usable output per month, or $44 becomes resentment",
+    "implementation": "jarvis-app/lib/standard.ts (scorecard, worstFirst, netPerMember)"
+  },
+  "board": {
+    "partners": [
+      "Owner",
+      "Content Guy",
+      "Jarvis"
+    ],
+    "quorum": 3,
+    "unanimous_required": [
+      "launch_page",
+      "kill_page",
+      "price_change",
+      "spend",
+      "niche_choice",
+      "policy_override"
+    ],
+    "majority_only": [
+      "cadence",
+      "angle",
+      "other"
+    ],
+    "rules": [
+      "an abstain is not a yes",
+      "silence is not consent",
+      "an absent partner blocks, it does not defer"
+    ],
+    "niche_evidence": [
+      "7 daily scans",
+      "14 days observed",
+      "ER >= 5%",
+      "buyer pool x3 >= 3000",
+      "policy clear",
+      "cost per asset <= $3",
+      "distinct from every live page"
+    ],
+    "implementation": "jarvis-app/lib/board.ts + /board"
+  },
+  "stickman_agent": {
+    "role": "the product inside the community — not a library, a staff member",
+    "what_it_does": [
+      "script",
+      "render stickman",
+      "cut longform into shorts + social",
+      "schedule to member's own channels",
+      "audit rules/policy/disclosure",
+      "pods, streaks, next action, public ledger"
+    ],
+    "free_tier": {
+      "window_hours": 5,
+      "runs_per_window": 20,
+      "monthly_cap": 300,
+      "receives": "our content to clip",
+      "watermark": {
+        "apply": true,
+        "label": "STICKMAN",
+        "position": "bottom-right, 40% opacity, static",
+        "never_covers": "character or caption",
+        "why": "free users distribute our brand at their cost, not our ad budget"
+      }
+    },
+    "tiers": {
+      "free": 0,
+      "circle": 44,
+      "pro": 53,
+      "team": 62
+    },
+    "windows": {
+      "free": 20,
+      "circle": 40,
+      "pro": 80,
+      "team": 80
+    },
+    "monthly": {
+      "free": 300,
+      "circle": 600,
+      "pro": 1200,
+      "team": 1200
+    },
+    "cost_per_run": 0.008,
+    "publish_gate": {
+      "always": "rules + policy + disclosure, machine-checked",
+      "first_3_publishes": "G4 human review",
+      "after_3": "earned auto-publish",
+      "flagged": "any flag returns the member to human review",
+      "never": "no tier publishes freely without passing the checks — this is the bucket that gets channels removed"
+    },
+    "funnel_shortcut": {
+      "allowed": true,
+      "price": 44,
+      "discount": 0,
+      "why": "a supporter who already trusts us should not be walked through a funnel built to create trust",
+      "cold_traffic": "still starts at the $28 First Shot"
+    },
+    "implementation": "jarvis-app/lib/stickman-agent.ts + /stickman + 3 tables (agent_members, agent_runs, agent_schedule)",
+    "tiers_dropped": {
+      "max": 71,
+      "why": "sat above the $62 Team tier — the same error as two tiers at $44. Team is SEATS, not a bigger agent."
+    },
+    "publish_paths": {
+      "free": {
+        "path": "manual_download",
+        "review": "none — they post it",
+        "why": "keeps the watermark; the download is the advert"
+      },
+      "circle": {
+        "path": "buffer_scheduled",
+        "review": "machine gate only",
+        "why": "scheduled through our publisher, so we never hold member platform tokens"
+      },
+      "pro": {
+        "path": "oauth_direct",
+        "review": "G4 human review, 2-hour SLA",
+        "until": "auto-publish earned after 3 clean publishes",
+        "why": "the SLA exists only where the risk is"
+      },
+      "rule": "the more access we take on, the more we must be paid to carry it"
+    },
+    "panel": {
+      "shape": "Whop-AI style single column: quota on top, next action always visible, nothing that needs a manual",
+      "screens": [
+        "home",
+        "create",
+        "performance",
+        "vault"
+      ],
+      "home": "quota, queue, next action — never a wall of numbers with no action",
+      "create": "7 steps, 6 of them gates; a blocked asset does not advance",
+      "performance": "six metrics ordered by how badly they can hurt; views last; never aggregated across pages",
+      "vault": "raw cuts, scripts, policy log, pods, community ledger",
+      "implementation": "jarvis-app/lib/panel.ts + /stickman, /stickman/create, /stickman/performance, /stickman/vault"
+    },
+    "team": {
+      "seats": 3,
+      "price": 62,
+      "inherits": "every Pro entitlement, per seat",
+      "extra": [
+        "seat management",
+        "shared hook bank",
+        "team ledger view",
+        "one bill, one invoice"
+      ],
+      "claim_window_days": 30,
+      "degrade_to": "circle",
+      "guard": "three seats claimed and used within 30 days, or Team reverts — a team of one is not a team",
+      "flagged_risk": "Pro $53 for one vs Team $62 for three — the guard exists so the $53 tier does not become decorative"
+    },
+    "free_waves": {
+      "size": 25,
+      "wave_1": "challenge finishers only — proven intent, zero acquisition cost",
+      "gate_to_next": "previous wave: <= 10% blocked assets, support load sustainable, watermark CTR measured",
+      "stop_rule": "more blocked assets than published clips in a wave means the free tier is teaching the wrong behaviour",
+      "never": "open every free seat at once to advertise a community whose first page has not proven itself"
+    },
+    "oauth_custody": {
+      "storage": "AES-256-GCM ciphertext in Neon; key in env only",
+      "scopes_ask": [
+        "upload",
+        "read_own_analytics"
+      ],
+      "scopes_never": [
+        "read_subscriptions",
+        "manage_comments",
+        "delete_content",
+        "financial"
+      ],
+      "disclose": "a panel the member can open at any time, plus on every connect, every 30 days, on scope change and on revocation",
+      "revoke": "within 1 hour of churn, instantly on request, deleted within 24h",
+      "never": "a token in a log is a breach, not a bug",
+      "audit": "anything unused 30 days is revoked; any over-scope is stripped",
+      "implementation": "jarvis-app/lib/oauth.ts + agent_oauth_grants (30 tables)"
+    },
+    "marketplace": {
+      "listing": "internal only until page 1 posts a GREEN week",
+      "then": "list in the Whop App Store as a second revenue line, and market it",
+      "gate": [
+        "page 1 GREEN",
+        "3 clean publish cycles",
+        "support load measured on the free waves"
+      ],
+      "pricing_on_listing": "install fee and/or per-member monthly — decide when the gate is passed, not before"
+    }
+  }
+}

@@ -1,0 +1,185 @@
+{
+  "name": "WF5 Publish (due)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "### WF5 — Auto-publish\nEvery 15 minutes. Calls `/api/cron/publish-due`, which:\n\n1. **claims** due rows with one conditional `UPDATE … RETURNING` — two overlapping\n   runs cannot post the same row twice;\n2. resolves the channel (member's own Buffer channel, else the page's);\n3. publishes and marks — **`published` only when Buffer returned a post id**.\n\nBuffer answers **HTTP 200 for a failed mutation**, so the app never reads the status\ncode as success (`P01`, `SC09`). This workflow does not decide anything; it rings\nthe bell.\n\nG4 still exists — it lives in `agent_schedule.gate_status`. A Pro member's first\nthree publishes sit at `g4_review` until a human moves them to `pass`.\n\n**Requires:** `JARVIS_BRAIN_URL`, `CRON_SECRET` in n8n Variables.",
+        "height": 340,
+        "width": 420,
+        "color": 4
+      },
+      "id": "5253cbb1-70b7-5239-a94f-c0a5af0ecaa6",
+      "name": "README",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/15 * * * *"
+            }
+          ]
+        }
+      },
+      "id": "07f4725c-fb16-5cd9-88ab-7beef36b739e",
+      "name": "Every 15 min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $vars.JARVIS_BRAIN_URL }}/api/cron/publish-due",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $vars.CRON_SECRET }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "a55c86ac-ce17-55e1-a311-f66de0fdce8c",
+      "name": "POST publish-due",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        230,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "did",
+              "leftValue": "={{ ($json.published || 0) + ($json.failed || 0) > 0 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "458e088d-24c9-5160-972c-455cba4797f2",
+      "name": "Anything happened?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        460,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\n// Only speak when something actually moved. A 15-minute 'nothing due' ping is\n// how a notification channel gets muted, and then the one real failure is missed.\nconst lines = [];\nif (d.published) lines.push(`${d.published} published`);\nif (d.failed) lines.push(`${d.failed} failed`);\nconst retries = (d.results || []).filter(r => r.outcome === 'retry');\nif (retries.length) lines.push(`${retries.length} retrying`);\nreturn [{ json: {\n  quiet: lines.length === 0,\n  text: lines.length\n    ? `WF5 — ${lines.join(', ')} of ${d.claimed} claimed.`\n    : 'nothing moved',\n  detail: (d.results || []).filter(r => r.outcome !== 'published'),\n} }];"
+      },
+      "id": "9a1e2469-23ee-524e-b3a5-8334ad37b63c",
+      "name": "Summarise",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+        "text": "={{ $json.text }}",
+        "additionalFields": {}
+      },
+      "id": "f2b74e72-7c6b-5ce6-aa1b-ec6f72135222",
+      "name": "Telegram Sir",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        900,
+        -80
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_TELEGRAM",
+          "name": "Jarvis Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Every 15 min": {
+      "main": [
+        [
+          {
+            "node": "POST publish-due",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST publish-due": {
+      "main": [
+        [
+          {
+            "node": "Anything happened?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anything happened?": {
+      "main": [
+        [
+          {
+            "node": "Summarise",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Summarise": {
+      "main": [
+        [
+          {
+            "node": "Telegram Sir",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

@@ -1,0 +1,140 @@
+{
+  "name": "WF4 Daily Brief",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "### WF4 — Brief\n05:45 EAT. Pulls `/api/cron/daily-brief` (Bearer `$CRON_SECRET`) and forwards it.\n\nThe route returns `source: \"placeholder\"` until it is wired to Neon. The workflow\n**prints that field** so a placeholder brief can never be mistaken for a real one.",
+        "height": 260,
+        "width": 420,
+        "color": 4
+      },
+      "id": "2f2b0565-fa80-5d2e-80aa-ddc25610cfc4",
+      "name": "README",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "45 5 * * *"
+            }
+          ]
+        }
+      },
+      "id": "e2948843-f986-5e1c-8cd0-7c2de42a6eb6",
+      "name": "05:45 daily",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $vars.JARVIS_BRAIN_URL }}/api/cron/daily-brief",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $vars.CRON_SECRET }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "id": "c0fee1b7-bd87-5cef-b528-192664f01a31",
+      "name": "GET daily-brief",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst src = d.source || 'unknown';\nconst flag = src === 'placeholder' ? '\\n\\n[PLACEHOLDER — not live data]' : '';\nreturn [{ json: { text: (d.briefing || 'no brief') + flag } }];"
+      },
+      "id": "7cda4a03-6521-5de2-aa44-3b3f6c3593fa",
+      "name": "Format",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+        "text": "={{ $json.text }}",
+        "additionalFields": {}
+      },
+      "id": "a6bc4bb4-6df9-5fff-8899-2b08b2cd4da4",
+      "name": "Telegram Sir",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        660,
+        0
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_TELEGRAM",
+          "name": "Jarvis Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "05:45 daily": {
+      "main": [
+        [
+          {
+            "node": "GET daily-brief",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET daily-brief": {
+      "main": [
+        [
+          {
+            "node": "Format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format": {
+      "main": [
+        [
+          {
+            "node": "Telegram Sir",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

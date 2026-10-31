@@ -1,0 +1,207 @@
+{
+  "name": "WF3 Demand → Whop",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "### WF3 — Demand → offer\nPASS = replies ≥ max(25, ceil(views × 1%)).\n\nThe offer on PASS is the **three agent tiers, one Whop product each**:\nCircle **$44** · Pro **$53** · Team **$62**. The one-time ladder ($28 first shot,\n$17 Lite, $35 Good, $89 Better) is a separate door and never gates a tier.\n\n**Nothing is created in Whop by this workflow.** Whop product ids are set once by the\nowner and read by the app from env.",
+        "height": 300,
+        "width": 420,
+        "color": 4
+      },
+      "id": "293a0bbd-d7dd-555c-b49b-b8c6c865aee6",
+      "name": "README",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      },
+      "id": "8443bb69-2e7f-5285-86fe-0e0b2cd279a2",
+      "name": "09:00 daily",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, platform, views, replies FROM post_analytics WHERE posted_at::date = CURRENT_DATE - 1 ORDER BY id",
+        "options": {}
+      },
+      "id": "2d14538e-d29f-5e2d-8a4c-90600baaad23",
+      "name": "Yesterday stats",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        220,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "REPLACE_POSTGRES",
+          "name": "Neon (jarvis)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// The gate is arithmetic, not judgement. Same formula as lib/stickman-agent.ts.\nconst rows = $input.all().map(r => r.json);\nconst results = rows.map(r => {\n  const views = Number(r.views || 0);\n  const replies = Number(r.replies || 0);\n  const bar = Math.max(25, Math.ceil(views * 0.01));\n  return { id: r.id, platform: r.platform, views, replies, bar, pass: replies >= bar };\n});\nconst passed = results.filter(r => r.pass);\nreturn [{ json: {\n  total: results.length,\n  passed: passed.length,\n  any_pass: passed.length > 0,\n  detail: results,\n  offer: passed.length > 0 ? 'Circle $44 / Pro $53 / Team $62 — one Whop product each' : null,\n} }];"
+      },
+      "id": "f909da2a-db6e-58c7-94d4-29f00537894a",
+      "name": "Demand gate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "p",
+              "leftValue": "={{ $json.any_pass }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "5fc21540-de61-5ca7-967a-f9f9e2d57eda",
+      "name": "Any PASS?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        660,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+        "text": "=PASS — {{ $json.passed }}/{{ $json.total }} posts cleared the bar. Offer: Circle $44 / Pro $53 / Team $62. Links: the three Whop products, one per tier. No discount.",
+        "additionalFields": {}
+      },
+      "id": "173ee921-12d5-53dd-9941-c1829afd29f7",
+      "name": "PASS — offer the tiers",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        -80
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_TELEGRAM",
+          "name": "Jarvis Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+        "text": "=No PASS — {{ $json.passed }}/{{ $json.total }} cleared the bar. No offer goes out. Improve the hook, not the price.",
+        "additionalFields": {}
+      },
+      "id": "77703eba-8f08-5af8-947e-baedb811a164",
+      "name": "No PASS — hold",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        120
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_TELEGRAM",
+          "name": "Jarvis Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "09:00 daily": {
+      "main": [
+        [
+          {
+            "node": "Yesterday stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Yesterday stats": {
+      "main": [
+        [
+          {
+            "node": "Demand gate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Demand gate": {
+      "main": [
+        [
+          {
+            "node": "Any PASS?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Any PASS?": {
+      "main": [
+        [
+          {
+            "node": "PASS — offer the tiers",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No PASS — hold",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}
