@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getSession } from "@/lib/auth";
 import { checkEntitlement, tierLimits } from "@/lib/entitlement";
 
 export async function GET(req: NextRequest) {
@@ -8,7 +9,11 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ ...ent, limits, checked_at: new Date().toISOString() });
 }
 export async function POST(req: NextRequest) {
-  const { whopUserId } = await req.json();
+  const session = getSession();
+  if (!session) return NextResponse.json({ ok: false, error: "unauthorised" }, { status: 401 });
+  const requested = (await req.json().catch(() => ({}))).whopUserId;
+  // Only the owner may ask about somebody else's entitlements.
+  const whopUserId = session.role === "owner" ? requested : session.email;
   const ent = await checkEntitlement(whopUserId);
   return NextResponse.json(ent);
 }

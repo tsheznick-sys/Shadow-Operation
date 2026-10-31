@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getSession } from "@/lib/auth";
 import { askJarvis } from "@/lib/jarvis";
 
 /**
@@ -10,6 +11,10 @@ import { askJarvis } from "@/lib/jarvis";
  * 503 to a visible "brain offline" message instead of inventing a reply.
  */
 export async function POST(req: Request) {
+  // An open endpoint that calls a paid model is a bill waiting to happen.
+  const session = getSession();
+  if (!session) return NextResponse.json({ ok: false, error: "unauthorised" }, { status: 401 });
+
   let body: any = null;
   try {
     body = await req.json();

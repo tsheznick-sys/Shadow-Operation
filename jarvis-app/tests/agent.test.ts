@@ -1819,6 +1819,43 @@ add({ id: "SC20", dimension: D.SCH, what: "a surface already has its full per-da
 
 const R = D.RUN;
 
+add({ id: "RN22", dimension: R, what: "the two-factor mail fails to send", expect: "the API never returns the code unless demo logins are explicitly on",
+  run: () => {
+    // `devCode: result.sent ? undefined : currentCodeForDemo(email)` is a second factor that
+    // anyone could simply ask for whenever delivery hiccuped — and delivery hiccups.
+    const t = readFileSync(join(ROOT, "jarvis-app", "app", "api", "auth", "mfa", "route.ts"), "utf8");
+    const line = t.split("\n").find((l) => l.includes("devCode:")) || "";
+    const gated = /showDemoLogins\(\)/.test(line) && /result\.sent\s*\|\|/.test(line);
+    const leaky = /result\.sent\s*\?\s*undefined\s*:\s*currentCodeForDemo/.test(t);
+    return { pass: gated && !leaky, got: `gated=${gated} leaky=${leaky}` };
+  }});
+
+
+add({ id: "RN21", dimension: R, what: "every mutating route, checked for a guard", expect: "each has one — session, cron token, owner gate, or a signature",
+  run: () => {
+    // drafts accepted `action:"send"` with no session at all; pods and retention took a user id
+    // off the body and mutated that member's row. None of it was visible from a green suite.
+    const open: string[] = [];
+    const walk = (dir: string) => {
+      for (const f of readdirSync(dir, { withFileTypes: true })) {
+        const full = join(dir, f.name);
+        if (f.isDirectory()) { if (!/node_modules|\.next/.test(full)) walk(full); continue; }
+        if (f.name !== "route.ts") continue;
+        const t = readFileSync(full, "utf8");
+        const mutates = /export async function (POST|PUT|PATCH|DELETE)/.test(t);
+        if (!mutates) continue;
+        const guarded = /getSession\(\)|bearered\(|cronAllowed\(|canControl\(|verifyWhopSignature|timingSafeEqual|signature/.test(t);
+        // The doors cannot require a session to exist, and /api/challenge is the public entry
+        // form; /api/omar/scan is pure arithmetic with no state to mutate.
+        const isDoor = /api\/auth\/(login|logout|mfa)\//.test(full) || /api\/challenge\/|api\/omar\/scan\//.test(full);
+        if (!guarded && !isDoor) open.push(full.replace(ROOT + "/jarvis-app/", ""));
+      }
+    };
+    walk(join(ROOT, "jarvis-app", "app", "api"));
+    return { pass: open.length === 0, got: open.length ? open.join(", ") : "every mutating route is guarded" };
+  }});
+
+
 add({ id: "RN19", dimension: R, what: "any route takes a gate verdict from the request body", expect: "none does — the sweep, not just the two I already fixed",
   run: () => {
     const hits: string[] = [];

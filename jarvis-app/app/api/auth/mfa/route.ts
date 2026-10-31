@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/session";
-import { SESSION_COOKIE, SESSION_MAX_AGE, signSession, teamUsers } from "@/lib/auth";
+import { SESSION_COOKIE, SESSION_MAX_AGE, showDemoLogins, signSession, teamUsers } from "@/lib/auth";
 import { currentCodeForDemo, knownEmail, sendCode, verifyCode } from "@/lib/twofactor";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +19,10 @@ export async function POST(req: Request) {
   return NextResponse.json({
     ok: true,
     channel: result.channel,
-    devCode: result.sent ? undefined : currentCodeForDemo(email),
+    // If the mail failed we used to hand back the code. In production that is a second factor
+    // that can be collected by asking for it. The code comes back only when demo logins are on.
+    devCode: result.sent || !showDemoLogins() ? undefined : currentCodeForDemo(email),
+    delivered: !!result.sent,
   });
 }
 

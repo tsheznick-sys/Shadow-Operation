@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getSession } from "@/lib/auth";
 import { getSql } from "@/lib/db";
 
 export async function GET() {
@@ -20,7 +21,13 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const session = getSession();
+  if (!session) return NextResponse.json({ ok: false, error: "unauthorised" }, { status: 401 });
   const { user_id, action } = await req.json();
+  // user_id came straight off the body, so any caller could move any member between pods.
+  if (session.role !== "owner" && String(user_id) !== session.email) {
+    return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
+  }
   const sql = getSql();
   if (!sql) return NextResponse.json({ mock: true, assigned: "pod_red", message: "Mock assigned to Pod Red — set DATABASE_URL for live" });
   // Assign to pod with fewest members (max 5)

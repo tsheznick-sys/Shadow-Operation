@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getSession } from "@/lib/auth";
 
 export async function GET() {
   const kpi = {
@@ -16,7 +17,12 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const session = getSession();
+  if (!session) return NextResponse.json({ ok: false, error: "unauthorised" }, { status: 401 });
   const { action, userId, offer } = await req.json();
+  if (session.role !== "owner" && String(userId) !== session.email) {
+    return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
+  }
   if (!["pause", "discount50", "downgrade_lite", "cancel"].includes(action)) {
     return NextResponse.json({ error: "invalid action" }, { status: 400 });
   }
