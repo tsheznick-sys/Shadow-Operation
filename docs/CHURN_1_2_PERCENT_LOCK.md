@@ -8,7 +8,7 @@
 
 ## Why 12% → 4-5% → 1-2%
 
-- **12% churn:** No system. Pay $19, watch 1 video, stuck, ghost.
+- **12% churn:** No system. Pay $26, watch 1 video, stuck, ghost.
 - **4-5% churn:** System (teach how to make money) — fixes `I don't know what to post`
 - **1-2% churn:** System + Agent (does it with them) + Proof Loop (proves others win weekly) — fixes `I didn't execute` + `I want refund` + `I outgrew you`
 
@@ -20,12 +20,12 @@
 
 **Teach 90%, keep 10% in Agent:**
 
-| Module | What you give (Whop Course $27+$9) | What you KEEP in paid Agent |
+| Module | What you give (Whop Course $35+$17) | What you KEEP in paid Agent |
 |---|---|---|
 | **M1: Niche to $100** | 1000 faceless niches CSV, 8-Gate filter (buyer_pool_x3, ratio<50, ER 3%+) | Grok live X trending + auto-rank Top 5 |
 | **M2: 30m → 8 clips** | TubeGen prompt pack, OpusClip virality checklist | Auto TubeGen 30m + OpusClip + Higgsfield per-clip (WF2-3) |
 | **M3: Post without opening platforms** | Buffer Team SOP, hashtag banks | Auto Buffer 6/day + SEO by Claude Max (WF4) |
-| **M4: Close $27** | DM scripts, 8ch ManyChat funnel | ManyChat auto + Whop ladder $27+$9+$79+$19 |
+| **M4: Close $35** | DM scripts, 8ch ManyChat funnel | ManyChat auto + Whop ladder $28+$17+$35+$89+$44+$26 |
 | **M5: Scale to 5 pages** | 5-domain template | WF8 auto-duplicates when PASS |
 
 **Delivery:** Whop `Courses` app (videos 6-8 min) + Notion SOP + templates. Each lesson ends with `→ Open Jarvis Agent and type: "Make my Day 1 queue"` — drives to Agent.
@@ -40,9 +40,9 @@
 
 **Pricing tiers (Whop one checkout):**
 
-- `Agent Lite $9/mo add-on` — 30 runs/mo, 1 domain, 3 clips/day — for vault $19 members
-- `Agent Pro $29/mo add-on` — unlimited, 5 domains, 6/day Buffer auto — unlocks when they hit $100
-- `Agent Team $79/mo` — for your own 3-man only (not community)
+- `Agent Lite $17/mo add-on` — 30 runs/mo, 1 domain, 3 clips/day — for Circle $26 members
+- `Agent Pro $44/mo add-on` — unlimited, 5 domains, 6/day Buffer auto — unlocks when they hit $100
+- `Agent Team $62/mo` — for your own 3-man only (not community)
 
 **Where it keeps engagement:**
 
@@ -72,7 +72,7 @@
 ## 7 Extra Saves to reach 1-2%
 
 1. **Day 0-7 Activation Sprint:** Must publish 1 clip in 48h. Agent DM every 12h until done.
-2. **Save Offer on Cancel:** Whop `membership_cancelled` webhook → n8n WF8 → `Pause $5/mo` vs `50% off` vs `Downgrade $9 Lite` — saves 40%.
+2. **Save Offer on Cancel:** Whop `membership_cancelled` webhook → n8n WF8 → `Pause $8/mo` vs `35% off → $17` vs `Downgrade $17 Lite` — saves 40%.
 3. **Pause not Cancel:** Whop `pause_membership` API — show as first option.
 4. **Payment Recovery:** Failed card → Chatfuel DM + SMS via Africa's Talking + 3 retries.
 5. **Streak freeze:** Miss 1 day? Agent offers `freeze $0`

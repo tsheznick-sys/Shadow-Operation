@@ -146,7 +146,7 @@ flowchart TD
   └──────────┘       │ ManyChat │      └──────────┘      │ 14-day   │
        │ AMBER       └──────────┘            │           └──────────┘
        └────────────────────────────────────┼──────────────────┘
-                                            │ $27 · $9 · $79 · $19/mo
+                                            │ $28 · $17 · $35 · $89 · $44 · $26/mo
                                             ▼
  LANE 3 · OPS LOOPS                     always on, no human
 
@@ -246,7 +246,7 @@ gantt
 | 1 | Postgres SELECT | Pull 50 GREEN creators ranked by `buyer_pool_x3*er`: `SELECT handle,platform,followers,avg_comments,buyer_pool_x3,ratio,er,gate FROM creators WHERE gate='GREEN' ORDER BY buyer_pool_x3*er DESC LIMIT 50` (1,462 GREEN in DB) | `DATABASE_URL` | `creators` |
 | 2 | HTTP Request ×4 | Social Blade + HypeAuditor + NotJustAnalytics/Picuki + Grok X trending → live `buyer_pool_x3`, `ratio`, `ER` | `GROK_API_KEY` `XAI_BASE_URL` | — |
 | 3 | IF (8-Gate) | `ER > THRESHOLD_ER_GREEN` **and** `ratio < THRESHOLD_RATIO_GREEN` **and** `buyer_pool_x3 > THRESHOLD_BUYER_POOL_MIN` → GREEN else AMBER | `THRESHOLD_ER_GREEN=5` `THRESHOLD_RATIO_GREEN=50` `THRESHOLD_BUYER_POOL_MIN=3000` | — |
-| 4 | Claude Code | "Rank top 5 most monetizable for self content vault $27" → JSON | `CLAUDE_API_KEY` | — |
+| 4 | Claude Code | "Rank top 5 most monetizable for self content vault $35" → JSON | `CLAUDE_API_KEY` | — |
 | 5 | Telegram + Gmail | "Sir top5 monetizable domains: 1) Psych Hack 8.2K pool 5.1% ER …" | `TELEGRAM_BOT_TOKEN` `GMAIL_OAUTH` | — |
 | 6 | Postgres UPDATE | `solo_domains.top5 = [...]`, `page_no` per `PAGES_COUNT` | `PAGES_COUNT=5` | `solo_domains` |
 
@@ -321,7 +321,7 @@ gantt
 | 2 | IF GREEN | `ratio < THRESHOLD_RATIO_GREEN` **and** `er >= THRESHOLD_ER_GREEN` **and** gate GREEN → GREEN; else AMBER check | `THRESHOLD_RATIO_GREEN=50` `THRESHOLD_ER_GREEN=5` | `creators` |
 | 3 | ChatFuel / ManyChat | Auto-DM `VAULT` keyword within **2 min** — ChatFuel IG & TikTok, ManyChat YT (ChatFuel cannot do YT) | `CHATFUEL_TOKEN` `MANYCHAT_API_KEY` | — |
 | 4 | Hard close | 3-email cap → **FINAL TERMS** one-pager 10 pts, sign only after PASS (no free audit, Rule 9) | `ADMIN_EMAIL` | — |
-| 5 | Whop API | Vault ladder `$27 + $9 + $79 + $19/mo`, grant to `scott.abuya@gmail.com` + `info.wolf@gmail.com`, Buffer Team | `WHOP_API_KEY` `WHOP_PRODUCT_LITE_ID` `WHOP_PRODUCT_PRO_ID` | `members` |
+| 5 | Whop API | Vault ladder `$28 + $17 + $35 + $89 + $44 + $26/mo`, grant to `scott.abuya@gmail.com` + `info.wolf@gmail.com`, Buffer Team | `WHOP_API_KEY` `WHOP_PRODUCT_LITE_ID` `WHOP_PRODUCT_PRO_ID` | `members` |
 | 6 | ChatFuel Push / ManyChat Push | 8 channels push → Jarvis DM auto, social manager reviews in one app | `CHATFUEL_TOKEN` `MANYCHAT_API_KEY` | — |
 | 7 | Gmail + Telegram | "Sir PASS — GREEN fast-close, vault live" to all 3 pods | `GMAIL_OAUTH` `TELEGRAM_BOT_TOKEN` | — |
 
@@ -338,7 +338,7 @@ gantt
 | 1 | IF AMBER | `ratio 50–70` **and** `er 3–5%` → enroll; else RED → HOLD + improve loop | `THRESHOLD_RATIO_AMBER_MAX=70` `THRESHOLD_ER_AMBER_MIN=3` `THRESHOLD_ER_AMBER_MAX=5` |
 | 2 | ChatFuel + ManyChat enroll | Day 1–3 Value Proof (1 script moving + WF3 value clip) | `CHATFUEL_SCOPE=IG&TikTok` |
 | 3 | Sequence | Day 4–7 DM scripts + teardown (quietwolfzz 514K case + GS variants) | — |
-| 4 | Sequence | Day 8–14 DM close + Whop `$19/mo` Circle — daily CTA (not 3-email cap) | `TIER_CIRCLE_PRICE=19` |
+| 4 | Sequence | Day 8–14 DM close + Whop `$26/mo` Circle — daily CTA (not 3-email cap) | `TIER_CIRCLE_PRICE=26` |
 | 5 | IF YES any day | Exit 14-day → jump to WF5 GREEN fast-close FINAL TERMS | — |
 | 6 | Post-14d no YES | HOLD → WF6 leak finder + WF1 re-rank; improve loop: A/B Higgsfield short-form + OpusClip 9.2 + daily ER + weekly Grok re-rank + Whop ladder A/B | — |
 
@@ -352,7 +352,7 @@ gantt
 | # | Node | What it does | 🔑 | 🗄 |
 |---|---|---|---|---|
 | 1 | Gmail Trigger | `brand@*` inbox → Claude classify brand deal → Telegram "brand deal inbound" | `GMAIL_OAUTH` `CLAUDE_API_KEY` `NICHES_POOL` | — |
-| 2 | Webhook ManyChat/ChatFuel | New subscriber → replies → Whop entitlement → Telegram "new vault buyer $27" | `MANYCHAT_API_KEY` `CHATFUEL_TOKEN` | `members` |
+| 2 | Webhook ManyChat/ChatFuel | New subscriber → replies → Whop entitlement → Telegram "new vault buyer $35" | `MANYCHAT_API_KEY` `CHATFUEL_TOKEN` | `members` |
 | 3 | Cron 05:45 | Telegram + Gmail "Shadow Hot" + Signal ×3: 6 videos live, views, replies, 1 Whop, n8n spend, `leak_finder` biggest leak from `operator_context` | `TELEGRAM_BOT_TOKEN` `SIGNAL_API` | `operator_context` |
 | 4 | Weekly Mon 08:00 | WF1 re-rank → if GREEN pool expands → auto-expand pages via `tools/big_run_1000.py` + WF9 pods | `PAGES_COUNT` | `solo_domains` |
 
@@ -387,8 +387,8 @@ gantt
 | 2 | IF guard | Skip if last save offer < 30d (max 1 save/30d) | — | `retention_events` |
 | 3 | Postgres SELECT | scripts_count, streak, pod_id, last_agent_use, tier via `checkEntitlement` | — | `members`, `pods` |
 | 4 | HTTP Whop | Verify membership active + `card_last4` | `WHOP_API_KEY` | — |
-| 5 | Claude | Personalized save copy in Vesper tone: "Sir you have 47 scripts + Day 4 streak + pod Red needs you — Pause $5 keeps all vs cancel deletes in 7d" | `CLAUDE_API_KEY` | — |
-| 6 | Telegram + ChatFuel + ManyChat | Save card: `[Pause $5]` `[50% off $9.50]` `[Downgrade $9 Lite]` — one-click via Whop API | `TIER_CIRCLE_PRICE=19` `TIER_LITE_PRICE=9` | — |
+| 5 | Claude | Personalized save copy in Vesper tone: "Sir you have 47 scripts + Day 4 streak + pod Red needs you — Pause $8 keeps all vs cancel deletes in 7d" | `CLAUDE_API_KEY` | — |
+| 6 | Telegram + ChatFuel + ManyChat | Save card: `[Pause $8]` `[35% off $17]` `[Downgrade $17 Lite]` — one-click via Whop API | `TIER_CIRCLE_PRICE=26` `TIER_LITE_PRICE=17` `TIER_SAVE_PRICE=17` | — |
 | 7 | Webhook choice | Pause/discount/downgrade → `retention_events saved`, `saved_rate++`, Telegram + Linear + optional Vesper voice note | — | `retention_events` |
 | 8 | ELSE cancel | churn++ ; if `churn7d > 2.5%` → **WF7 emergency broadcast** ("Sir churn 3.1%") → trigger win clip + office hour | — | `revenue_log` |
 | 9 | Entitlement sync | Whop active → Neon `entitlements.tier=pro/lite` → `lib/entitlement.ts has_access` | `DATABASE_URL` | `entitlements` |

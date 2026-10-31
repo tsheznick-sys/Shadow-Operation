@@ -1,12 +1,16 @@
 // COMMUNITY FUNDING — self-funding model, no assumed pocket.
+// Prices follow the 8-aligned ladder (see lib/numerology.ts): break-even and
+// recommended counts are snapped UP to the next 8, never down.
 // Every number here is env-overridable: no code change to re-price or re-split.
+
+import { nextEight } from "./numerology";
 
 export type FundingInputs = {
   circlePrice: number;
   members: number;
   toolsMonthly: number;
   prizeTarget: number;
-  oneTimeMonthly: number; // $27 vault + $79 Pro sales, estimated per month
+  oneTimeMonthly: number; // $28 first shot + $35 GOOD + $89 BETTER sales, estimated per month
   reservePct: number;
 };
 
@@ -16,6 +20,8 @@ export type FundingModel = {
   totalRevenue: number;
   breakEvenMembers: number;
   recommendedMembers: number;
+  breakEvenRaw: number;
+  recommendedRaw: number;
   prizePool: number;
   reserve: number;
   toolsCovered: number;
@@ -35,10 +41,10 @@ function n(env: string, fallback: number): number {
 
 export function fundingInputs(membersFromDb?: number): FundingInputs {
   return {
-    circlePrice: n("TIER_CIRCLE_PRICE", 19),
+    circlePrice: n("TIER_CIRCLE_PRICE", 26),
     members: membersFromDb ?? n("FUNDING_MEMBERS", 0),
     toolsMonthly: n("FUNDING_TOOLS_MONTHLY", 165),
-    prizeTarget: n("FUNDING_PRIZE_TARGET", 500),
+    prizeTarget: n("FUNDING_PRIZE_TARGET", 710),
     oneTimeMonthly: n("FUNDING_ONE_TIME_MONTHLY", 0),
     reservePct: n("FUNDING_RESERVE_PCT", 12.5),
   };
@@ -46,28 +52,32 @@ export function fundingInputs(membersFromDb?: number): FundingInputs {
 
 /** Wardley-style arithmetic: what the community must actually carry. */
 export function computeFunding(inputs: FundingInputs): FundingModel {
+  const annualBillsEarly =
+    n("ANNUAL_TUBEGEN", 29 * 12 * 0.8) +
+    n("ANNUAL_HIGGSFIELD", 29 * 12 * 0.8) +
+    n("ANNUAL_BUFFER", 60 * 12 * 0.8) +
+    n("ANNUAL_OPUSCLIP", 15 * 12 * 0.8);
+  const annualFundPerMonth = Math.ceil(annualBillsEarly / 12);
+
   const circleRevenue = inputs.circlePrice * inputs.members;
   const totalRevenue = circleRevenue + inputs.oneTimeMonthly;
 
   // Members needed before Circle alone covers tools + prizes (no reserve).
-  const breakEvenMembers = Math.ceil((inputs.toolsMonthly + inputs.prizeTarget) / Math.max(inputs.circlePrice, 1));
+  const breakEvenRaw = Math.ceil((inputs.toolsMonthly + inputs.prizeTarget) / Math.max(inputs.circlePrice, 1));
   // Recommended floor adds the reserve buffer on top.
-  const recommendedMembers = Math.ceil(
-    (inputs.toolsMonthly + inputs.prizeTarget) / (Math.max(inputs.circlePrice, 1) * (1 - inputs.reservePct / 100))
+  const recommendedRaw = Math.ceil(
+    (inputs.toolsMonthly + inputs.prizeTarget + annualFundPerMonth) / Math.max(inputs.circlePrice, 1)
   );
+  // Snap UP to the next 8-aligned member count (never down — a floor has to stay a floor).
+  const breakEvenMembers = nextEight(breakEvenRaw);
+  const recommendedMembers = nextEight(Math.max(recommendedRaw, breakEvenMembers));
 
   const afterTools = Math.max(0, circleRevenue - inputs.toolsMonthly);
   const prizePool = Math.min(inputs.prizeTarget, afterTools);
   const reserve = Math.max(0, afterTools - prizePool);
 
   // Annual-only bills: 20% cheaper than monthly when prepaid.
-  const annualBills =
-    n("ANNUAL_TUBEGEN", 29 * 12 * 0.8) +
-    n("ANNUAL_HIGGSFIELD", 29 * 12 * 0.8) +
-    n("ANNUAL_BUFFER", 60 * 12 * 0.8) +
-    n("ANNUAL_OPUSCLIP", 15 * 12 * 0.8);
-  const annualFundPerMonth = Math.ceil(annualBills / 12);
-
+  const annualBills = annualBillsEarly;
   const buckets = [
     {
       name: "Tools & engines",
@@ -104,6 +114,8 @@ export function computeFunding(inputs: FundingInputs): FundingModel {
     totalRevenue,
     breakEvenMembers,
     recommendedMembers,
+    breakEvenRaw,
+    recommendedRaw,
     prizePool,
     reserve,
     toolsCovered: Math.min(circleRevenue, inputs.toolsMonthly),

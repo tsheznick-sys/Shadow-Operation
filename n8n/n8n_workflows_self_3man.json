@@ -10,7 +10,7 @@
         "HTTP Request Social Blade + HypeAuditor + NotJustAnalytics/Picuki + Grok X trending (xAI GROK_API_KEY) - buyer_pool_x3,ratio,ER live",
         "HTTP Request WHOLE-INTERNET strategy scan daily: X trending + Reddit + YouTube search + Google Trends + competitor channels -> Claude extracts every monetizable strategy that works right now",
         "IF ER>{{$env.THRESHOLD_ER_GREEN || 5}}% && ratio<{{$env.THRESHOLD_RATIO_GREEN || 50}} && buyer_pool_x3>{{$env.THRESHOLD_BUYER_POOL_MIN || 3000}} => GREEN (8-Gate STRICT per 2026-10-31 answer) \u2014 thresholds from env THRESHOLD_*",
-        "Claude Code node (CLAUDE_API_KEY): rank top5 most monetizable for self content vault $27 AND write the daily ACTION PLAN per niche (3 angles + hook + CTA + posting day + proof asset)",
+        "Claude Code node (CLAUDE_API_KEY): rank top5 most monetizable for self content vault $35 AND write the daily ACTION PLAN per niche (3 angles + hook + CTA + posting day + proof asset)",
         "Telegram + Gmail nodes: Sir top5 + today's action plan 1) Stickman Finance 8.2K pool 5.1% ER -> angle/hook/CTA...",
         "Postgres UPDATE solo_domains SET top5=[...], action_plan=jsonb, ranked_at=now()"
       ],
@@ -69,7 +69,7 @@
         "HTTP IG/TikTok/YT analytics ONLY (X views ignored) views+replies last 3 posts + Social Blade alternatives HypeAuditor/NotJustAnalytics/Picuki daily ER check",
         "IF ratio<{{$env.THRESHOLD_RATIO_GREEN || 50}} && er>={{$env.THRESHOLD_ER_GREEN || 5}} (STRICT GREEN via THRESHOLD_RATIO_GREEN+ER_GREEN) && buyer_pool_x3 gate GREEN -> GREEN else check AMBER \u2014 adaptable via Vercel env",
         "IF GREEN: ChatFuel IG&TikTok + ManyChat YT auto-DM VAULT keyword within 2min (ManyChat YT because ChatFuel cannot YT) -> Comments->DM->Whop superfast",
-        "Shadow hard-close: 3-email cap -> FINAL TERMS one-pager 10pts sign only after PASS (no free audit, Hard Rule2 R9) -> Whop Create Product Vault $27+$9+$79+$19/mo ladder grant scott.abuya@gmail.com + info.wolf@gmail.com Buffer Team",
+        "Shadow hard-close: 3-email cap -> FINAL TERMS one-pager 10pts sign only after PASS (no free audit, Hard Rule2 R9) -> Whop Create Product Vault $35+$17+$89+$26/mo ladder + First Shot $28 one-time 14-day (the only 1 in the ladder) grant scott.abuya@gmail.com + info.wolf@gmail.com Buffer Team",
         "ChatFuel Push 8ch IG&TikTok + ManyChat YT Push Whop funnel -> n8n Jarvis DM auto social manager reviews Vercel one-app ChatFuel IG&TikTok + ManyChat YT",
         "Gmail Sir PASS GREEN fast-close vault live - Telegram all 3 pods"
       ],
@@ -97,9 +97,9 @@
       "trigger": "Gmail Trigger brand@* + cron 45 5 * * * + daily leak check",
       "nodes": [
         "Gmail Trigger brand@* adaptable NICHES_POOL {{$env.NICHES_POOL}} -> Claude Max classify brand deal -> Telegram Sir brand deal inbound",
-        "ManyChat YT + ChatFuel IG&TikTok webhook new subscriber -> Postgres replies -> Whop entitlement -> Telegram New vault buyer $27",
+        "ManyChat YT + ChatFuel IG&TikTok webhook new subscriber -> Postgres replies -> Whop entitlement -> Telegram New vault buyer $35",
         "Daily feedback email to ALL 3 seats from Jarvis Agent (Vessy) + in-app PWA update + SMS if a seat is offline; no reply in 10 min -> voice callback to that seat",
-        "Cron 45 5 * * * Telegram+Gmail Shadow Hot+Signal all 3: Sir 6 videos live 2.1K views 18 replies 1 Whop $27 - n8n spent $1.20 Claude today + leak_finder biggest leak in operator_context via /api/cron/daily-brief \u2014 env NICHES_POOL + THRESHOLD_* adaptable",
+        "Cron 45 5 * * * Telegram+Gmail Shadow Hot+Signal all 3: Sir 6 videos live 2.1K views 18 replies 1 Whop $35 - n8n spent $1.20 Claude today + leak_finder biggest leak in operator_context via /api/cron/daily-brief \u2014 env NICHES_POOL + THRESHOLD_* adaptable",
         "Weekly Expand Mon 08:00: WF1 Grok re-rank top5 monetizable -> if GREEN pool expands -> auto-expand to 5 pages template big_run_1000.py + WF9 pods"
       ],
       "rule": "leak_expand you chose: daily leak via operator_context + weekly re-rank expand \u2014 superfast to Whop"
@@ -126,17 +126,17 @@
       "name": "WF8 - Retention 1-2% Save Engine (Pause/Downgrade/50% off + Alias Wise Pay) + Entitlement sync",
       "trigger": "Whop webhook membership_cancelled + membership_payment_failed + cron 0 6 * * * churn check + manual /retention save click + ManyChat inactive 3d",
       "nodes": [
-        "Webhook Whop membership_cancelled (WHOP_API_KEY) -> payload user_id, plan $19, reason, cancel_click_at \u2014 BEFORE final cancel",
+        "Webhook Whop membership_cancelled (WHOP_API_KEY) -> payload user_id, plan $26, reason, cancel_click_at \u2014 BEFORE final cancel",
         "IF user in retention_events where last_save_offer <30d -> skip (1 save/30d max)",
         "Postgres SELECT user_vault scripts_count, streak, pod_id, last_agent_use, entitlement tier from checkEntitlement",
         "HTTP Whop API GET /api/v1/memberships/{id} -> verify active, get card_last4",
-        "Claude Code: personalized save copy via Vesper 20yo tone: Sir you have 47 scripts + Day 4 streak + pod Red needs you \u2014 Pause $5 keeps all vs Cancel deletes in 7d",
-        "Telegram + Chatfuel DM + ManyChat 8ch push save offer card: [Pause $5 keep vault] [50% off ${{($env.TIER_CIRCLE_PRICE||19)/2}} next mo] [Downgrade ${{$env.TIER_LITE_PRICE||9}} Lite] \u2014 one-click via Whop API \u2014 TIER_* env adaptable",
+        "Claude Code: personalized save copy via Vesper 20yo tone: Sir you have 47 scripts + Day 4 streak + pod Red needs you \u2014 Pause $8 keeps all vs Cancel deletes in 7d",
+        "Telegram + Chatfuel DM + ManyChat 8ch push save offer card: [Pause $8 keep vault] [35% off ${{$env.TIER_SAVE_PRICE || 17}} for 3 mo] [Downgrade ${{$env.TIER_LITE_PRICE||17}} Lite] \u2014 one-click via Whop API \u2014 TIER_* env adaptable",
         "Webhook user choice -> HTTP Whop API POST \u2014 IF pause/discount/downgrade -> Postgres INSERT retention_events saved, Neon saved_rate++, Telegram Sir saved + Linear SHA + Jive Vesper voice note optional",
         "ELSE cancel confirmed -> Postgres churn increment, IF churn7d>2.0% (tightened 2026-10-31) -> WF7 Jive broadcast emergency Sir churn 3.1% trigger win clip + office hour",
         "Entitlement sync: Whop active -> update Neon entitlements tier=pro/lite for jarvis-app/lib/entitlement.ts has_access",
         "ALIAS PAY: Cron 0 8 1 * * * (1st 08:00) -> HTTP YouTube Analytics + TikTok + Whop revenue_last_month -> Neon revenue_log -> Wise API POST /v1/batch-transfers alias with Social Manager: propose pay Jarvis $108 + community $500 from Wise USD, Social approves in /retention -> Wise executes",
-        "Funding ledger: monthly Circle revenue -> tools first -> prizes (cap $500, pro-rata) -> annual fund $133 -> reserve; write funding_ledger",
+        "Funding ledger: monthly Circle revenue -> tools first -> prizes (cap $710, pro-rata) -> annual fund $133 -> reserve; write funding_ledger",
         "Autopay HELD: read app_config autopay_authority \u2014 if not_granted, send proposal only, never transfer (owner 2026-10-31)"
       ],
       "cost": "Whop API $0 + Wise batch $0.43% + Neon $0 \u2014 saves 40% cancels, recovers 30% failed payments",

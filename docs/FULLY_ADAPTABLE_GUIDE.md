@@ -14,7 +14,7 @@ Branch `arena/6c47af3d-shadow-operation` `pr_open` | 2026-10-30 EAT | Stack: Ver
 | GREEN/AMBER thresholds | `<50+5%+`, `50-70+3-5%` in `lib/jarvis.ts` | `THRESHOLD_*` in `lib/config.ts` | `THRESHOLD_RATIO_GREEN=50` `THRESHOLD_ER_GREEN=5` etc |
 | Platforms & X serious | X discovery 1-2, IG/TT/YT 6/day in pages | `PLATFORMS` + `BUFFER_X_DAILY` + `BUFFER_SERIOUS_DAILY` + `X_MODE` | `PLATFORMS=X,IG,TikTok,YT` |
 | ChatFuel / ManyChat | IG&TikTok ChatFuel only, YT ManyChat | `CHATFUEL_SCOPE` + `MANYCHAT_API_KEY` presence | `CHATFUEL_TOKEN=...` `MANYCHAT_API_KEY=...` |
-| Pricing ladder | $27+$9+$79+$19 in `app/pods` `app/retention` | `WHOP_LADDER_*` + `TIER_*` tiers | `TIER_LITE_PRICE=9` `TIER_PRO_PRICE=29` etc |
+| Pricing ladder | $28 first shot → $17/$35/$89/$44/$26 (all 8-aligned) | `WHOP_LADDER_*` + `TIER_*` tiers | `TIER_LITE_PRICE=17` `TIER_PRO_PRICE=44` etc |
 | Pages count | 5 pages hardcoded in `app/page.tsx` `app/retention` | `PAGES_COUNT` drives dashboard + pods + n8n loops | `PAGES_COUNT=5` (any N) |
 | Brand voice | Wolf consumerism copy | `JARVIS_BRAND_VOICE` prompts override + Neon `brand_voice` row | `JARVIS_BRAND_VOICE=...` |
 | Buffer cadence | 6/day serious + X 1-2 stated in pages | `BUFFER_DAILY_LIMIT` style via `lib/config.ts` content.serious_daily | `BUFFER_SERIOUS_DAILY=6` |
@@ -29,7 +29,7 @@ All pages (`app/content|social|admin|pods|retention|bros|drafts|page.tsx`) now r
 1. **One master config file** `config/adaptable.json` is git source of defaults; override per deploy via Vercel env — never edit code to change niche/price.
 2. **Weekly Grok re-rank WF1**: let Grok rank 1000 niches CSV `data/creator_db_faceless_1000_FINAL.csv` on `buyer_pool_x3 + ratio<50 + ER5%+` → write top5 to Neon `solo_domains` → WF2 reads it — so niches auto-rotate without you.
 3. **Threshold tuning**: start strict `THRESHOLD_RATIO_GREEN=50 ER_GREEN=5`. After 2 weeks, if AMBER volume >60%, loosen to `55+4.5%` via env only, re-run demand test.
-4. **Pricing A/B**: keep WHOP ladder `$27+$9+$79+$19/mo` as default, A/B via `WHOP_LADDER_PRICES` env + `lib/entitlement.ts` — test $19 Circle vs $9 Lite conversion weekly in n8n WF6 leak→expand.
+4. **Pricing A/B**: keep the numerology_8 ladder `$28+$17+$35+$89+$44+$26` as default, A/B via `WHOP_LADDER_PRICES` env + `lib/entitlement.ts` — test $26 Circle vs $17 Lite conversion weekly in n8n WF6 leak→expand. Any new price must still reduce to 8 (run `scripts/check_numerology.py`).
 5. **Platform switch**: to add YouTube Shorts-only brand, set `PLATFORMS=IG,TikTok,YT` + `X_MODE=off` → X cron skips DMs automatically via `CONFIG.content.x_mode`.
 6. **Pages scale**: bump `PAGES_COUNT=8` + deploy — WF2 loops `for solo_domains limit PAGES_COUNT` — no app code change. Each page = 1 YT 30m + its TT/IG/Shorts.
 7. **Brand voice per page**: store `brand_voice` per `solo_domains` row → `JARVIS_SYSTEM` concatenates `brand_voice` at prompt time → same Jarvis speaks Wolf vs Mindset appropriately.
@@ -65,7 +65,7 @@ All pages (`app/content|social|admin|pods|retention|bros|drafts|page.tsx`) now r
 # + redeploy
 
 # Change ladder:
-# Vercel env: TIER_LITE_PRICE=12 TIER_PRO_PRICE=35 WHOP_LADDER_PRICES=$27+$12+$89+$19/mo
+# Vercel env: TIER_LITE_PRICE=17 TIER_PRO_PRICE=44 WHOP_LADDER_PRICES=$28+$17+$35+$89+$44+$26
 ```
 
 ## 5) ZIP bundle includes adaptable deploy

@@ -147,7 +147,7 @@ d.text(
 mx = 2960
 for line in reversed([
     "branch arena/6c47af3d-shadow-operation",
-    "13 workflows · 14 routes",
+    "14 workflows · 17 routes",
     "WF1 daily 08:00 internet scan",
     "6/day serious + X 1-2",
 ]):
@@ -213,7 +213,7 @@ LANES = [
               "GREEN: ratio < 50 & ER >= 5% & gate GREEN (strict kept)",
               "ChatFuel IG/TK + ManyChat YT auto-DM 'VAULT' in 2 min",
               "3-email cap -> FINAL TERMS 10 pts (no free audit)",
-              "Whop ladder $27 + $9 + $79 + $19/mo (consult data over time)"],
+              "Whop $28 first shot -> $17 / $35 / $89 / $44 / $26/mo (only 28 is not an 8)"],
              "GREEN -> same-day close · else AMBER", C_AMBER),
             ("WF5A", "AMBER / Monthly 14-Day", "branch from WF5 09:00",
              ["AMBER: ratio 50-70 & ER 3-5% -> enroll",
@@ -230,12 +230,12 @@ LANES = [
               "Every macro injected with the Social interview answers"],
              "conversations write members / replies", C_VIOLET),
             ("WHOP", "Whop Vault + Wise", "money layer",
-             ["$27 vault · $9 Lite · $79 Pro · $19/mo Circle",
+             ["$28 first shot · $17 Lite · $35 GOOD · $89 BETTER · $44 Pro · $26 Circle",
               "Entitlement -> lib/entitlement.ts has_access",
               "Webhooks: cancelled + payment_failed -> WF8",
               "Revenue -> revenue_log -> funding_ledger",
-              "Jarvis proposes ladder changes from live market data"],
-             "9 members cover tools · 40 self-fund", C_GREEN),
+              "Every price reduces to 8 — except the $28 first shot (the 1)"],
+             "35 members cover tools + prizes · 44 everything", C_GREEN),
             ("WF11", "Demand-Test Gate", "72h after the 3-slide test",
              ["3-slide carousel in Stories only — never a feed post",
               "50+ comments = PASS -> full sequence runs immediately",
@@ -253,7 +253,7 @@ LANES = [
         "boxes": [
             ("WF8", "Retention 1-2%", "Whop webhooks + 06:00",
              ["Cancel click intercepted BEFORE final cancel",
-              "1 save offer / 30d: Pause $5 · 50% off · Lite $9",
+              "1 save offer / 30d: Pause $8 · 35% off $17 · Lite $17",
               "Pause = still active = 0% churn counted",
               "churn7d > 2.0% -> escalate to WF7 voice call",
               "Entitlement sync + funding ledger + autopay proposal"],
@@ -294,7 +294,7 @@ LANES = [
         "note": "the only screens the 3-man team touches · every workflow reads and writes through this spine",
         "width": 730,
         "boxes": [
-            ("APP", "jarvis-app (Vercel)", "14 routes · 0.0.0.0:3000",
+            ("APP", "jarvis-app (Vercel)", "17 routes · 0.0.0.0:3000",
              ["/content G4 · /social read-only · /retention saves + money · /pods streaks",
               "/team 3 seats · /onboarding interview · /money funding · /login auth · /admin deck",
               "/drafts · /jarvis chat+mic · /n8n embed · /bros · /omar — crons */15 + 45 5"],
@@ -370,11 +370,11 @@ LANES = [
               "Owner sees who is actually briefed"],
              "replaces asking you the same questions twice", C_BLUE),
             ("FUNDING", "/money", "self-funding model",
-             ["Circle $19: tools $165 first, prizes to $750, annual fund $133",
-              "Break-even 48 · recommended 51 members · reserve 12.5%",
+             ["Circle $26: tools $165 first, prizes to $710, annual fund $133",
+              "Break-even 35 · recommended 44 members · reserve 12.5%",
               "Prize pool scales with revenue — never a fixed promise",
               "Payments HELD until owner grants; grant is audited"],
-             "9 members = lights on · 51 = self-funding", C_GREEN),
+             "35 = tools + prizes · 44 = everything funded", C_GREEN),
             ("SIGNALS", "Vessy + Red Button", "email → app → SMS → call",
              ["Daily email to all 3 seats, signed by Vessy",
               "In-app PWA update · SMS if a seat is offline",
@@ -487,7 +487,7 @@ def rail(bg, bottom):
     ry += 22
 
     section("FUNDING (SELF)")
-    for k, v in [("Circle price", "$19"), ("Tools / mo", "$165"), ("Prize cap", "$750"), ("Annual fund", "$133 / mo"), ("Break-even", "48 members"), ("Recommended", "51 members")]:
+    for k, v in [("Circle price", "$26"), ("Tools / mo", "$165"), ("Prize cap", "$710"), ("Annual fund", "$133 / mo"), ("Break-even", "35 members"), ("Recommended", "44 members")]:
         kv(k, v, vcol=C_GREEN)
 
     section("AUTONOMY (RECOMMENDED)")

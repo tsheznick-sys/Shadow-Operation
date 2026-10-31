@@ -5,7 +5,7 @@
     "created": "2026-10-30",
     "branch": "arena/6c47af3d-shadow-operation",
     "status": "pr_open",
-    "updated": "2026-10-31 Round5 FINAL: email daily + Signal + SMS offline + 10-min callback \u00b7 global pause \u00b7 30-day retention \u00b7 full autonomy when offline \u00b7 all 5 pages at once \u00b7 2 YT channels per brand"
+    "updated": "2026-10-31 PRICING: numerology_8 ladder \u2014 $28 first shot then every price reduces to 8 ($17/$35/$89/$44/$26/$62); prizes $710; break-even 35, recommended 44; saves $8 + 35% off $17"
   },
   "niches": {
     "strategy": "Grok weekly re-rank via WF1, not hardcoded",
@@ -136,7 +136,7 @@
   "conversion": {
     "dual": {
       "green_fast_close": "Comments\u2192DM\u2192Whop\u2192Purchase same day via ChatFuel IG&TikTok + ManyChat YT \u2014 3-email cap \u2192 FINAL TERMS 10pts (Hard Rule 2/3)",
-      "amber_14day": "Comments\u2192DM\u219214-day\u2192Whop\u2192Purchase via ChatFuel IG&TikTok + ManyChat YT drip Day1-3 value proof, Day4-7 teardown, Day8-14 close + Whop $19/mo Circle \u2014 daily CTA (no FINAL TERMS), AMBER YES any day exits to fast-close",
+      "amber_14day": "Comments\u2192DM\u219214-day\u2192Whop\u2192Purchase via ChatFuel IG&TikTok + ManyChat YT drip Day1-3 value proof, Day4-7 teardown, Day8-14 close + Whop $26/mo Circle \u2014 daily CTA (no FINAL TERMS), AMBER YES any day exits to fast-close",
       "priority": "Comments\u2192DM\u2192Whop\u2192Purchase prioritized over feed \u2014 both to advantage",
       "red_hold": "ratio >70 or ER <3% HOLD \u2014 improve loop (see improve loop, no G4 per lock)"
     },
@@ -163,27 +163,62 @@
     "leak_expand": "keep daily leak finder + weekly Monday expand (owner 2026-10-31)"
   },
   "paywalls": {
-    "ladder": "$27 + $9 bump + $79 Pro + $19/mo Circle (env WHOP_LADDER_PRICES)",
-    "good_better_best": {
-      "GOOD": "$27 Starter Pillow+Wan manual \u2014 no auto",
-      "BETTER": "$79 Pro TubeGen+OpusClip presets \u2014 Lite $9 unlocks 1 domain 3 clips/day",
-      "BEST": "$79+$29/mo Vault+Agent Pro full stack $160 auto stickman 5 pages 6/day \u2014 Pro unlocks",
-      "Circle": "$19/mo Continuity pod streak WWS"
+    "profile": "numerology_8",
+    "rule": "First shot is $28 (2+8=10 -> 1: the Leader, a deliberate opening move). Every other price reduces to 8 \u2014 the Life Path 8 ladder. Shortcut: an 8-aligned price satisfies n % 9 == 8.",
+    "reduces_to": {
+      "28": 1,
+      "17": 8,
+      "35": 8,
+      "89": 8,
+      "44": 8,
+      "26": 8,
+      "62": 8,
+      "710": 8
     },
-    "entitlement": "lib/entitlement.ts Lite $9 (30 runs, 1d, 3c/d) / Pro $29 (9999, 5d, 6c/d) via WHOP_PRODUCT_LITE_ID/PRO_ID/TEAM_ID + Whop API v2/memberships",
-    "take": "Whop 3%+2.7%+$0.30 per sale (~$4.70 on $79)"
+    "first_shot": {
+      "name": "First Shot",
+      "price": 28,
+      "cadence": "one-time",
+      "what": "14 days all-access: all 5 domains, 6 posts/day, character lock, sequence slides, vault",
+      "after_14_days": "upgrade to Circle $26/mo or any one-time build \u2014 no auto-charge, no card kept on file",
+      "why_28": "reduces to 1 \u2014 the opening move; the only non-8 in the system, by design",
+      "env": "TIER_FIRST_SHOT_PRICE"
+    },
+    "ladder": "$28 first shot -> $17 Lite/mo -> $35 GOOD -> $89 BETTER -> $44 Pro/mo -> $26 Circle/mo -> $62 Team (env WHOP_LADDER_PRICES)",
+    "good_better_best": {
+      "GOOD": "$35 Starter Pillow+Wan manual \u2014 no auto (was $27)",
+      "BETTER": "$89 Pro TubeGen+OpusClip presets \u2014 Lite $17 unlocks 1 domain 3 clips/day (was $79)",
+      "BEST": "$89+$44/mo Vault+Agent Pro full stack auto stickman 5 pages 6/day \u2014 Pro unlocks (was $79+$29)",
+      "Circle": "$26/mo Continuity pod streak WWS (was $19)",
+      "Team": "$62 three seats (was $59)"
+    },
+    "floor": "nothing advertised below $17 \u2014 the $8 save pause is the only sub-17 price and only for an existing member",
+    "hidden_test_tier": "$9/mo \u2014 never advertised, never in the ladder; private A/B control to prove the $17 floor is not leaving money on the table",
+    "save_prices": {
+      "pause": 8,
+      "discount_rate_pct": 35,
+      "discount_price": 17,
+      "discount_months": 3,
+      "downgrade": 17
+    },
+    "save_math": "35% of $26 = $16.90, quoted as $17 so the member sees an 8 \u2014 the rate (35) and the price (17) both reduce to 8. 44% would land on $14.56 (a 7), so 35% is the only rate that keeps both sides clean. The $0.10 is absorbed deliberately.",
+    "entitlement": "lib/entitlement.ts Lite $17 (30 runs, 1d, 3c/d) / Pro $44 (9999, 5d, 6c/d) via WHOP_PRODUCT_LITE_ID/PRO_ID/TEAM_ID + Whop API v2/memberships",
+    "take": "Whop 3%+2.7%+$0.30 per sale (~$5.37 on $89)",
+    "consult_owner": "Jarvis never reprices without the owner \u2014 it presents live market data and waits for a decision",
+    "code": "jarvis-app/lib/numerology.ts (digitalRoot, nextEight, LADDER) + scripts/check_numerology.py",
+    "docs": "docs/PRICING_NUMEROLOGY.md"
   },
   "retention": {
     "target": "1.1-1.4% churn \u2192 1-2% lock",
-    "save": "WF8 Pause $5 / 50% off $9.50 / Downgrade $9 Lite \u2014 44% save, 1 save/30d max, paused=0% churn",
+    "save": "WF8 Pause $8 / 35% off -> $17 for 3 months / Downgrade Lite $17 \u2014 1 save/30d max, paused=0% churn",
     "pods": 5,
     "proof": "WWS Sun 09:00 + Tue/Fri proof clips + Leaderboard + Thu 19:00 teardown \u2192 Neon vault \u2192 32s teaser",
-    "upgrade": "all_three triggers Day3 win + Day7 streak + Leaderboard Top3 \u2192 Lite $9\u2192Pro $29 POST /api/whop/upgrade Whop change_plan",
+    "upgrade": "all_three triggers Day3 win + Day7 streak + Leaderboard Top3 -> Lite $17->Pro $44 POST /api/whop/upgrade Whop change_plan",
     "churn_alert_weekly_pct": 2.0,
     "save_offers": [
-      "pause $5 (counts active)",
-      "50% off next month",
-      "downgrade Lite $9"
+      "pause $8/mo (counts active \u2014 the only sub-$17 price)",
+      "35% off -> $17/mo for 3 months (rate and price both reduce to 8)",
+      "downgrade Lite $17"
     ],
     "data_retention": {
       "masters": "delete after 30 days (lean storage)",
@@ -196,7 +231,7 @@
   "shadow_pattern": "leak_expand: Daily 05:45 leak finder biggest leak in operator_context via /api/cron/daily-brief + weekly Grok re-rank top5 expand \u2192 auto-expand to 5 pages template big_run_1000.py + WF9 pods \u2014 superfast to Whop",
   "scale": {
     "mvp": "$61/mo \u2192 $732/yr 1 page 6/day (stickman free + OpusClip free + Higgsfield manual + Buffer Free 3ch)",
-    "scale_5": "$165/mo \u2192 $1,980/yr + ~$60 PSTN (stickman $0 engine + OpusClip $15 + Higgsfield $29 longform+shorts+sequence slides + Buffer Team $60 + R2 $5 + brain $36 + TubeGen $29 fallback only) \u2014 7 sales $189 covers scale",
+    "scale_5": "$165/mo \u2192 $1,980/yr + ~$60 PSTN (stickman $0 engine + OpusClip $15 + Higgsfield $29 longform+shorts+sequence slides + Buffer Team $60 + R2 $5 + brain $36 + TubeGen $29 fallback only) \u2014 2 BETTER $89 sales cover scale",
     "year1": "Pocket $189/mo\u00d712=$2,268 \u2192 Net $1K/mo for 3 bros 30/20/50 \u2192 100K gross before re-tool \u2014 docs/YEAR1_POCKET_TO_100K_SCALE.md",
     "adaptable_pages": "Env PAGES_COUNT 5 (scalable any N) \u2014 no code change, WF1-9 loop domains",
     "languages": "English default, extendable via CLAUDE_LOCALE env + Grok X trending locale"
@@ -272,20 +307,24 @@
   },
   "community_funding": {
     "model": "self-funding \u2014 Circle carries tools first, then prizes, then annual fund, then reserve",
-    "circle_price": 19,
+    "circle_price": 26,
     "tools_monthly": 165,
-    "prize_target": 750,
+    "prize_target": 710,
     "annual_bills": 1596,
     "annual_fund_per_month": 133,
-    "break_even_members": 48,
-    "recommended_members": 51,
+    "break_even_members": 35,
+    "recommended_members": 44,
+    "break_even_raw": 34,
+    "recommended_raw": 39,
+    "math": "break-even 35: 35x$26=$910 - $165 tools = $745 >= $710 prize pool (raw 34, snapped up to 35). Recommended 44: 44x$26=$1,144 - $165 - $710 = $269 >= $133/mo annual fund, leaving $136 reserve (raw 39, snapped up to 44).",
+    "why_710": "closest 8 to the old $750 cap (750 -> 746 is nearer but unreadable; 710 keeps a round prize number and 7+1+0=8)",
     "order": [
       "tools",
       "prizes",
       "annual_fund",
       "reserve"
     ],
-    "prize_rule": "prize pool = max(0, circle revenue - tools), cap 750 \u2014 scales with members, never a fixed promise",
+    "prize_rule": "prize pool = max(0, circle revenue - tools), cap 710 \u2014 scales with members, never a fixed promise",
     "ledger": "Neon funding_ledger",
     "docs": "docs/COMMUNITY_FUNDING_MODEL.md",
     "decide_from_data": "final floor locked from 60 days of real churn + conversion data, not from a model"

@@ -42,15 +42,17 @@ WF4 buffer       → 6 Shorts/day serious + longform Mon/Wed/Fri + X 1–2 disco
 
 ## C — How money is made
 
-**Ladder `WHOP_API_KEY`:** `Circle $19/mo` · `Lite $9` (1 domain, 3/day) · `GOOD $27` manual → `BETTER $79` TubeGen presets → `Pro $29/mo` across 5 domains 6/day. Jarvis **consults the owner with live market data before changing any price** — it never reprices quietly.
+**Ladder `WHOP_API_KEY` — numerology_8:** `$28 first shot` (one-time, 14 days all-access) → `$17 Lite/mo` (1 domain, 3/day) → `$35 GOOD` manual → `$89 BETTER` TubeGen presets → `$44 Pro/mo` across 5 domains 6/day → `$26 Circle/mo` → `$62 Team`.
+
+**Every price reduces to 8** — except the $28 first shot, which reduces to 1 (2+8=10→1, the Leader). Shortcut: an aligned price satisfies `n % 9 == 8`. Jarvis **consults the owner with live market data before changing any price** — it never reprices quietly. Full detail: `docs/PRICING_NUMEROLOGY.md`.
 
 **Two ways in:**
 - **GREEN** → `Comments → DM → Whop` **same day**, 3-email cap, then FINAL TERMS.
 - **AMBER** → the **monthly 14-day Growth Operator sequence** per the playbook: Warm-Up 1–3 / Value 4–9 / Money 10–14 with **11 buy buttons**. Higgsfield renders the slides → Buffer. G4 approves once per cycle.
 
-**Save offers:** pause $5/mo · 50% off · Lite $9 — **one per 30 days**.
+**Save offers:** pause **$8/mo** · **35% off → $17** for 3 months · Lite **$17** — **one per 30 days**. (35% of $26 is $16.90, quoted as $17 — rate and price both reduce to 8.)
 
-**Funding is self-funding:** $19 Circle · tools $165 paid first · prizes $750 pro-rata · annual fund $133/mo. **Break-even 48 members · recommended 51** (final floor from 60 days of real data). **Autopay is HELD** until you grant it.
+**Funding is self-funding:** $26 Circle · tools $165 paid first · prizes **$710** pro-rata · annual fund $133/mo. **Break-even 35 members · recommended 44** — both derived from the new prices and snapped up to an 8, never picked. At 44: `$1,144 − $165 − $710 = $269`, the $133/mo annual fund is covered and **$136 stays as reserve**. **Autopay is HELD** until you grant it.
 
 ---
 
