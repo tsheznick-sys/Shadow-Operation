@@ -1,5 +1,5 @@
 {
-  "name": "Jarvis SELF 3-Man Content Jarvis - 13 Workflows (auth+interview, autonomy matrix, monthly sequence, self-funding)",
+  "name": "Jarvis SELF 3-Man Content Jarvis - 14 Workflows (auth+interview+autonomy, monthly sequence, signals, global pause)",
   "workflows": [
     {
       "id": "wf1_research_grok",
@@ -55,6 +55,7 @@
         "Vercel /content pending_G4 view -> Content guy G4 approve once (edit caption/hashtag/thumbnail) -> Postgres status='content_approved'",
         "Claude Code SEO pack per platform: IG hashtags vs TikTok hooks vs YT titles + buyer_pool_x3 targeting",
         "Postgres UPDATE status='content_approved' -> trigger Buffer schedule immediately (G5 social review REMOVED 2026-10-31)",
+        "Route by surface: Shorts -> each brand's YT-Shorts channel + IG + TikTok; longform -> the brand's YT-Long channel 3x/week (2 channels per brand, YT_CHANNELS_PER_BRAND=2)",
         "HTTP Buffer API (BUFFER_TOKEN Team $12/ch) schedule {{$env.BUFFER_SERIOUS_DAILY || 6}}/day serious (IG/TikTok/YT) + longform 3x/week Mon/Wed/Fri per page + {{$env.BUFFER_X_DAILY || 2}}/day X discovery per domain unlimited (env PLATFORMS+X_MODE)",
         "Telegram Sir 6/day live via Buffer + longform uploaded to YT - Linear Done SHA"
       ],
@@ -97,6 +98,7 @@
       "nodes": [
         "Gmail Trigger brand@* adaptable NICHES_POOL {{$env.NICHES_POOL}} -> Claude Max classify brand deal -> Telegram Sir brand deal inbound",
         "ManyChat YT + ChatFuel IG&TikTok webhook new subscriber -> Postgres replies -> Whop entitlement -> Telegram New vault buyer $27",
+        "Daily feedback email to ALL 3 seats from Jarvis Agent (Vessy) + in-app PWA update + SMS if a seat is offline; no reply in 10 min -> voice callback to that seat",
         "Cron 45 5 * * * Telegram+Gmail Shadow Hot+Signal all 3: Sir 6 videos live 2.1K views 18 replies 1 Whop $27 - n8n spent $1.20 Claude today + leak_finder biggest leak in operator_context via /api/cron/daily-brief \u2014 env NICHES_POOL + THRESHOLD_* adaptable",
         "Weekly Expand Mon 08:00: WF1 Grok re-rank top5 monetizable -> if GREEN pool expands -> auto-expand to 5 pages template big_run_1000.py + WF9 pods"
       ],
@@ -113,7 +115,8 @@
         "Whisper transcribe each leg -> Neon save transcript + Drive HQ 17KpzZCm/calls/ recording + Linear SHA + /admin log",
         "Claude Pro generates 3 fixes -> Voiceflow presents via Vesper 20yo",
         "Vapi feedback call to Owner ONLY via same Jive permanent number - Vesper reads fixes: Say Apply or press 1 -> Admin Big Red Button optional double-confirm -> Execute via n8n",
-        "Legs = 3 (owner all / content only / social only) \u2014 kept 2026-10-31; advice from the interview decides fixes, not guesses"
+        "Legs = 3 (owner all / content only / social only) \u2014 kept 2026-10-31; advice from the interview decides fixes, not guesses",
+        "10-minute no-reply timer: if a seat has not acknowledged the SMS, WF7 calls that seat directly"
       ],
       "cost": "Vapi $0 free WebRTC + PSTN $0.06-0.22/min emergency only",
       "security": "JIVE_JARVIS_NUMBER env only not in docs/commit"
@@ -194,6 +197,19 @@
         "Vercel /team card + audit_log row (interview_digest)"
       ],
       "rule": "A seat under 60% does not get unsupervised authority over its lane \u2014 docs/TEAM_ONBOARDING_AUTH.md"
+    },
+    {
+      "id": "wf13_global_pause",
+      "name": "WF13 - Global Pause (Big Red Button) \u2014 stops publish, DM, voice and money",
+      "trigger": "webhook /api/control + /admin Big Red Button + Vapi 'press 1'",
+      "nodes": [
+        "Webhook control {action: pause|resume} -> owner-only check (session role = owner or signed Vapi token)",
+        "Postgres UPDATE app_config control_state = paused|running + audit_log row (who, when, why)",
+        "Every outbound WF (WF4 Buffer, WF5/WF5A DM, WF7 voice, WF8/WF10 money) checks control_state BEFORE acting \u2014 paused = stop, log, Telegram",
+        "Resume requires owner; paused workflows do not auto-resume",
+        "Telegram + email all 3: Jarvis paused by <seat> at <time> \u2014 nothing ships until resume"
+      ],
+      "rule": "Global pause is absolute and owner-only to undo (2026-10-31) \u2014 no partial resume paths"
     }
   ],
   "creds_needed": [
@@ -220,7 +236,7 @@
     "TEAM_OWNER_PASSWORD + TEAM_CONTENT_PASSWORD + TEAM_SOCIAL_PASSWORD \u2014 rotate from dev defaults before live",
     "AUTOPAY_AUTHORITY not_granted | granted \u2014 Jarvis only transfers after the owner flips this in /money"
   ],
-  "total_cost": "MVP 1 page: Vercel $0 + Neon $0 + n8n $20 + Claude $20 + Grok $16 + stickman free + OpusClip free + Buffer Free + R2 $5 = $61/mo -> SCALE 5 pages: +OpusClip $15 + Higgsfield $29 (longform+shorts+sequence slides) + Buffer Team $60 = $165/mo (TubeGen $29 fallback only) \u2014 3 sales $81 covers MVP, 7 sales $189 covers scale",
+  "total_cost": "MVP: $61/mo (1 brand, 2 YT channels) -> SCALE 5 brands / 10 YT channels: $165/mo + SMS/call usage ~$10 (Africa's Talking) = ~$175/mo \u2014 3 sales $81 covers MVP, 7 sales $189 covers scale",
   "next_step": "n8n Cloud Import this JSON -> add WHOP_API_KEY + WHOP_PRODUCT_LITE_ID/PRO_ID + WISE_API_KEY -> Vercel env same + set Whop webhooks membership_cancelled/payment_failed -> test /api/entitlement?whop_user_id=xxx -> WF8 retention save",
   "self_only": "3-man core self-only scalable 5 domains \u2014 ALL pages stickman free engine 30m longform (render daily, publish Mon/Wed/Fri) + Shorts -> OpusClip 9.2 -> Higgsfield polish longform+shorts -> R2 canonical storage -> monthly 14-day Growth Operator sequence with Higgsfield slides -> Buffer (IG/TikTok gated at 1K) -> G4 only \u2014 cloud free GitHub+Vercel Hobby+Neon free"
 }

@@ -140,7 +140,7 @@ def arrow(x1, y1, x2, y2, color=(76, 94, 116), width=3, head=11):
 d.text((40, 28), "JARVIS — n8n WORKFLOW MAP", font=F_TITLE, fill=TEXT)
 d.text(
     (40, 92),
-    "13 workflows · Google OAuth + 2FA · 18-question interviews · autonomy matrix (80% overall) · stickman_all · self-funding community",
+    "14 workflows · Google OAuth + 2FA · 18-question interviews · autonomy 80% overall · 2 YT channels per brand · global pause · self-funding",
     font=F_SUB,
     fill=MUTED,
 )
@@ -173,6 +173,7 @@ LANES = [
              "writes solo_domains.top5 + action_plan", C_TEAL),
             ("WF2", "Longform Engine", "cron daily 02:00 EAT",
              ["Claude writes 6 scripts/domain = 4,500 words / 30 min",
+              "2 YT channels per brand: Shorts + Longform (10 at 5 pages)",
               "ALL pages -> stickman-video-director FREE (git clone $0)",
               "TubeGen $29 / Wan T4 = fallback only if render fails",
               "R2 upload (canonical, off Drive) · 9:16 master",
@@ -348,7 +349,7 @@ LANES = [
         "label": "6 · TEAM · AUTH · INTERVIEW · FUNDING",
         "color": C_VIOLET,
         "note": "three humans enter once — Jarvis stops guessing and stops asking the same questions twice",
-        "width": 542,
+        "width": 431,
         "boxes": [
             ("AUTH", "3 seats + login", "/login · signed cookie 7d",
              ["Google OAuth (only the 3 seeded emails) + password fallback",
@@ -373,7 +374,14 @@ LANES = [
               "Break-even 48 · recommended 51 members · reserve 12.5%",
               "Prize pool scales with revenue — never a fixed promise",
               "Payments HELD until owner grants; grant is audited"],
-             "9 members = lights on · 40 = self-funding", C_GREEN),
+             "9 members = lights on · 51 = self-funding", C_GREEN),
+            ("SIGNALS", "Vessy + Red Button", "email → app → SMS → call",
+             ["Daily email to all 3 seats, signed by Vessy",
+              "In-app PWA update · SMS if a seat is offline",
+              "No reply in 10 min -> Jarvis calls that seat",
+              "GLOBAL PAUSE stops publish, DM, voice and money",
+              "30-day masters · published assets forever"],
+             "docs/SIGNALS_CONTROLS_RETENTION.md", C_RED),
         ],
     },
 ]
@@ -520,7 +528,7 @@ fy = bottom + 26
 d.rounded_rectangle([28, fy, 2250, fy + 62], radius=14, fill=(13, 18, 26), outline=(30, 40, 52), width=1)
 d.text(
     (50, fy + 20),
-    "WF1 daily scan -> WF2 stickman 30m -> WF3 OpusClip + Higgsfield -> WF4 G4 -> Buffer -> WF5 demand -> Whop -> WF8 save -> WF9 proof -> WF6 leak -> WF10 monthly -> WF11 1K gate -> WF1",
+    "WF1 daily scan -> WF2 stickman 30m (2 YT channels/brand) -> WF3 OpusClip + Higgsfield -> WF4 G4 -> Buffer -> WF5 demand -> Whop -> WF8 save -> WF9 proof -> WF6 leak -> WF10 monthly -> WF11 demand test -> WF13 pause -> WF1",
     font=font(15, True, mono=True),
     fill=C_TEAL,
 )
@@ -539,7 +547,7 @@ ty = ly + 78
 for t in [
     "WF1 daily 08:00 · WF2 daily 02:00 (publish M/W/F) · WF3 webhook · WF4 G4 only · WF5 09:00 + comments",
     "WF5A monthly cycle · WF6 Gmail + 05:45 + weekly · WF7 emergency · WF8 Whop + 06:00 + 1st 08:00 · WF9 Sun/05:45/Thu",
-    "WF10 1st 07:00 · WF11 daily 06:30 · WF12 Mon 07:30 — interviews decide what Jarvis may do unsupervised",
+    "WF10 1st 07:00 · WF11 72h demand test · WF12 Mon 07:30 · WF13 global pause (owner only) — interviews decide autonomy",
 ]:
     d.text((200, ty), t, font=font(13, mono=True), fill=MUTED)
     ty += 22

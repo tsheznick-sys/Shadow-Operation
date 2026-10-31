@@ -2,11 +2,13 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // Edge-safe HMAC verify (WebCrypto) — mirrors lib/auth.ts without node:crypto.
-const PROTECTED = ["/team", "/money", "/onboarding", "/content", "/social", "/admin", "/retention", "/pods", "/drafts", "/autonomy"];
+const OWNER_ONLY = ["/admin", "/control"];
+
+const PROTECTED = ["/team", "/money", "/onboarding", "/content", "/social", "/admin", "/retention", "/pods", "/drafts", "/autonomy", "/control"];
 
 const ROLE_ROUTES: Record<string, string[]> = {
   owner: ["*"],
-  content: ["/content", "/pods", "/onboarding", "/team", "/money", "/drafts", "/jarvis", "/n8n", "/autonomy"],
+  content: ["/content", "/pods", "/onboarding", "/team", "/money", "/drafts", "/jarvis", "/n8n", "/autonomy", "/control"],
   social: ["/social", "/pods", "/onboarding", "/team", "/money", "/drafts", "/jarvis", "/n8n", "/retention", "/autonomy"],
 };
 
@@ -57,6 +59,13 @@ export async function middleware(req: NextRequest) {
     const url = req.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("next", pathname);
+    return NextResponse.redirect(url);
+  }
+
+  if (OWNER_ONLY.some((p) => pathname === p || pathname.startsWith(`${p}/`)) && session.role !== "owner") {
+    const url = req.nextUrl.clone();
+    url.pathname = "/team";
+    url.searchParams.set("denied", pathname);
     return NextResponse.redirect(url);
   }
 

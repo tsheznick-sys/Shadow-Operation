@@ -30,6 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <a href="/team" className="px-3 py-1.5 rounded-full bg-zinc-800">Team 3</a>
               <a href="/money" className="px-3 py-1.5 rounded-full bg-zinc-800">Funding</a>
               <a href="/autonomy" className="px-3 py-1.5 rounded-full bg-zinc-800">Autonomy</a>
+              <a href="/control" className="px-3 py-1.5 rounded-full bg-red-600 text-white font-bold">Red Button</a>
               <a href="/login" className="px-3 py-1.5 rounded-full border border-zinc-700">Sign in</a>
             </nav>
           </div>

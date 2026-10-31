@@ -5,7 +5,7 @@
     "created": "2026-10-30",
     "branch": "arena/6c47af3d-shadow-operation",
     "status": "pr_open",
-    "updated": "2026-10-31 Round4: 18 questions per seat \u00b7 Google OAuth + 2FA on money \u00b7 autonomy matrix (80-90% operation, money capped) \u00b7 prizes $750 floor 51 \u00b7 demand test replaces follower gate"
+    "updated": "2026-10-31 Round5 FINAL: email daily + Signal + SMS offline + 10-min callback \u00b7 global pause \u00b7 30-day retention \u00b7 full autonomy when offline \u00b7 all 5 pages at once \u00b7 2 YT channels per brand"
   },
   "niches": {
     "strategy": "Grok weekly re-rank via WF1, not hardcoded",
@@ -47,7 +47,7 @@
     "scripts_per_domain": 6,
     "words_per_longform": 4500,
     "clip_targets": "3x8s short + 2x32s long + 1x60s deep from 30m p01_32s_9x16.mp4 Katana queue70",
-    "publish": "Buffer Team $12/ch 6/day serious IG/TikTok/YT + X 1-2/day discovery filler (configurable via BUFFER_DAILY_LIMIT)",
+    "publish": "Buffer Team 6/day serious per brand (IG + TikTok + YT-Shorts) + longform 3x/week to YT-Long + X 1-2/day discovery (configurable BUFFER_SERIOUS_DAILY / LONGFORM_PUBLISH_DAYS)",
     "channels": [
       "X",
       "IG",
@@ -116,6 +116,21 @@
       "demand_test": "3-slide carousel in Stories only, read after 72h \u2014 50+ comments GREEN, 25-49 AMBER, <25 RED hold",
       "docs": "docs/GROWTH_OPERATOR_14DAY_SEQUENCE.md",
       "gate": "DEMAND-TEST GATE (replaces follower count): run the 3-slide carousel in Stories, read at 72h \u2014 50+ comments = PASS -> proceed with the full sequence immediately; 25-49 = AMBER -> warm up and retest; <25 = RED -> hold. Scans update the DB every cycle."
+    },
+    "channels_per_brand": {
+      "rule": "1 brand = 2 YouTube channels (owner 2026-10-31): a Shorts channel and a Longform channel",
+      "at_5_pages": "5 brands x 2 = 10 YouTube channels + each brand's TikTok + IG + X",
+      "brands": [
+        "Stickman Finance",
+        "Psychology",
+        "Dark Psychology",
+        "Marketing History",
+        "Mindset"
+      ],
+      "naming": "YT-Shorts: '<Brand> Shorts' \u00b7 YT-Long: '<Brand>' \u2014 separate handles, shared character lock",
+      "why": "Shorts channels get subscriber velocity from volume; longform channels protect watch-time and ad RPM. Mixing them splits the algorithm signal",
+      "brand_lock": "one master prompt + one reference frame shared across both channels so the character is identical",
+      "env": "YT_CHANNELS_PER_BRAND=2 (1 = legacy single-channel mode)"
     }
   },
   "conversion": {
@@ -169,7 +184,14 @@
       "pause $5 (counts active)",
       "50% off next month",
       "downgrade Lite $9"
-    ]
+    ],
+    "data_retention": {
+      "masters": "delete after 30 days (lean storage)",
+      "published_assets": "keep forever (shorts, slides, longform finals)",
+      "transcripts": "12 months",
+      "index": "Neon keeps rows + hashes after the object is deleted",
+      "docs": "docs/SIGNALS_CONTROLS_RETENTION.md"
+    }
   },
   "shadow_pattern": "leak_expand: Daily 05:45 leak finder biggest leak in operator_context via /api/cron/daily-brief + weekly Grok re-rank top5 expand \u2192 auto-expand to 5 pages template big_run_1000.py + WF9 pods \u2014 superfast to Whop",
   "scale": {
@@ -277,5 +299,39 @@
       "WISE_API_KEY",
       "AUTOPAY_HOLD_UNTIL"
     ]
+  },
+  "signals": {
+    "daily_email": "daily feedback email to all 3 seats \u2014 from Jarvis Agent (Vessy)",
+    "in_app": "in-app updates on the phone (PWA) for the same update",
+    "sms_offline": "SMS when a seat is offline / unreachable (Africa's Talking primary, Twilio fallback)",
+    "escalation": "no reply within 10 minutes -> voice call to that seat",
+    "sender": "Vessy (Vesper) \u2014 every message signed as the Jarvis Agent",
+    "order": [
+      "daily email all 3",
+      "in-app PWA",
+      "SMS if offline",
+      "call after 10 min no reply"
+    ],
+    "env": [
+      "AFRICASTALKING_* or TWILIO_*",
+      "email provider",
+      "VAPI for the callback"
+    ]
+  },
+  "controls": {
+    "big_red_button": "GLOBAL PAUSE \u2014 stops every outbound workflow (publish, DM, voice, money). Nothing resumes until the owner undoes it",
+    "triggers": [
+      "/admin Big Red Button",
+      "Vapi 'press 1'",
+      "/api/control Global pause"
+    ],
+    "resume": "owner only, audit_log row written on pause and resume",
+    "env": "CONTROL_STATE=running|paused"
+  },
+  "operations": {
+    "offline_mode": "keep running at full autonomy when the owner is away; daily SMS feedback to all 3 seats",
+    "golive": "all 5 pages at once \u2014 import 13 workflows, start every page",
+    "phase2": "after the Shadow Operation role converts clients to the required number, build the whole backend and give it the full pipeline to run, monetise the pages and make sales",
+    "first_week": "all 5 pages live \u00b7 30 clips out \u00b7 first 3 Circle members"
   }
 }
