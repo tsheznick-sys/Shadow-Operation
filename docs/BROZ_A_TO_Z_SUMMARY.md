@@ -20,6 +20,14 @@
 
 **Four panel screens, all built:** Home (quota, queue, next action) · Create (7 steps, 6 gates) · Performance (six metrics ordered by how badly they hurt, views last) · Vault (raw cuts, scripts, policy log, pods).
 
+**Team $62 = everything, for three seats.** It inherits every Pro entitlement per seat, plus seat management, a shared hook bank, the team ledger and one invoice. The uncomfortable arithmetic is recorded rather than hidden: **Pro is $53 for one person, Team is $62 for three.** Guard: three seats claimed and used within 30 days, or it reverts to Circle — a team of one is not a team, and a decorative $53 tier is a mess we would have built ourselves.
+
+**Free opens in waves of 25.** Wave 1 is challenge finishers only — proven intent, zero acquisition cost. Each wave is measured (blocked-asset rate ≤ 10%, support load, watermark CTR) before the next opens. If a wave produces more blocked assets than published clips, the next wave does not open.
+
+**We hold a key to their channel, so we write the law down.** AES-256-GCM, key in env only. We ask for **upload and our own analytics — nothing else**, and we never request subscriber lists, comment management, delete access or anything financial even when offered. The member sees exactly what we hold. Revoked within an hour of churn, instantly on request, deleted within 24 hours. **A token in a log is a breach, not a bug.**
+
+**The App Store waits for GREEN.** Internal only until page 1 posts a GREEN week plus three clean publish cycles. Then it is listed as a second revenue line — and marketed.
+
 **Stickman Agent is the product.** Members do not buy a library, they buy a staff member: script, render, cut, schedule, audit. Free tier gets **20 runs per 5-hour window** (300/month cap) and **our content to clip**, with **our watermark on every export** — free users distribute our brand at their cost. Paid tiers are clean. Supporters may skip the funnel and join the community directly at $44; the discount is **0%**, only the path is shorter. Nobody publishes freely until rules, policy and disclosure pass; the first 3 publishes get G4 review, then auto-publish is earned.
 
 **`stickman_all` on every page.** `kaomei/stickman-video-director` (git clone, **free**) renders the **30-minute longform AND the Shorts** — one master prompt + one reference frame locks the character across both.

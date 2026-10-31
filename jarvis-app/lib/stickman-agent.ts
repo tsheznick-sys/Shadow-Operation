@@ -15,7 +15,7 @@
 //   3. Nobody publishes freely until they pass rules, policy and disclosure. Machine gate
 //      always; G4 human review for the first three publishes, then earned auto-publish.
 
-export type Tier = "free" | "circle" | "pro";
+export type Tier = "free" | "circle" | "pro" | "team";
 
 // MAX WAS DROPPED 2026-10-31. At $71 it sat ABOVE the $62 Team tier, which is the same
 // class of error as two tiers priced at $44: a member cannot tell which one is better,
@@ -32,6 +32,9 @@ export const WINDOW_RUNS: Record<Tier, number> = {
   free: 20,
   circle: 40,
   pro: 80,
+  // Team is 3 seats, each with a Pro-shaped window rather than one shared pool —
+  // a shared pool means the loudest member spends it by Tuesday.
+  team: 80,
 };
 
 /**
@@ -42,7 +45,27 @@ export const MONTHLY_RUNS: Record<Tier, number> = {
   free: 300,
   circle: 600,
   pro: 1200,
+  team: 1200, // per seat, not per team
 };
+
+/**
+ * TEAM $62 (owner-stated 2026-10-31): "all on the other tiers, and then the added features
+ * for the team version." Team inherits every Pro entitlement for three seats.
+ *
+ * Flagged honestly, because the arithmetic is uncomfortable: Pro is $53 for one person and
+ * Team is $62 for three. A rational buyer never chooses Pro. Guard, recorded not hidden:
+ * three real seats claimed within 30 days, or the account reverts to Circle. A team of one
+ * is not a team, and a decorative $53 tier is a mess we would have built ourselves.
+ */
+export const TEAM = {
+  seats: 3,
+  price: 62,
+  inherits: "every Pro entitlement, per seat",
+  extra: ["seat management", "shared hook bank", "team ledger view", "one bill, one invoice"],
+  claim_window_days: 30,
+  degrade_to: "circle",
+  guard: "three seats claimed and used within 30 days, or Team reverts — a team of one is not a team",
+} as const;
 
 /** Blended cost per run: script generation + free stickman render + storage. No paid polish. */
 export const COST_PER_RUN = 0.008;
@@ -62,6 +85,10 @@ export const TIER_RULES: Record<Tier, { watermark: boolean; polish: boolean; raw
   pro: {
     watermark: false, polish: true, raw_vault: true, pod_priority: true, direct_publish: true, price: 53,
     includes: "everything in Circle, polish, 80 runs/5h, DIRECT publishing to their own accounts, 2-hour review SLA until auto-publish is earned",
+  },
+  team: {
+    watermark: false, polish: true, raw_vault: true, pod_priority: true, direct_publish: true, price: 62,
+    includes: "everything in Pro for 3 seats, plus seat management, a shared hook bank, the team ledger view and one invoice",
   },
 };
 
@@ -101,6 +128,24 @@ export function publishPath(tier: Tier, passes = 0): { path: PublishPath; review
  * only the path is shorter. Recorded, because "we skipped the funnel" must never become
  * "we discounted the price" by the time it reaches a spreadsheet.
  */
+/**
+ * WHEN FREE OPENS (decided 2026-10-31, owner delegated the choice).
+ *
+ * Not day one, and not a waitlist that never moves. Waves of 25, and the first wave is the
+ * people who already finished the 14-day challenge: they have intent, they cost nothing to
+ * acquire, and they are the least likely to submit something that earns us a strike.
+ *
+ * Each wave is measured before the next opens — support load, blocked-asset rate, watermark
+ * click-through. If a wave produces more blocks than clips, the next wave does not open.
+ */
+export const FREE_WAVES = {
+  size: 25,
+  wave_1: "challenge finishers only — proven intent, zero acquisition cost",
+  gate_to_next: "previous wave: <= 10% blocked assets, support load sustainable, watermark CTR measured",
+  stop_rule: "more blocked assets than published clips in a wave means the free tier is teaching the wrong behaviour",
+  never: "open every free seat at once to advertise a community whose first page has not proven itself",
+} as const;
+
 export const FUNNEL_SHORTCUT = {
   allowed: true,
   path: "direct_community",

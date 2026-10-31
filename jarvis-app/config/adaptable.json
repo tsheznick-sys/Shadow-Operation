@@ -1013,17 +1013,20 @@
     "tiers": {
       "free": 0,
       "circle": 44,
-      "pro": 53
+      "pro": 53,
+      "team": 62
     },
     "windows": {
       "free": 20,
       "circle": 40,
-      "pro": 80
+      "pro": 80,
+      "team": 80
     },
     "monthly": {
       "free": 300,
       "circle": 600,
-      "pro": 1200
+      "pro": 1200,
+      "team": 1200
     },
     "cost_per_run": 0.008,
     "publish_gate": {
@@ -1077,6 +1080,56 @@
       "performance": "six metrics ordered by how badly they can hurt; views last; never aggregated across pages",
       "vault": "raw cuts, scripts, policy log, pods, community ledger",
       "implementation": "jarvis-app/lib/panel.ts + /stickman, /stickman/create, /stickman/performance, /stickman/vault"
+    },
+    "team": {
+      "seats": 3,
+      "price": 62,
+      "inherits": "every Pro entitlement, per seat",
+      "extra": [
+        "seat management",
+        "shared hook bank",
+        "team ledger view",
+        "one bill, one invoice"
+      ],
+      "claim_window_days": 30,
+      "degrade_to": "circle",
+      "guard": "three seats claimed and used within 30 days, or Team reverts — a team of one is not a team",
+      "flagged_risk": "Pro $53 for one vs Team $62 for three — the guard exists so the $53 tier does not become decorative"
+    },
+    "free_waves": {
+      "size": 25,
+      "wave_1": "challenge finishers only — proven intent, zero acquisition cost",
+      "gate_to_next": "previous wave: <= 10% blocked assets, support load sustainable, watermark CTR measured",
+      "stop_rule": "more blocked assets than published clips in a wave means the free tier is teaching the wrong behaviour",
+      "never": "open every free seat at once to advertise a community whose first page has not proven itself"
+    },
+    "oauth_custody": {
+      "storage": "AES-256-GCM ciphertext in Neon; key in env only",
+      "scopes_ask": [
+        "upload",
+        "read_own_analytics"
+      ],
+      "scopes_never": [
+        "read_subscriptions",
+        "manage_comments",
+        "delete_content",
+        "financial"
+      ],
+      "disclose": "a panel the member can open at any time, plus on every connect, every 30 days, on scope change and on revocation",
+      "revoke": "within 1 hour of churn, instantly on request, deleted within 24h",
+      "never": "a token in a log is a breach, not a bug",
+      "audit": "anything unused 30 days is revoked; any over-scope is stripped",
+      "implementation": "jarvis-app/lib/oauth.ts + agent_oauth_grants (30 tables)"
+    },
+    "marketplace": {
+      "listing": "internal only until page 1 posts a GREEN week",
+      "then": "list in the Whop App Store as a second revenue line, and market it",
+      "gate": [
+        "page 1 GREEN",
+        "3 clean publish cycles",
+        "support load measured on the free waves"
+      ],
+      "pricing_on_listing": "install fee and/or per-member monthly — decide when the gate is passed, not before"
     }
   }
 }

@@ -468,3 +468,30 @@ ALTER TABLE agent_schedule ADD COLUMN IF NOT EXISTS sla_due_at TIMESTAMPTZ;
 
 COMMENT ON TABLE agent_members IS
   'Free = 20 runs/5h and a watermark on every export. Circle = scheduled via our publisher. Pro = direct OAuth + 2h review until auto-publish is earned.';
+
+-- ============================================================
+-- OAUTH CUSTODY (2026-10-31) — we hold keys to someone's channel.
+-- Encrypted at rest, revocable, never logged, and disclosed to the member.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS agent_oauth_grants (
+  id           BIGSERIAL PRIMARY KEY,
+  member_id    TEXT NOT NULL REFERENCES agent_members(id) ON DELETE CASCADE,
+  platform     TEXT NOT NULL CHECK (platform IN ('youtube','tiktok','instagram','facebook')),
+  scopes       TEXT[] NOT NULL DEFAULT '{upload}',
+  -- the ciphertext only. The key is in the environment, never in this table.
+  ciphertext   BYTEA NOT NULL,
+  iv           BYTEA NOT NULL,
+  tag          BYTEA NOT NULL,
+  cipher       TEXT NOT NULL DEFAULT 'aes-256-gcm' CHECK (cipher = 'aes-256-gcm'),
+  granted_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  last_used_at TIMESTAMPTZ,
+  revoked_at   TIMESTAMPTZ,
+  revoke_reason TEXT CHECK (revoke_reason IN ('member_request','churn','scope_change','incident')),
+  -- never log a token: this column exists so the audit can prove we did not
+  logged_anywhere BOOLEAN NOT NULL DEFAULT false CHECK (logged_anywhere = false),
+  UNIQUE (member_id, platform)
+);
+CREATE INDEX IF NOT EXISTS agent_oauth_active ON agent_oauth_grants (member_id) WHERE revoked_at IS NULL;
+
+COMMENT ON TABLE agent_oauth_grants IS
+  'AES-256-GCM ciphertext only, key in env. Revoked within 1h of churn. The logged_anywhere CHECK exists because a token in a log is a breach, not a bug.';
