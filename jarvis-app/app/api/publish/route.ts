@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { bearered } from "@/lib/cron-auth";
 import {
-  ALL_SURFACES, canAutoPublish, channelsFromEnv, describeChannels, fitsBudget, listChannels, proposeMapping,
+  ALL_SURFACES, canAutoPublish, canScheduleToBuffer, channelsFromEnv, describeChannels, fitsBudget, listChannels, proposeMapping,
   publish, validate, buildCreatePost, type PublishInput, type Surface,
 } from "@/lib/publish";
 import type { AgentTier } from "@/lib/tiers";
@@ -99,16 +99,22 @@ export async function POST(req: Request) {
     dueAt: body?.dueAt ? String(body.dueAt) : undefined,
   };
 
-  // The tier gate. A member on Circle does not get direct publish — that is what they bought,
-  // and the privilege is read from lib/tiers.ts rather than restated here.
+  // The tier gate. Two privileges: scheduled (Circle and up) and direct (Pro and up).
+  // The scheduler posts on the member's behalf, so it checks the first, not the second.
   const tier = (typeof body?.tier === "string" ? body.tier : "free") as AgentTier;
-  if (body?.requireTier !== false && !canAutoPublish(tier)) {
+  const path = body?.path === "direct" ? "direct" : "scheduled";
+  const allowed = path === "direct" ? canAutoPublish(tier) : canScheduleToBuffer(tier);
+  if (body?.requireTier !== false && !allowed) {
     return NextResponse.json(
       {
         ok: false,
-        error: "tier_cannot_publish_directly",
+        error: path === "direct" ? "tier_cannot_publish_directly" : "tier_cannot_schedule",
         tier,
-        remedy: "Circle and below receive the finished asset to post themselves. Pro and Team publish directly.",
+        path,
+        remedy:
+          path === "direct"
+            ? "Direct publish to your own connected accounts is Pro and Team. Circle is scheduled through our publisher instead."
+            : "Free receives the finished asset to post. Circle and above are scheduled automatically.",
       },
       { status: 403 },
     );

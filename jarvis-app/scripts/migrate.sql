@@ -462,6 +462,39 @@ CREATE TABLE IF NOT EXISTS agent_schedule (
 );
 CREATE INDEX IF NOT EXISTS agent_schedule_due ON agent_schedule (publish_at) WHERE gate_status IN ('pending','g4_review');
 
+-- The scheduler's own columns (2026-10-31). The table existed with a due-index and no reader;
+-- lib/schedule.ts is the reader, and these are what it needs to be safe to run twice.
+ALTER TABLE agent_schedule ADD COLUMN IF NOT EXISTS attempts       INT NOT NULL DEFAULT 0;
+ALTER TABLE agent_schedule ADD COLUMN IF NOT EXISTS claimed_at     TIMESTAMPTZ;
+ALTER TABLE agent_schedule ADD COLUMN IF NOT EXISTS published_at   TIMESTAMPTZ;
+ALTER TABLE agent_schedule ADD COLUMN IF NOT EXISTS buffer_post_id TEXT;
+ALTER TABLE agent_schedule ADD COLUMN IF NOT EXISTS last_error     TEXT;
+-- One row per asset per surface. A double-submitted plan is a duplicate post otherwise.
+CREATE UNIQUE INDEX IF NOT EXISTS agent_schedule_once
+  ON agent_schedule (member_id, asset_id, platform);
+CREATE INDEX IF NOT EXISTS agent_schedule_ready
+  ON agent_schedule (publish_at) WHERE gate_status = 'pass' AND claimed_at IS NULL;
+
+COMMENT ON COLUMN agent_schedule.claimed_at IS
+  'Set by the single UPDATE ... RETURNING that claims a row. Non-null means a run owns it; the mark clears it.';
+
+-- Which Buffer channel belongs to which member and surface.
+-- A member connects their own accounts inside Buffer; we never hold a platform token — only the
+-- Buffer channel id they granted us, which can be revoked from their side in one click.
+CREATE TABLE IF NOT EXISTS member_channels (
+  member_id        TEXT NOT NULL REFERENCES agent_members(id) ON DELETE CASCADE,
+  platform         TEXT NOT NULL CHECK (platform IN ('youtube_longform','youtube_shorts','tiktok','instagram','facebook')),
+  page_ref         TEXT,
+  buffer_channel_id TEXT NOT NULL,
+  connected_at     TIMESTAMPTZ DEFAULT NOW(),
+  revoked_at       TIMESTAMPTZ,
+  PRIMARY KEY (member_id, platform)
+);
+CREATE INDEX IF NOT EXISTS member_channels_live ON member_channels (member_id) WHERE revoked_at IS NULL;
+
+COMMENT ON TABLE member_channels IS
+  'The member granted a Buffer channel, not a platform token. Revoking it in Buffer is one click and does not involve us.';
+
 -- Max was dropped 2026-10-31: at $71 it sat above the $62 Team tier. Team is SEATS, not a bigger agent.
 ALTER TABLE agent_members DROP CONSTRAINT IF EXISTS agent_members_tier_check;
 ALTER TABLE agent_members ADD CONSTRAINT agent_members_tier_check CHECK (tier IN ('free','circle','pro','team'));

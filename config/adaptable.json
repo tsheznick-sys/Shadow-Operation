@@ -106,14 +106,14 @@
     "scripts_per_domain": 6,
     "words_per_longform": 4500,
     "clip_targets": "3x8s short + 2x32s long + 1x60s deep from 30m p01_32s_9x16.mp4 Katana queue70",
-    "publish": "Buffer Team 6/day serious per brand (IG + TikTok + YT-Shorts) + longform 3x/week to YT-Long + X 1-2/day discovery (configurable BUFFER_SERIOUS_DAILY / LONGFORM_PUBLISH_DAYS)",
+    "publish": "Buffer Team 6/day serious per brand (IG + TikTok + YT-Shorts) + longform 3x/week to YT-Long (configurable BUFFER_SERIOUS_DAILY / LONGFORM_PUBLISH_DAYS). X removed 2026-10-31: five surfaces, not six. The agent books these slots via lib/schedule.ts.",
     "channels": [
-      "X",
-      "IG",
+      "YT",
       "TikTok",
-      "YT"
+      "IG",
+      "FB"
     ],
-    "x_mode": "discovery only 1-2/day filler, no gate, no ChatFuel (user lock)",
+    "x_mode": "removed 2026-10-31 — X is not a surface this operation runs",
     "seo": "Claude Max per platform: IG hashtags vs TikTok hooks vs YT titles + buyer_pool_x3 targeting",
     "engine_alternatives": {
       "primary": "Wan 1.3B T4 free WAN_T4_URL + TubeGen $29 auto",

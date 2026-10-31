@@ -135,14 +135,32 @@ export function channelsFromEnv(env: Env = process.env): { channels: ChannelMap;
 /* ------------------------------- who may publish ------------------------------- */
 
 /**
- * Direct publish is a tier privilege, and it is read from the registry rather than restated here.
- * A tier that is not allowed to publish directly gets the asset as a download and publishes it
- * themselves — which is the product they bought.
+ * TWO different privileges, and conflating them was a bug in this file for one commit.
+ *
+ *   scheduled  — the agent books a slot and OUR publisher posts it. Circle, Pro, Team.
+ *                Circle's whole promise is "scheduled through our publisher"; it is not a
+ *                downgrade to a download.
+ *   direct     — the member connected their OWN accounts and we post there. Pro and Team only,
+ *                because that is the difference $44 does not buy.
+ *
+ * Free gets neither: the file is the product.
  */
+export function canScheduleToBuffer(tier: AgentTier): boolean {
+  return tier !== "free";
+}
+
+/** Direct publishing to a member's own connected accounts. Read from the registry, not restated. */
 export function canAutoPublish(tier: AgentTier): boolean {
   if (tier === "free") return false;
   const spec = TIER_SPECS[tier as PaidTier];
   return !!spec?.direct_publish;
+}
+
+/** Which path a tier takes. One function, so the route and the scheduler cannot disagree. */
+export function publishPathFor(tier: AgentTier): "manual_download" | "buffer_scheduled" | "oauth_direct" {
+  if (tier === "free") return "manual_download";
+  if (canAutoPublish(tier)) return "oauth_direct";
+  return "buffer_scheduled";
 }
 
 /* ------------------------------- the post body ------------------------------- */

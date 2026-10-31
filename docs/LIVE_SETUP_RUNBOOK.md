@@ -136,6 +136,47 @@ repo calls Buffer.
 - Rate limits are **100 per 15 minutes, 250–500 a day**. At full scale this operation sends 75/day
   (5 surfaces × 5 pages × 3 posts) — inside the budget, but it is close enough to watch.
 
+## Step 6b — The scheduler (how a post actually happens)
+
+The agent books the slot. Buffer keeps it. Nobody posts by hand.
+
+```
+asset → gate → slots → agent_schedule → /api/cron/publish-due → Buffer → published
+```
+
+| Piece | Where | What it decides |
+|---|---|---|
+| slots | `lib/schedule.ts` | which day and time per surface |
+| gate | `lib/stickman-agent.ts` | may it publish at all, and does a human look first |
+| claim | one `UPDATE … RETURNING` | who owns a row — so two runs cannot post it twice |
+| publish | `lib/publish.ts` | one surface per call, and HTTP 200 is not success |
+| cron | `vercel.json` + n8n WF5 | every 15 minutes |
+
+**Times** (local, Africa/Nairobi, no DST): longform **09:00 Mon/Wed/Fri**; YouTube Shorts **12:00**,
+TikTok **17:00**, Instagram **19:00**, Facebook **20:00**, every day. Staggered on purpose — five
+surfaces at one minute is a template.
+
+**Who publishes on their own:**
+
+| Tier | Path | Wait |
+|---|---|---|
+| free | manual download | — the file is the product |
+| Circle $44 | scheduled through our publisher | none: machine gate only |
+| Pro $53 / Team $62 | scheduled, direct to their own channel | **2 hours** for the first three |
+
+A Pro member's first three rows sit at `g4_review`. Approve them with:
+
+```
+PATCH /api/schedule   { "id": 12, "action": "approve" }
+```
+
+**If a publish fails**, the row retries after 5, then 30, then 120 minutes, and after three attempts
+it is `blocked` with the reason in `last_error`. It never silently disappears.
+
+**Verify it is running:** `GET /api/cron/publish-due` with the cron Bearer returns
+`{ claimed, published, failed, results }`. `claimed: 0` means nothing was due — that is a healthy
+answer, not a fault.
+
 **Direct publish is a Pro and Team privilege.** A Circle member receives the finished asset to post
 themselves; `/api/publish` returns 403 for any tier below Pro, read from `lib/tiers.ts`.
 

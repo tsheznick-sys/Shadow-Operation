@@ -614,152 +614,99 @@ def wf_brief():
 
 
 def wf_publish():
-    """WF5 — the G4 gate in front of Buffer. Manual by design, and fan-out per surface."""
-    name = "WF5 Publish (G4)"
+    """WF5 — the auto-publisher. The agent books slots; this keeps them.
+
+    WAS: a manual trigger that POSTed to Buffer's retired REST endpoint.
+
+    NOW: a 15-minute schedule that calls /api/cron/publish-due, which does the claiming,
+    the channel resolution and the publishing inside the app. n8n schedules the call; the app
+    owns the safety. A workflow that decision-makes in a Code node is a second source of truth.
+    """
+    name = "WF5 Publish (due)"
     return {
         "name": name,
         "nodes": [
             note(
                 name,
-                "### WF5 — Publish\n"
-                "**Manual trigger on purpose.** G4 is a human approving an asset, not a cron job.\n\n"
-                "Only rows a human moved to `approved` are sent. For each row this fans out to the five\n"
-                "surfaces and posts to `/api/publish` — one call per surface, because Buffer's API is\n"
-                "one channel per call.\n\n"
-                "**Buffer's old REST endpoint is gone.** `api.bufferapp.com/1/updates/create.json` was\n"
-                "retired; the adapter speaks GraphQL at `api.buffer.com`. And a failed mutation returns\n"
-                "**HTTP 200**, so the node is set to continue on error and the results are inspected —\n"
-                "a batch where two of five surfaces failed must not report five successes.",
+                "### WF5 — Auto-publish\n"
+                "Every 15 minutes. Calls `/api/cron/publish-due`, which:\n\n"
+                "1. **claims** due rows with one conditional `UPDATE … RETURNING` — two overlapping\n"
+                "   runs cannot post the same row twice;\n"
+                "2. resolves the channel (member's own Buffer channel, else the page's);\n"
+                "3. publishes and marks — **`published` only when Buffer returned a post id**.\n\n"
+                "Buffer answers **HTTP 200 for a failed mutation**, so the app never reads the status\n"
+                "code as success (`P01`, `SC09`). This workflow does not decide anything; it rings\n"
+                "the bell.\n\n"
+                "G4 still exists — it lives in `agent_schedule.gate_status`. A Pro member's first\n"
+                "three publishes sit at `g4_review` until a human moves them to `pass`.\n\n"
+                "**Requires:** `JARVIS_BRAIN_URL`, `CRON_SECRET` in n8n Variables.",
                 [-380, 0],
                 height=340,
             ),
-            node(name, "Manual G4", MANUAL, {}, [0, 0], type_version=1),
+            node(name, "Every 15 min", TRIGGER, {"rule": {"interval": [{"field": "cronExpression", "expression": "*/15 * * * *"}]}}, [0, 0], type_version=1.1),
             node(
                 name,
-                "Approved rows",
-                POSTGRES,
+                "POST publish-due",
+                HTTP,
                 {
-                    "operation": "executeQuery",
-                    "query": "SELECT id, caption, video_url FROM publisher_queue38 WHERE status = 'approved' AND scheduled_for IS NOT NULL AND scheduled_for <= NOW() ORDER BY id LIMIT 5",
-                    "options": {},
+                    "method": "POST",
+                    "url": "={{ $vars.JARVIS_BRAIN_URL }}/api/cron/publish-due",
+                    "sendHeaders": True,
+                    "headerParameters": {"parameters": [{"name": "Authorization", "value": "=Bearer {{ $vars.CRON_SECRET }}"}]},
+                    "options": {"timeout": 120000},
                 },
-                [220, 0],
-                PG_CRED,
-                type_version=2.4,
+                [230, 0],
+                type_version=4.2,
             ),
             node(
                 name,
-                "Anything approved?",
+                "Anything happened?",
                 IF,
                 {
                     "conditions": {
                         "options": {"caseSensitive": True, "leftValue": "", "typeValidation": "loose"},
                         "conditions": [
-                            {"id": "has", "leftValue": "={{ $json.id !== undefined && $json.id !== null }}", "rightValue": "", "operator": {"type": "boolean", "operation": "true", "singleValue": True}}
+                            {
+                                "id": "did",
+                                "leftValue": "={{ ($json.published || 0) + ($json.failed || 0) > 0 }}",
+                                "rightValue": "",
+                                "operator": {"type": "boolean", "operation": "true", "singleValue": True},
+                            }
                         ],
                         "combinator": "and",
                     },
                     "options": {},
                 },
-                [440, 0],
+                [460, 0],
                 type_version=2,
             ),
             node(
                 name,
-                "Fan out 5 surfaces",
+                "Summarise",
                 CODE,
                 {
                     "jsCode": "\n".join(
                         [
-                            "// One row in the queue becomes five posts: YouTube longform, YouTube Shorts,",
-                            "// TikTok, Instagram, Facebook. X was removed 2026-10-31 and is not offered.",
-                            "const SURFACES = ['youtube_longform','youtube_shorts','tiktok','instagram','facebook'];",
-                            "const out = [];",
-                            "for (const row of $input.all()) {",
-                            "  for (const surface of SURFACES) {",
-                            "    out.push({ json: {",
-                            "      queue_id: row.json.id,",
-                            "      surface,",
-                            "      text: row.json.caption || '',",
-                            "      videoUrl: row.json.video_url || '',",
-                            "      // Pro is the tier whose privilege this is; the app re-reads lib/tiers.ts anyway.",
-                            "      tier: 'pro',",
-                            "    } });",
-                            "  }",
-                            "}",
-                            "if (out.length === 0) throw new Error('nothing to publish');",
-                            "return out;",
-                        ]
-                    )
-                },
-                [660, -60],
-                type_version=2,
-            ),
-            {
-                "parameters": {
-                    "method": "POST",
-                    "url": "={{ $vars.JARVIS_BRAIN_URL }}/api/publish",
-                    "sendHeaders": True,
-                    "headerParameters": {"parameters": [{"name": "Authorization", "value": "=Bearer {{ $vars.N8N_BRAIN_TOKEN }}"}]},
-                    "sendBody": True,
-                    "specifyBody": "json",
-                    "jsonBody": "={{ JSON.stringify({ surface: $json.surface, text: $json.text, videoUrl: $json.videoUrl, tier: $json.tier }) }}",
-                    "options": {"timeout": 45000},
-                },
-                "onError": "continueRegularOutput",
-                "id": nid(name, "Publish per surface"),
-                "name": "Publish per surface",
-                "type": HTTP,
-                "typeVersion": 4.2,
-                "position": [880, -60],
-            },
-            node(
-                name,
-                "Collect results",
-                CODE,
-                {
-                    "jsCode": "\n".join(
-                        [
-                            "// A failed mutation returns HTTP 200 from Buffer, so the app reports `ok` and a",
-                            "// `code`. Only surfaces that came back ok count as published.",
-                            "const rows = $input.all();",
-                            "const byQueue = {};",
-                            "for (let i = 0; i < rows.length; i++) {",
-                            "  const src = $('Fan out 5 surfaces').all()[i]?.json || {};",
-                            "  const body = rows[i].json || {};",
-                            "  const ok = body.ok === true;",
-                            "  const key = src.queue_id ?? 'unknown';",
-                            "  byQueue[key] = byQueue[key] || { id: key, ok: 0, failed: 0, detail: [] };",
-                            "  if (ok) byQueue[key].ok++;",
-                            "  else { byQueue[key].failed++; byQueue[key].detail.push(`${src.surface}: ${body.error || 'failed'}`); }",
-                            "}",
-                            "const summary = Object.values(byQueue);",
-                            "const complete = summary.filter(s => s.failed === 0 && s.ok === 5).map(s => s.id);",
+                            "const d = $input.first().json;",
+                            "// Only speak when something actually moved. A 15-minute 'nothing due' ping is",
+                            "// how a notification channel gets muted, and then the one real failure is missed.",
+                            "const lines = [];",
+                            "if (d.published) lines.push(`${d.published} published`);",
+                            "if (d.failed) lines.push(`${d.failed} failed`);",
+                            "const retries = (d.results || []).filter(r => r.outcome === 'retry');",
+                            "if (retries.length) lines.push(`${retries.length} retrying`);",
                             "return [{ json: {",
-                            "  complete,",
-                            "  incomplete: summary.filter(s => !(s.failed === 0 && s.ok === 5)),",
-                            "  message: complete.length === summary.length",
-                            "    ? `All ${summary.length} asset(s) published to all 5 surfaces.`",
-                            "    : `${summary.length - complete.length} asset(s) only partially published — see incomplete.`,",
+                            "  quiet: lines.length === 0,",
+                            "  text: lines.length",
+                            "    ? `WF5 — ${lines.join(', ')} of ${d.claimed} claimed.`",
+                            "    : 'nothing moved',",
+                            "  detail: (d.results || []).filter(r => r.outcome !== 'published'),",
                             "} }];",
                         ]
                     )
                 },
-                [1100, -60],
+                [680, -80],
                 type_version=2,
-            ),
-            node(
-                name,
-                "Mark complete rows",
-                POSTGRES,
-                {
-                    "operation": "executeQuery",
-                    "query": "UPDATE publisher_queue38 SET status = 'published', published_at = NOW() WHERE id = ANY($1::bigint[])",
-                    "options": {"queryReplacement": "={{ JSON.stringify($json.complete) }}"},
-                },
-                [1320, -160],
-                PG_CRED,
-                type_version=2.4,
             ),
             node(
                 name,
@@ -767,46 +714,24 @@ def wf_publish():
                 TELEGRAM,
                 {
                     "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
-                    "text": "=WF5 — {{ $('Collect results').first().json.message }}",
+                    "text": "={{ $json.text }}",
                     "additionalFields": {},
                 },
-                [1540, -60],
-                TG_CRED,
-                type_version=1.2,
-            ),
-            node(
-                name,
-                "Nothing approved",
-                TELEGRAM,
-                {
-                    "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
-                    "text": "=WF5 ran — nothing is approved for this window. G4 still holds the queue.",
-                    "additionalFields": {},
-                },
-                [660, 140],
+                [900, -80],
                 TG_CRED,
                 type_version=1.2,
             ),
         ],
         "connections": {
-            "Manual G4": {"main": [[{"node": "Approved rows", "type": "main", "index": 0}]]},
-            "Approved rows": {"main": [[{"node": "Anything approved?", "type": "main", "index": 0}]]},
-            "Anything approved?": {
+            "Every 15 min": {"main": [[{"node": "POST publish-due", "type": "main", "index": 0}]]},
+            "POST publish-due": {"main": [[{"node": "Anything happened?", "type": "main", "index": 0}]]},
+            "Anything happened?": {
                 "main": [
-                    [{"node": "Fan out 5 surfaces", "type": "main", "index": 0}],
-                    [{"node": "Nothing approved", "type": "main", "index": 0}],
+                    [{"node": "Summarise", "type": "main", "index": 0}],
+                    [],
                 ]
             },
-            "Fan out 5 surfaces": {"main": [[{"node": "Publish per surface", "type": "main", "index": 0}]]},
-            "Publish per surface": {"main": [[{"node": "Collect results", "type": "main", "index": 0}]]},
-            "Collect results": {
-                "main": [
-                    [
-                        {"node": "Mark complete rows", "type": "main", "index": 0},
-                        {"node": "Telegram Sir", "type": "main", "index": 0},
-                    ]
-                ]
-            },
+            "Summarise": {"main": [[{"node": "Telegram Sir", "type": "main", "index": 0}]]},
         },
         "settings": {"executionOrder": "v1"},
         "pinData": {},

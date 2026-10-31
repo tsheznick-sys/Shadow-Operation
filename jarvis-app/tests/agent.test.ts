@@ -28,6 +28,12 @@ import {
   effortFor, isRetiredModel, laneFor, mockAllowed, modelId, sanitizeHistory, sanitizeSchema, verifyChoice,
 } from "../lib/brain";
 import { askJarvis } from "../lib/jarvis";
+import { canScheduleToBuffer, publishPathFor } from "../lib/publish";
+import {
+  CLAIM_SQL, LONGFORM_DAYS, MARK_SQL, MAX_ATTEMPTS, SCHEDULABLE_SURFACES, backoffMinutes, batchSize,
+  dayKey, localWeekday, nextSlot, parseHHMM, planAsset, resolveChannel, shouldCountAsPublished,
+  slotInstant, utcOffsetMinutes,
+} from "../lib/schedule";
 import {
   ALL_SURFACES, BUFFER_ENDPOINT, SURFACES, buildCreatePost, canAutoPublish, classifyResponse,
   clampText, countHashtags, describeChannels, fitsBudget, proposeMapping, publish, validate,
@@ -38,7 +44,7 @@ const results: Case[] = [];
 const short = (hits: string[]) => (hits.length ? hits.slice(0, 3).map((h) => h.slice(0, 80)).join(" | ") : "none");
 const add = (c: Case) => results.push(c);
 
-const D = { REL: "reliability", JUD: "judgment", EXE: "execution", MEM: "memory", BRAIN: "brain", AUTO: "automation", PUB: "publish" };
+const D = { REL: "reliability", JUD: "judgment", EXE: "execution", MEM: "memory", BRAIN: "brain", AUTO: "automation", PUB: "publish", SCH: "schedule" };
 
 /* ---------------- RELIABILITY: fault injection ---------------- */
 
@@ -1427,6 +1433,220 @@ add({ id: "P16", dimension: P, what: "Buffer rate-limits mid-batch", expect: "re
   run: () => {
     const r = classifyResponse(429, {});
     return { pass: r.status === "error" && r.code === "rate_limited" && r.retryable, got: r.status === "error" ? `${r.code} retryable=${r.retryable}` : "ok" };
+  }});
+
+
+/* ---------------- SCHEDULE: the agent books the slot, Buffer keeps it ---------------- */
+
+const SC = D.SCH;
+const ENV_TZ = { SCHEDULE_UTC_OFFSET_MIN: "180" } as any;
+
+const planOnce = (over: any = {}, opts: any = {}) =>
+  planAsset({
+    asset_id: "a1", page_ref: "page-1", tier: "circle",
+    rules_ok: true, policy_ok: true, disclosure_ok: true, ...over,
+  }, { env: ENV_TZ, now: new Date("2026-11-04T04:00:00Z"), ...opts }); // Wed 07:00 EAT
+
+add({ id: "SC01", dimension: SC, what: "the agent books a slot that has already passed", expect: "it rolls forward, never into the past",
+  run: () => {
+    // 09:00 EAT is 06:00Z. It is 04:00Z, so today's slot is still ahead — then check a time past it.
+    const now = new Date("2026-11-04T08:00:00Z"); // 11:00 EAT, after the 09:00 longform slot
+    const slot = nextSlot("youtube_longform", now, { env: ENV_TZ });
+    const past = slot ? slot.getTime() < now.getTime() : true;
+    return { pass: !!slot && !past, got: slot ? `${slot.toISOString()} vs now ${now.toISOString()}` : "no slot" };
+  }});
+
+add({ id: "SC02", dimension: SC, what: "a longform post is booked on a Tuesday", expect: "Mon/Wed/Fri only",
+  run: () => {
+    // 2026-11-03 is a Tuesday. Longform must skip it and land on Wednesday 2026-11-04.
+    const from = new Date("2026-11-03T00:00:00Z");
+    const slot = nextSlot("youtube_longform", from, { env: ENV_TZ });
+    const wd = slot ? localWeekday(slot, 180) : -1;
+    const dayNames = LONGFORM_DAYS.join(",");
+    return { pass: LONGFORM_DAYS.includes(wd), got: `${slot?.toISOString()} weekday=${wd} allowed=[${dayNames}]` };
+  }});
+
+add({ id: "SC03", dimension: SC, what: "two assets want the same surface on the same day", expect: "the second moves to the next day",
+  run: () => {
+    const first = planOnce({ asset_id: "a1", surfaces: ["tiktok"] });
+    const booked = first.rows.map((r) => ({ surface: r.surface, publish_at: r.publish_at }));
+    const second = planAsset(
+      { asset_id: "a2", page_ref: "page-1", tier: "circle", rules_ok: true, policy_ok: true, disclosure_ok: true, surfaces: ["tiktok"] },
+      { env: ENV_TZ, now: new Date("2026-11-04T04:00:00Z"), booked: booked as any },
+    );
+    const sameDay = second.rows.length > 0 && second.rows[0].publish_at.slice(0, 10) === first.rows[0].publish_at.slice(0, 10);
+    const later = new Date(second.rows[0]?.publish_at).getTime() > new Date(first.rows[0].publish_at).getTime();
+    return { pass: !sameDay && later, got: `${first.rows[0]?.publish_at.slice(0, 10)} then ${second.rows[0]?.publish_at.slice(0, 10)}` };
+  }});
+
+add({ id: "SC04", dimension: SC, what: "a free member asks the agent to schedule", expect: "refused — the download is the product",
+  run: () => {
+    const p = planOnce({ tier: "free" });
+    return { pass: p.rows.length === 0 && p.refused?.code === "manual_tier", got: `${p.rows.length} rows, refused=${p.refused?.code ?? "none"}` };
+  }});
+
+add({ id: "SC05", dimension: SC, what: "Circle vs Pro's first publish", expect: "Circle auto-publishes, Pro's first three wait 2h",
+  run: () => {
+    const circle = planOnce({ tier: "circle", surfaces: ["tiktok"] });
+    const pro = planOnce({ tier: "pro", passes: 0, surfaces: ["tiktok"] });
+    const proEarned = planOnce({ tier: "pro", passes: 3, surfaces: ["tiktok"] });
+    const earnedPath = (p: any) => p.rows[0]?.gate_status + "/" + (p.rows[0]?.sla_due_at ? "sla" : "no-sla");
+    return {
+      pass: circle.rows[0]?.gate_status === "pass" && pro.rows[0]?.gate_status === "g4_review" && !!pro.rows[0]?.sla_due_at && proEarned.rows[0]?.gate_status === "pass",
+      got: `circle=${circle.rows[0]?.gate_status} pro0=${earnedPath(pro)} pro3=${proEarned.rows[0]?.gate_status}`,
+    };
+  }});
+
+add({ id: "SC06", dimension: SC, what: "the asset fails the policy gate", expect: "no row with a time — a booked slot is a promise",
+  run: () => {
+    const p = planOnce({ policy_ok: false });
+    return { pass: p.rows.length === 0 && p.refused?.code === "gate_blocked", got: `${p.rows.length} rows, refused=${p.refused?.code}` };
+  }});
+
+add({ id: "SC07", dimension: SC, what: "the publisher runs twice in the same minute", expect: "the claim is conditional — no SELECT-then-POST",
+  run: () => {
+    // A duplicate post cannot be undone by a retry. `UPDATE ... RETURNING` with the state guard is
+    // the only shape that survives an overlapping cron, a retry and a manual trigger.
+    const sql = CLAIM_SQL.replace(/\s+/g, " ");
+    const guarded = /WHERE gate_status = 'pass'/.test(sql) && /publish_at <= \$1/.test(sql) && /claimed_at IS NULL/.test(sql);
+    const atomic = /^\s*WITH due AS/.test(CLAIM_SQL.trim()) && /UPDATE agent_schedule s/.test(sql) && /RETURNING/.test(sql);
+    const locks = /FOR UPDATE SKIP LOCKED/.test(sql);
+    return { pass: guarded && atomic && locks, got: `guarded=${guarded} atomic=${atomic} skip_locked=${locks}` };
+  }});
+
+add({ id: "SC08", dimension: SC, what: "a publish attempt fails three times", expect: "backoff grows, then the row blocks",
+  run: () => {
+    const b = [1, 2, 3].map(backoffMinutes);
+    const grows = b[0] < b[1] && b[1] < b[2];
+    const capped = backoffMinutes(9) === b[b.length - 1];
+    return { pass: grows && capped && MAX_ATTEMPTS === 3, got: `${b.join("/")} min capped=${capped}` };
+  }});
+
+add({ id: "SC09", dimension: SC, what: "Buffer answers 200 but returns no post id", expect: "not counted as published",
+  run: () => {
+    // The exact trap: HTTP 200 is not a publish. A post id is.
+    const fake200 = { ok: true, post: { status: "queued" } } as any;
+    const real200 = { ok: true, post: { id: "p_123", status: "queued" } } as any;
+    return { pass: !shouldCountAsPublished(fake200) && shouldCountAsPublished(real200), got: `no-id=${shouldCountAsPublished(fake200)} with-id=${shouldCountAsPublished(real200)}` };
+  }});
+
+add({ id: "SC10", dimension: SC, what: "no channel is configured for a surface", expect: "blocked, never a guessed default",
+  run: () => {
+    const none = resolveChannel({ platform: "tiktok" }, null, {});
+    const member = resolveChannel({ platform: "tiktok" }, { tiktok: "m-1" } as any, { tiktok: "p-1" });
+    const page = resolveChannel({ platform: "tiktok" }, null, { tiktok: "p-1" });
+    return {
+      pass: none.channelId === null && none.source === "none" && member.channelId === "m-1" && member.source === "member" && page.source === "page",
+      got: `none=${none.source} member=${member.source} page=${page.source}`,
+    };
+  }});
+
+add({ id: "SC11", dimension: SC, what: "five surfaces are booked for one asset", expect: "five different times, not one",
+  run: () => {
+    const p = planOnce({ surfaces: SCHEDULABLE_SURFACES });
+    const times = new Set(p.rows.map((r) => r.publish_at));
+    const surfaces = new Set(p.rows.map((r) => r.surface));
+    return { pass: p.rows.length === 5 && times.size === 5 && surfaces.size === 5, got: `${p.rows.length} rows, ${times.size} distinct times` };
+  }});
+
+add({ id: "SC12", dimension: SC, what: "X is asked for as a scheduling surface", expect: "not in the list and never scheduled",
+  run: () => {
+    const hasX = (SCHEDULABLE_SURFACES as string[]).some((s) => /^x$|twitter/i.test(s));
+    const p = planOnce({ surfaces: ["x", "twitter"] as any });
+    return { pass: !hasX && p.rows.length === 0, got: `in_list=${hasX} rows_for_x=${p.rows.length}` };
+  }});
+
+add({ id: "SC13", dimension: SC, what: "Nairobi has no DST, so 09:00 EAT must be 06:00 UTC", expect: "a fixed offset applied as arithmetic",
+  run: () => {
+    const at = slotInstant("2026-11-04", "09:00", 180);
+    const wrong = slotInstant("2026-11-04", "09:00", 0);
+    const bad = parseHHMM("25:00");
+    return {
+      pass: at?.toISOString() === "2026-11-04T06:00:00.000Z" && wrong?.toISOString() === "2026-11-04T09:00:00.000Z" && bad === null,
+      got: `EAT=${at?.toISOString()} UTC=${wrong?.toISOString()} bogus_time=${bad}`,
+    };
+  }});
+
+add({ id: "SC14", dimension: SC, what: "a run tries to send more than the batch cap", expect: "clamped to 25",
+  run: () => {
+    const many = batchSize(400, ENV_TZ);
+    const few = batchSize(3, ENV_TZ);
+    return { pass: many === 25 && few === 3, got: `400->${many} 3->${few}` };
+  }});
+
+add({ id: "SC15", dimension: SC, what: "the mark records a post without a Buffer id", expect: "published only with an id, and the mark clears the claim",
+  run: () => {
+    const sql = MARK_SQL.replace(/\s+/g, " ");
+    const clearsClaim = /claimed_at = NULL/.test(sql);
+    const conditionalDate = /CASE WHEN \$2 = 'published' THEN NOW\(\)/.test(sql);
+    return { pass: clearsClaim && conditionalDate, got: `clears_claim=${clearsClaim} conditional_published_at=${conditionalDate}` };
+  }});
+
+add({ id: "SC16", dimension: SC, what: "the same asset is submitted to the scheduler twice", expect: "one row per surface, enforced by the database",
+  run: () => {
+    // ON CONFLICT DO NOTHING needs a unique index to conflict against — without it a retried
+    // submission is a duplicate post, which is the one scheduling error a platform punishes.
+    const sql = readFileSync(join(ROOT, "jarvis-app", "scripts", "migrate.sql"), "utf8");
+    const hasUnique = /CREATE UNIQUE INDEX IF NOT EXISTS agent_schedule_once[\s\S]{0,120}\(member_id, asset_id, platform\)/.test(sql);
+    return { pass: hasUnique, got: hasUnique ? "unique(member_id, asset_id, platform)" : "no unique index — duplicates possible" };
+  }});
+
+
+add({ id: "J12", dimension: D.JUD, what: "the config still hands X to the agent as a channel", expect: "no X anywhere in the channel list",
+  run: () => {
+    // lib/jarvis.ts builds the system prompt from CONFIG.content.channels. It said
+    // ["X","IG","TikTok","YT"] — so the brain was still being told to run a channel the owner
+    // removed, and only four surfaces existed where the product promises five.
+    const cfg = JSON.parse(readFileSync(join(ROOT, "config", "adaptable.json"), "utf8"));
+    const chans: string[] = cfg?.content?.channels ?? [];
+    const hasX = chans.some((c) => /^x$/i.test(c) || /twitter/i.test(c));
+    const xMode = String(cfg?.content?.x_mode ?? "");
+    const xInMode = /\bX\b/.test(xMode) && !/removed|not a surface/i.test(xMode);
+    return { pass: !hasX && !xInMode && chans.length >= 4, got: `channels=[${chans.join(",")}] x_mode="${xMode.slice(0, 40)}"` };
+  }});
+
+add({ id: "J13", dimension: D.JUD, what: "the app config and the repo config disagree", expect: "byte-identical content blocks",
+  run: () => {
+    // Two copies of the same file is the tier bug waiting to happen again: one gets edited, the
+    // other keeps feeding the running app. They are compared, not trusted.
+    const a = JSON.parse(readFileSync(join(ROOT, "config", "adaptable.json"), "utf8"));
+    const b = JSON.parse(readFileSync(join(ROOT, "jarvis-app", "config", "adaptable.json"), "utf8"));
+    const same = JSON.stringify(a.content) === JSON.stringify(b.content) && JSON.stringify(a.paywalls) === JSON.stringify(b.paywalls);
+    return { pass: same, got: same ? "content + paywalls identical" : "config copies have diverged" };
+  }});
+
+add({ id: "SC17", dimension: D.SCH, what: "the publisher cron is not scheduled anywhere", expect: "vercel.json asks for it every 15 minutes",
+  run: () => {
+    // A publisher that nothing calls is the same defect as a workflow with no nodes.
+    const v = JSON.parse(readFileSync(join(ROOT, "jarvis-app", "vercel.json"), "utf8"));
+    const cron = (v?.crons ?? []).find((c: any) => c.path === "/api/cron/publish-due");
+    return { pass: !!cron && cron.schedule === "*/15 * * * *", got: cron ? cron.schedule : "not registered" };
+  }});
+
+add({ id: "SC18", dimension: D.SCH, what: "a Circle member is told they cannot be scheduled", expect: "scheduled is Circle+, direct is Pro+",
+  run: () => {
+    // One commit ago this file had canAutoPublish(circle) === false doing both jobs, which would
+    // have refused the $44 tier the scheduling it paid for.
+    const sched = (t: any) => canScheduleToBuffer(t);
+    const direct = (t: any) => canAutoPublish(t);
+    const path = (t: any) => publishPathFor(t);
+    return {
+      pass:
+        !sched("free") && sched("circle") && sched("pro") &&
+        !direct("circle") && direct("pro") &&
+        path("free") === "manual_download" && path("circle") === "buffer_scheduled" && path("pro") === "oauth_direct",
+      got: `sched circle=${sched("circle")} direct circle=${direct("circle")} path=${path("free")}/${path("circle")}/${path("pro")}`,
+    };
+  }});
+
+add({ id: "SC19", dimension: D.SCH, what: "the agent schedules to a surface the schema rejects", expect: "platform CHECK has no X and has all five",
+  run: () => {
+    const sql = readFileSync(join(ROOT, "jarvis-app", "scripts", "migrate.sql"), "utf8");
+    const m = /platform\s+IN\s*\(([^)]*)\)/.exec(sql);
+    const list = (m?.[1] ?? "").split(",").map((x) => x.replace(/['"\s]/g, "")).filter(Boolean);
+    const expected = ["youtube_longform", "youtube_shorts", "tiktok", "instagram", "facebook"];
+    const matches = expected.every((e) => list.includes(e)) && !list.some((x) => /^x$|twitter/i.test(x));
+    return { pass: matches, got: list.join(",") || "no platform CHECK found" };
   }});
 
 /* ---------------- run ---------------- */
