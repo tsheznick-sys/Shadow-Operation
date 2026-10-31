@@ -68,8 +68,17 @@ def note(wf, text, pos, width=420, height=260):
     }
 
 
-def brain_node(wf, name, pos, expect, prompt_expr):
-    """The one door from the automation to the model. Token, not a session."""
+def brain_node(wf, name, pos, expect, prompt_expr, schema=None):
+    """The one door from the automation to the model. Token, not a session.
+
+    When `schema` is given the app forwards it to the provider as output_config.format
+    (Anthropic, 2026-10-21 API) or response_format (xAI), so the reply arrives as a JSON object
+    instead of a paragraph a Code node has to scrape.
+    """
+    payload = "{ prompt: " + prompt_expr + ", expect: " + json.dumps(expect)
+    if schema is not None:
+        payload += ", schema: " + json.dumps(schema, separators=(",", ":"))
+    payload += " }"
     return node(
         wf,
         name,
@@ -86,7 +95,7 @@ def brain_node(wf, name, pos, expect, prompt_expr):
             },
             "sendBody": True,
             "specifyBody": "json",
-            "jsonBody": "={{ JSON.stringify({ prompt: " + prompt_expr + ", expect: " + json.dumps(expect) + " }) }}",
+            "jsonBody": "={{ JSON.stringify(" + payload + ") }}",
             # No `response.neverError`: on a 503 n8n must FAIL the node. A brain outage that
             # quietly returns a body is the whole defect this file exists to prevent.
             "options": {"timeout": 45000},
@@ -146,7 +155,7 @@ def wf_research():
                 [440, 0],
                 type_version=2,
             ),
-            brain_node(name, "Ask brain (rank)", [660, 0], "rank", "prompt"),
+            brain_node(name, "Ask brain (rank)", [660, 0], "rank", "prompt", RANK_SCHEMA),
             node(
                 name,
                 "Brain ok?",
@@ -172,9 +181,13 @@ def wf_research():
                     "jsCode": "\n".join(
                         [
                             "const body = $input.first().json;",
+                            "// Structured output: the app already parsed the JSON for us.",
+                            "if (body.parsed && Array.isArray(body.parsed.top5)) {",
+                            "  return body.parsed.top5.map(t => ({ json: { handle: t.handle, why: t.why || '', provider: body.provider, model: body.model } }));",
+                            "}",
+                            "// Fallback: the provider ignored the schema and returned prose. Recover it, and if",
+                            "// it cannot be recovered, throw rather than writing garbage to Postgres.",
                             "const text = body.data || '';",
-                            "// The model was asked for JSON. If it wrapped it in prose or fences, recover it —",
-                            "// and if it cannot be recovered, throw rather than writing garbage to Postgres.",
                             "const start = text.indexOf('{');",
                             "const end = text.lastIndexOf('}');",
                             "if (start === -1 || end === -1) throw new Error('brain reply was not JSON: ' + text.slice(0, 200));",
@@ -300,7 +313,7 @@ def wf_content():
                 [440, 0],
                 type_version=2,
             ),
-            brain_node(name, "Ask brain (script)", [660, 0], "script", "prompt"),
+            brain_node(name, "Ask brain (script)", [660, 0], "script", "prompt", SCRIPT_SCHEMA),
             node(
                 name,
                 "Brain ok?",
@@ -327,11 +340,14 @@ def wf_content():
                     "jsCode": "\n".join(
                         [
                             "const body = $input.first().json;",
-                            "const text = body.data || '';",
-                            "const start = text.indexOf('{');",
-                            "const end = text.lastIndexOf('}');",
-                            "if (start === -1 || end === -1) throw new Error('brain reply was not JSON');",
-                            "const parsed = JSON.parse(text.slice(start, end + 1));",
+                            "let parsed = body.parsed;",
+                            "if (!parsed) {",
+                            "  const text = body.data || '';",
+                            "  const start = text.indexOf('{');",
+                            "  const end = text.lastIndexOf('}');",
+                            "  if (start === -1 || end === -1) throw new Error('brain reply was not JSON');",
+                            "  parsed = JSON.parse(text.slice(start, end + 1));",
+                            "}",
                             "const scripts = Array.isArray(parsed.scripts) ? parsed.scripts : [];",
                             "if (scripts.length === 0) throw new Error('brain returned no scripts');",
                             "const today = new Date().toISOString().slice(0, 10);",
@@ -701,6 +717,42 @@ def wf_publish():
         "pinData": {},
     }
 
+
+RANK_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "top5": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {"handle": {"type": "string"}, "why": {"type": "string"}},
+                "required": ["handle", "why"],
+            },
+        }
+    },
+    "required": ["top5"],
+}
+
+SCRIPT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "scripts": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "kind": {"type": "string", "description": "one of 8s, 32s, 60s"},
+                    "domain": {"type": "string"},
+                    "hook": {"type": "string"},
+                    "script": {"type": "string"},
+                    "caption": {"type": "string"},
+                },
+                "required": ["kind", "domain", "hook", "script", "caption"],
+            },
+        }
+    },
+    "required": ["scripts"],
+}
 
 WORKFLOWS = {
     "wf1_research": wf_research(),

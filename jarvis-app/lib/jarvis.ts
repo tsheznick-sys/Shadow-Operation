@@ -1,5 +1,5 @@
 import { CONFIG } from "./config";
-import { ask, explain, mockAllowed, type BrainResult } from "./brain";
+import { ask, explain, mockAllowed, type BrainResult, type Expect, type JsonSchema } from "./brain";
 
 // JARVIS brain — Grok + Claude Primary — FULLY ADAPTABLE (no hardcoded niche/price/threshold)
 // Thresholds, niches, platforms, pricing, pages all via CONFIG (env-overridable) — see config/adaptable.json
@@ -40,7 +40,22 @@ export type JarvisReply = {
   provider: "claude" | "grok" | "mock" | "none";
   model?: string;
   ms?: number;
+  lane?: string;
+  effort?: string;
+  parsed?: any;
   error?: string;
+};
+
+export type JarvisOpts = {
+  env?: Record<string, string | undefined>;
+  timeoutMs?: number;
+  maxTokens?: number;
+  fetchImpl?: typeof fetch;
+  /** chat | script | rank | reframe | classify | extract | route | deep — selects the model lane */
+  expect?: Expect;
+  /** when given, the provider must return JSON matching this schema */
+  schema?: JsonSchema;
+  schemaName?: string;
 };
 
 /**
@@ -56,11 +71,21 @@ export type JarvisReply = {
 export async function askJarvis(
   prompt: string,
   history: unknown[] = [],
-  opts: { env?: Record<string, string | undefined>; timeoutMs?: number; fetchImpl?: typeof fetch } = {},
+  opts: JarvisOpts = {},
 ): Promise<JarvisReply> {
   const res: BrainResult = await ask({ prompt, system: JARVIS_SYSTEM, history, ...opts });
   if (res.status === "ok") {
-    return { ok: true, text: res.text, mock: false, provider: res.provider, model: res.model, ms: res.ms };
+    return {
+      ok: true,
+      text: res.text,
+      mock: false,
+      provider: res.provider,
+      model: res.model,
+      ms: res.ms,
+      lane: res.lane,
+      effort: res.effort,
+      parsed: res.parsed,
+    };
   }
   if (mockAllowed(opts.env)) {
     return {
@@ -81,7 +106,7 @@ export async function askJarvis(
  * The previous body was identical to askJarvis, so nothing was ever streamed through it either —
  * the name was the only claim being made, and it was false.
  */
-export async function askJarvisStream(prompt: string, history: unknown[] = []) {
-  const r = await askJarvis(prompt, history);
+export async function askJarvisStream(prompt: string, history: unknown[] = [], opts: JarvisOpts = {}) {
+  const r = await askJarvis(prompt, history, opts);
   return { ...r, streamed: false as const };
 }

@@ -24,7 +24,8 @@ import {
 } from "../lib/tiers";
 import { tierLimits } from "../lib/entitlement";
 import {
-  DEFAULT_MODEL, RETIRED_MODELS, askClaude, isRetiredModel, mockAllowed, modelId, sanitizeHistory,
+  ANTHROPIC_VERSION, CLAUDE_MODELS, DEFAULT_MODEL, GROK_MODELS, RETIRED_MODELS, askClaude, askGrok,
+  effortFor, isRetiredModel, laneFor, mockAllowed, modelId, sanitizeHistory, sanitizeSchema, verifyChoice,
 } from "../lib/brain";
 import { askJarvis } from "../lib/jarvis";
 
@@ -911,6 +912,134 @@ add({ id: "B07", dimension: B, what: "a live reply from Claude", expect: "ok:tru
     return { pass: r.ok === true && r.provider === "claude" && r.mock === false, got: `${r.provider} ok=${r.ok} mock=${r.mock}` };
   }});
 
+add({ id: "B08", dimension: B, what: "the request speaks the current Anthropic API version", expect: "2026-10-21, not 2023-06-01",
+  run: async () => {
+    // 2026-10-21 removed temperature/top_p/top_k outright and added output_config. A client still
+    // sending the old shapes gets a 400 on every model — which looks exactly like an outage.
+    let headers: any = null;
+    let sent: any = null;
+    const fake = (async (_u: any, init: any) => {
+      headers = init.headers;
+      sent = JSON.parse(init.body);
+      return { ok: true, status: 200, json: async () => ({ content: [{ type: "text", text: "ok" }], stop_reason: "end_turn" }), text: async () => "" };
+    }) as unknown as typeof fetch;
+    const r = await askClaude({ prompt: "hi", system: "s", env: { ANTHROPIC_API_KEY: "k" } as any, fetchImpl: fake });
+    const banned = ["temperature", "top_p", "top_k"].filter((k) => Object.prototype.hasOwnProperty.call(sent, k));
+    const thinking = Object.prototype.hasOwnProperty.call(sent, "thinking");
+    // The body must also be the NEW shape: effort is the replacement for temperature, and its
+    // absence means someone reverted to a request the current API no longer accepts.
+    const effort = sent?.output_config?.effort;
+    return {
+      pass:
+        r.status === "ok" &&
+        headers?.["anthropic-version"] === ANTHROPIC_VERSION &&
+        banned.length === 0 &&
+        !thinking &&
+        typeof effort === "string" &&
+        ["low", "medium", "high", "xhigh", "max"].includes(effort),
+      got: `version=${headers?.["anthropic-version"]} effort=${effort} banned=${banned.join(",") || "none"} thinking=${thinking}`,
+    };
+  }});
+
+add({ id: "B09", dimension: B, what: "which model answers a classification vs a script", expect: "haiku for cheap lanes, sonnet for quality",
+  run: () => {
+    // ~20x price difference between these two. A $44 member's "is this GREEN?" question must not
+    // cost the same as a 60-second script.
+    const classify = modelId({} as any, "classify").id;
+    const script = modelId({} as any, "script").id;
+    const deep = modelId({} as any, "deep").id;
+    const lanes = `${laneFor("classify")}/${laneFor("script")}/${laneFor("deep")}`;
+    return {
+      pass: classify === CLAUDE_MODELS.cheap && script === CLAUDE_MODELS.quality && deep === CLAUDE_MODELS.deep && lanes === "cheap/quality/deep",
+      got: `${classify} · ${script} · ${deep} [${lanes}]`,
+    };
+  }});
+
+add({ id: "B10", dimension: B, what: "effort is a spend control and defaults sanely", expect: "low on cheap, medium on chat, high on script",
+  run: () => {
+    // Effort replaced temperature. It changes how many tokens the model spends, so it is the only
+    // lever left on a free tier that allows 20 runs per 5 hours.
+    const cheap = effortFor("cheap", "classify", {} as any);
+    const chat = effortFor("quality", "chat", {} as any);
+    const script = effortFor("quality", "script", {} as any);
+    const pinned = effortFor("quality", "script", { ANTHROPIC_EFFORT: "max" } as any);
+    return { pass: cheap === "low" && chat === "medium" && script === "high" && pinned === "max", got: `${cheap}/${chat}/${script} pinned=${pinned}` };
+  }});
+
+add({ id: "B11", dimension: B, what: "a schema contains keywords the 2026-10-21 API rejects", expect: "bounds moved to description, objects closed",
+  run: async () => {
+    let sent: any = null;
+    const fake = (async (_u: any, init: any) => {
+      sent = JSON.parse(init.body);
+      return { ok: true, status: 200, json: async () => ({ content: [{ type: "text", text: "{\"n\":3}" }], stop_reason: "end_turn" }), text: async () => "" };
+    }) as unknown as typeof fetch;
+    const schema = {
+      type: "object",
+      properties: { n: { type: "integer", minimum: 1, maximum: 5, description: "a count" }, tags: { type: "array", items: { type: "string", maxLength: 20 }, minItems: 3 } },
+    } as any;
+    const r = await askClaude({ prompt: "give 3", system: "s", env: { ANTHROPIC_API_KEY: "k" } as any, schema, fetchImpl: fake });
+    const fmt = sent?.output_config?.format;
+    // Detect the banned keywords as KEYS, not as substrings: the sanitizer deliberately moves
+    // "minimum=1, maximum=5" into a description, and a naive string match flags its own fix.
+    const BANNED = ["minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum", "minLength", "maxLength", "pattern", "uniqueItems", "$schema"];
+    const keys: string[] = [];
+    const collect = (node: any) => {
+      if (!node || typeof node !== "object") return;
+      if (Array.isArray(node)) { node.forEach(collect); return; }
+      Object.keys(node).forEach((k) => { keys.push(k); collect(node[k]); });
+    };
+    collect(fmt?.schema);
+    const leaks = keys.filter((k) => BANNED.includes(k));
+    const bigMinItems = JSON.stringify(fmt?.schema ?? {}).includes('"minItems"');
+    const closed = fmt?.schema?.additionalProperties === false;
+    const descCarried = /minimum=1/.test(JSON.stringify(fmt?.schema ?? {}));
+    return {
+      pass: r.status === "ok" && fmt?.type === "json_schema" && leaks.length === 0 && !bigMinItems && closed && descCarried && (r.status === "ok" && r.parsed?.n === 3),
+      got: `type=${fmt?.type} leaked_keys=${leaks.join(",") || "none"} closed=${closed} bounds_in_description=${descCarried} parsed=${JSON.stringify(r.status === "ok" ? r.parsed : null)}`,
+    };
+  }});
+
+add({ id: "B12", dimension: B, what: "the model declines (stop_reason=refusal)", expect: "code=refused, never retried as a fault",
+  run: async () => {
+    const fake = (async () => ({ ok: true, status: 200, json: async () => ({ content: [], stop_reason: "refusal" }), text: async () => "" })) as unknown as typeof fetch;
+    const r = await askClaude({ prompt: "hi", system: "s", env: { ANTHROPIC_API_KEY: "k" } as any, fetchImpl: fake });
+    return { pass: r.status === "error" && r.code === "refused", got: r.status === "error" ? r.code : "ok" };
+  }});
+
+add({ id: "B13", dimension: B, what: "thinking ate the token budget before any text", expect: "code=truncated, with the reason said plainly",
+  run: async () => {
+    // Claude 5 thinks by default and thinking counts against max_tokens. A 512-token cap on a
+    // script request returns stop_reason=max_tokens and NO text — which used to look like the
+    // model returning nothing at all.
+    const fake = (async () => ({ ok: true, status: 200, json: async () => ({ content: [], stop_reason: "max_tokens" }), text: async () => "" })) as unknown as typeof fetch;
+    const r = await askClaude({ prompt: "hi", system: "s", env: { ANTHROPIC_API_KEY: "k" } as any, maxTokens: 512, fetchImpl: fake });
+    return { pass: r.status === "error" && r.code === "truncated", got: r.status === "error" ? `${r.code}: ${r.detail.slice(0, 50)}` : "ok" };
+  }});
+
+add({ id: "B14", dimension: B, what: "the Grok fallback is the current flagship", expect: "grok-4.7, not grok-2-latest",
+  run: async () => {
+    let sent: any = null;
+    const fake = (async (_u: any, init: any) => {
+      sent = JSON.parse(init.body);
+      return { ok: true, status: 200, json: async () => ({ choices: [{ message: { content: "{\"ok\":true}" }, finish_reason: "stop" }] }), text: async () => "" };
+    }) as unknown as typeof fetch;
+    const r = await askGrok({ prompt: "hi", system: "s", env: { GROK_API_KEY: "k" } as any, schema: { type: "object", properties: { ok: { type: "boolean" } } }, fetchImpl: fake });
+    const stale = isRetiredModel(sent?.model);
+    return {
+      pass: r.status === "ok" && sent?.model === GROK_MODELS.quality && !stale && sent?.response_format?.type === "json_schema",
+      got: `${sent?.model} response_format=${sent?.response_format?.type} stale=${stale}`,
+    };
+  }});
+
+add({ id: "B15", dimension: B, what: "a live catalog no longer lists the model we would call", expect: "verifyChoice says so instead of pretending",
+  run: () => {
+    const cat = { ok: true, provider: "claude", source: "live" as const, models: [{ id: "claude-sonnet-5-5" }, { id: "claude-haiku-5-5" }] };
+    const present = verifyChoice(cat, CLAUDE_MODELS.quality);
+    const gone = verifyChoice(cat, CLAUDE_MODELS.deep);
+    const offline = verifyChoice({ ok: false, provider: "claude", source: "fallback" as const, models: [], error: "no key" }, CLAUDE_MODELS.quality);
+    return { pass: present.present && !gone.present && !!gone.note && !offline.present, got: `present=${present.present} gone=${gone.present} offline=${offline.present}` };
+  }});
+
 /* ---------------- AUTOMATION: the n8n half has to be machinery, not prose ---------------- */
 
 const A = D.AUTO;
@@ -1026,6 +1155,60 @@ add({ id: "J11", dimension: D.JUD, what: "a page invents an answer when the requ
     const invents = /mockReply|function\s+mockReply/.test(src);
     const handles = /brain offline|!r\.ok/.test(src);
     return { pass: !invents && handles, got: `mockReply=${invents} errorHandled=${handles}` };
+  }});
+
+add({ id: "N05", dimension: A, what: "a Code node in a workflow is not valid JavaScript", expect: "every jsCode parses",
+  run: () => {
+    // A workflow is machinery only if it runs. n8n would surface this at execution time, which is
+    // a worse place to find it than a test that costs milliseconds.
+    const bad: string[] = [];
+    let codes = 0;
+    for (const f of readdirSync(N8N).filter((x) => x.endsWith(".json"))) {
+      for (const w of bundlesOf(loadN8N(f))) {
+        for (const n of w?.nodes ?? []) {
+          if (!String(n?.type).endsWith(".code")) continue;
+          codes++;
+          const src = String(n?.parameters?.jsCode ?? "");
+          try { new Function(src); } catch (e) { bad.push(`${f}:${n.name}: ${(e as Error).message.slice(0, 60)}`); }
+          // A Code node that returns nothing silently produces an empty item downstream.
+          if (!/\breturn\b/.test(src)) bad.push(`${f}:${n.name}: no return statement`);
+        }
+      }
+    }
+    return { pass: bad.length === 0 && codes > 0, got: bad.length ? short(bad) : `${codes} code nodes parse` };
+  }});
+
+add({ id: "N06", dimension: A, what: "a workflow queries a table the schema does not create", expect: "every FROM/INTO/UPDATE target exists",
+  run: () => {
+    // The workflows passed every structural test and would still have failed on their first
+    // Postgres node: creator pool, queue and analytics tables were never created. Import-able is
+    // not the same as runnable.
+    const sql = readFileSync(join(ROOT, "jarvis-app", "scripts", "migrate.sql"), "utf8").toLowerCase();
+    const known = new Set<string>();
+    const created = sql.matchAll(/create table if not exists\s+([a-z_][a-z0-9_]*)/g);
+    for (const m of Array.from(created)) known.add(m[1]);
+
+    const used = new Set<string>();
+    for (const f of readdirSync(N8N).filter((x) => x.endsWith(".json"))) {
+      for (const w of bundlesOf(loadN8N(f))) {
+        for (const n of w?.nodes ?? []) {
+          const q = n?.parameters?.query;
+          if (typeof q !== "string") continue;
+          const hits = q.matchAll(/\b(?:from|into|update)\s+([a-z_][a-z0-9_]*)/gi);
+          // "DO UPDATE SET" is a clause, not a table.
+          const SQL_WORDS = ["set", "on", "where", "values", "conflict", "table"];
+          for (const m of Array.from(hits)) {
+            const t = m[1].toLowerCase();
+            if (!SQL_WORDS.includes(t)) used.add(t);
+          }
+        }
+      }
+    }
+    const missing = Array.from(used).filter((t) => !known.has(t));
+    return {
+      pass: missing.length === 0 && used.size > 0,
+      got: missing.length ? `missing: ${missing.join(", ")}` : `${used.size} tables referenced, all created by migrate.sql`,
+    };
   }});
 
 /* ---------------- run ---------------- */

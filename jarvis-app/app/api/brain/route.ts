@@ -3,23 +3,29 @@ import { askJarvis } from "@/lib/jarvis";
 import { bearered } from "@/lib/cron-auth";
 
 /**
- * THE MACHINE DOOR TO THE BRAIN — this is the missing link in "n8n Cloud automation + Claude brain".
+ * THE MACHINE DOOR TO THE BRAIN — the link between the n8n automation and Claude.
  *
- * n8n cannot hold a session cookie, so every /api route except /api/auth, /api/whop/webhook and
- * /api/cron answered it 401. The automation half of the architecture had no way to reach the
- * thinking half: WF2 could not ask for a script, WF3 could not ask for a reframe. The blueprint
- * said "Claude 3.5 Sonnet primary + Grok-2 secondary" inside an n8n node, which would have put a
- * second copy of the prompt and a second copy of the model id outside this repo — the exact drift
- * that produced the tier bug.
- *
- * So n8n calls THIS, with a token, and gets one prompt, one model policy, one audit trail.
+ * n8n cannot hold a session cookie, so every /api route except the crons and the Whop webhook
+ * answered it 401. WF2 could not ask for a script; WF3 could not ask for a reframe.
  *
  *   POST /api/brain
- *   Authorization: Bearer $N8N_BRAIN_TOKEN   (falls back to CRON_SECRET if the former is unset)
- *   { "prompt": "...", "history": [...], "expect": "script" | "rank" | "reframe" | "chat" }
+ *   Authorization: Bearer $N8N_BRAIN_TOKEN   (falls back to CRON_SECRET if unset)
+ *   {
+ *     "prompt":  "...",
+ *     "expect":  "script" | "rank" | "reframe" | "chat" | "classify" | "deep",
+ *     "schema":  { ...JSON Schema... }        // optional — forces structured output
+ *   }
  *
- * 503 when no model answered. n8n must treat that as a failure, not as content — a workflow that
- * quietly publishes the word "brain unavailable" is worse than one that stops.
+ * `expect` picks the lane, and the lane picks the model:
+ *   classify/extract/route → claude-haiku-5-5 (cheap)
+ *   script/rank/reframe    → claude-sonnet-5-5 (quality)
+ *   deep/strategy          → claude-opus-5-5 (opt-in)
+ *
+ * With `schema`, the provider is asked for JSON via output_config.format, so a workflow receives
+ * an object instead of a paragraph it has to scrape. `parsed` is the object; `data` is still the
+ * raw text so an older node keeps working.
+ *
+ * 503 when no model answered. A workflow must treat that as failure, not as content.
  */
 export async function POST(req: Request) {
   const tokenName = (process.env.N8N_BRAIN_TOKEN || "").trim() ? "N8N_BRAIN_TOKEN" : "CRON_SECRET";
@@ -39,9 +45,10 @@ export async function POST(req: Request) {
 
   const expect = typeof body?.expect === "string" ? body.expect : "chat";
   const history = Array.isArray(body?.history) ? body.history : [];
+  const schema = body?.schema && typeof body.schema === "object" ? body.schema : undefined;
 
   const started = Date.now();
-  const reply = await askJarvis(prompt, history);
+  const reply = await askJarvis(prompt, history, { expect, schema, schemaName: body?.schemaName });
 
   if (!reply.ok) {
     return NextResponse.json(
@@ -60,8 +67,11 @@ export async function POST(req: Request) {
     ok: true,
     expect,
     data: reply.text,
+    parsed: reply.parsed ?? null,
     provider: reply.provider,
     model: reply.model ?? null,
+    lane: reply.lane ?? null,
+    effort: reply.effort ?? null,
     mock: reply.mock,
     ms: reply.ms ?? Date.now() - started,
     // Never let a mock reach a publishing node.
@@ -74,6 +84,13 @@ export async function GET() {
     ok: true,
     door: "/api/brain",
     auth: "Authorization: Bearer $N8N_BRAIN_TOKEN (or $CRON_SECRET)",
+    lanes: {
+      cheap: "classify | extract | route",
+      quality: "chat | script | rank | reframe",
+      deep: "deep | strategy | plan",
+    },
+    structured: "send `schema` to receive `parsed` as an object",
+    catalog: "GET /api/brain/models — what the account can actually call right now",
     warns: "503 means no model answered — do not publish the body as content",
   });
 }

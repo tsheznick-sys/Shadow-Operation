@@ -1,4 +1,8 @@
--- Base tables (creators etc already exists from older migrate)
+-- Base tables. NOTE (2026-10-31): this said "creators etc already exists from older migrate".
+-- That was an assumption, not a statement: a fresh Neon from this file had no creators, and the
+-- n8n workflows failed at their first Postgres node. Every table a workflow touches is now
+-- created below, with IF NOT EXISTS, so this file is the whole schema and nothing else is
+-- required to run the automation.
 -- Run in Neon SQL Editor: copy paste this whole file once
 CREATE TABLE IF NOT EXISTS user_vault (
   user_id TEXT PRIMARY KEY,
@@ -495,3 +499,73 @@ CREATE INDEX IF NOT EXISTS agent_oauth_active ON agent_oauth_grants (member_id) 
 
 COMMENT ON TABLE agent_oauth_grants IS
   'AES-256-GCM ciphertext only, key in env. Revoked within 1h of churn. The logged_anywhere CHECK exists because a token in a log is a breach, not a bug.';
+
+-- ============================================================
+-- TABLES THE AUTOMATION ACTUALLY WRITES (2026-10-31)
+--
+-- These were referenced by n8n/*.json and by lib/ but never created here. The workflows imported,
+-- passed every structural test, and would have failed on their first query — machinery that reads
+-- as real, which is this project's most expensive recurring defect.
+-- ============================================================
+
+-- WF1 reads the pool. gate is the only column the research gate trusts.
+CREATE TABLE IF NOT EXISTS creators (
+  handle         TEXT PRIMARY KEY,
+  platform       TEXT NOT NULL DEFAULT 'youtube',
+  followers      BIGINT NOT NULL DEFAULT 0,
+  avg_comments   INT NOT NULL DEFAULT 0,
+  buyer_pool_x3  INT NOT NULL DEFAULT 0,
+  ratio          NUMERIC(8,2) NOT NULL DEFAULT 0,
+  er             NUMERIC(5,2) NOT NULL DEFAULT 0,
+  gate           TEXT NOT NULL DEFAULT 'RED' CHECK (gate IN ('GREEN','AMBER','RED')),
+  niche          TEXT,
+  brand_voice    TEXT,
+  source         TEXT,
+  created_at     TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS creators_gate_pool ON creators (gate, buyer_pool_x3 DESC);
+
+-- WF1 writes the ranked five here.
+ALTER TABLE solo_domains ADD COLUMN IF NOT EXISTS handle    TEXT;
+ALTER TABLE solo_domains ADD COLUMN IF NOT EXISTS why       TEXT DEFAULT '';
+ALTER TABLE solo_domains ADD COLUMN IF NOT EXISTS ranked_at TIMESTAMPTZ;
+ALTER TABLE solo_domains ADD COLUMN IF NOT EXISTS marked_by TEXT;
+-- id had no default, so an INSERT that did not supply one violated the primary key.
+ALTER TABLE solo_domains ALTER COLUMN id SET DEFAULT gen_random_uuid()::text;
+-- WF1 uses ON CONFLICT (handle) — that needs a unique index to infer, not just a column.
+CREATE UNIQUE INDEX IF NOT EXISTS solo_domains_handle_key ON solo_domains (handle);
+
+-- WF2 writes scripts here; WF5 publishes only what a human moved to 'approved'.
+CREATE TABLE IF NOT EXISTS publisher_queue38 (
+  id            BIGSERIAL PRIMARY KEY,
+  date          DATE NOT NULL DEFAULT CURRENT_DATE,
+  slot          INT  NOT NULL DEFAULT 1,
+  kind          TEXT NOT NULL DEFAULT '8s',
+  domain        TEXT DEFAULT '',
+  hook          TEXT DEFAULT '',
+  caption       TEXT DEFAULT '',
+  body          TEXT DEFAULT '',
+  video_url     TEXT,
+  status        TEXT NOT NULL DEFAULT 'pending_G4'
+                CHECK (status IN ('pending_G4','g4_review','approved','blocked','published')),
+  scheduled_for TIMESTAMPTZ,
+  published_at  TIMESTAMPTZ,
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS publisher_queue38_due ON publisher_queue38 (status, scheduled_for);
+
+-- WF3 reads yesterday's numbers. One row per post per platform per day.
+CREATE TABLE IF NOT EXISTS post_analytics (
+  id          BIGSERIAL PRIMARY KEY,
+  post_id     TEXT,
+  platform    TEXT NOT NULL,
+  views       BIGINT NOT NULL DEFAULT 0,
+  replies     INT NOT NULL DEFAULT 0,
+  comments    INT NOT NULL DEFAULT 0,
+  posted_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  recorded_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS post_analytics_day ON post_analytics (posted_at DESC);
+
+COMMENT ON TABLE publisher_queue38 IS
+  'G4 lives here. A row moves pending_G4 -> approved by a human, and only then can WF5 publish it.';

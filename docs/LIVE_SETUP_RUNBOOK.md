@@ -15,7 +15,9 @@ Why first: in production the app refuses to boot without it, by design.
 2. **Connect** → copy the connection string (use the **pooled** one, it contains `-pooler`).
 3. Keep it on the clipboard for Step 2. Do not paste it into any document.
 4. Create the tables: open the Neon SQL Editor, paste all of `jarvis-app/scripts/migrate.sql`, run it. It is idempotent.
-5. Verify: `SELECT count(*) FROM information_schema.tables WHERE table_schema='public';` → **30+**. If 0, the editor ran against the wrong database.
+5. Verify: `SELECT count(*) FROM information_schema.tables WHERE table_schema='public';` → **33 or more**. If 0, the editor ran against the wrong database.
+
+   The file creates 33 tables. Three of them — `creators`, `publisher_queue38`, `post_analytics` — were added on 2026-10-31 because the n8n workflows wrote to them and nothing created them. If your count is short by exactly those three, you pasted an older copy of the file.
 
 ## Step 2 — Vercel (hosting)
 
@@ -46,11 +48,28 @@ Why first: in production the app refuses to boot without it, by design.
 - https://console.anthropic.com → API Keys → `ANTHROPIC_API_KEY` (the code also accepts `CLAUDE_API_KEY`)
 - https://console.x.ai → API Keys → `GROK_API_KEY` (second brain, used only if Claude fails)
 
+**The models, as of 2026-10-31** (see `docs/MODELS_2026-10-31.md` for the reasoning):
+
+| Lane | Model | Price / MTok |
+|---|---|---|
+| quality — script, rank, reframe, chat | `claude-sonnet-5-5` | $2 / $10 |
+| cheap — classify, extract, route | `claude-haiku-5-5` | $0.10 / $0.50 |
+| deep — strategy, opt-in | `claude-opus-5-5` | $4 / $20 |
+| fallback | `grok-4.7` | $2 / $6 |
+
 **Do not set `ANTHROPIC_MODEL` to a retired id.** `claude-3-5-sonnet-20241022` was retired on
 2025-10-28 and sat in this codebase for a year: every request 404'd, the catch swallowed it, and a
-canned paragraph was returned with HTTP 200. `lib/brain.ts` now refuses a retired id in favour of
-`claude-sonnet-5-5`, and `B01` tests it. Leave the variable unset unless you are deliberately
-pinning a newer model.
+canned paragraph was returned with HTTP 200. `lib/brain.ts` now refuses a retired id in favour of the
+lane default, and `B01` tests it. Leave the variables unset unless you are deliberately pinning.
+
+**After any provider announcement, run this before trusting an env pin:**
+
+```
+GET /api/brain/models      (Authorization: Bearer $N8N_BRAIN_TOKEN)
+```
+
+It asks both providers what the account can actually call and reports whether the ids above are
+still there. Model ids rot; that endpoint is how you find out before a member does.
 
 **No `ALLOW_MOCK_BRAIN=true`.** In production, no key means `/api/jarvis` returns **503** and the
 chat shows "brain offline". A member must never be handed a sample paragraph as an answer.

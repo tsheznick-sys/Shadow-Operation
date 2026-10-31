@@ -90,7 +90,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ prompt: prompt, expect: \"script\" }) }}",
+        "jsonBody": "={{ JSON.stringify({ prompt: prompt, expect: \"script\", schema: {\"type\":\"object\",\"properties\":{\"scripts\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"kind\":{\"type\":\"string\",\"description\":\"one of 8s, 32s, 60s\"},\"domain\":{\"type\":\"string\"},\"hook\":{\"type\":\"string\"},\"script\":{\"type\":\"string\"},\"caption\":{\"type\":\"string\"}},\"required\":[\"kind\",\"domain\",\"hook\",\"script\",\"caption\"]}}},\"required\":[\"scripts\"]} }) }}",
         "options": {
           "timeout": 45000
         }
@@ -149,7 +149,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const body = $input.first().json;\nconst text = body.data || '';\nconst start = text.indexOf('{');\nconst end = text.lastIndexOf('}');\nif (start === -1 || end === -1) throw new Error('brain reply was not JSON');\nconst parsed = JSON.parse(text.slice(start, end + 1));\nconst scripts = Array.isArray(parsed.scripts) ? parsed.scripts : [];\nif (scripts.length === 0) throw new Error('brain returned no scripts');\nconst today = new Date().toISOString().slice(0, 10);\nreturn scripts.map((s, i) => ({ json: {\n  date: today,\n  slot: i + 1,\n  kind: s.kind || '8s',\n  domain: s.domain || '',\n  hook: s.hook || '',\n  caption: s.caption || '',\n  body: s.script || '',\n  status: 'pending_G4',\n} }));"
+        "jsCode": "const body = $input.first().json;\nlet parsed = body.parsed;\nif (!parsed) {\n  const text = body.data || '';\n  const start = text.indexOf('{');\n  const end = text.lastIndexOf('}');\n  if (start === -1 || end === -1) throw new Error('brain reply was not JSON');\n  parsed = JSON.parse(text.slice(start, end + 1));\n}\nconst scripts = Array.isArray(parsed.scripts) ? parsed.scripts : [];\nif (scripts.length === 0) throw new Error('brain returned no scripts');\nconst today = new Date().toISOString().slice(0, 10);\nreturn scripts.map((s, i) => ({ json: {\n  date: today,\n  slot: i + 1,\n  kind: s.kind || '8s',\n  domain: s.domain || '',\n  hook: s.hook || '',\n  caption: s.caption || '',\n  body: s.script || '',\n  status: 'pending_G4',\n} }));"
       },
       "id": "2a1224f7-78e3-5522-83e6-9dc45b1787ee",
       "name": "Queue for G4",

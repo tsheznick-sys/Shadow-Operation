@@ -75,6 +75,14 @@ Authorization: Bearer $N8N_BRAIN_TOKEN
 → 503 { ok: false, error: "brain_unavailable", retryable: true }
 ```
 
+**Models are not named anywhere in these workflows.** A node sends an `expect` value
+(`script`, `rank`, `chat`, …) and the app picks the model for that lane. A model id typed into
+n8n would be a second source of truth, which is exactly how the tier bug happened.
+
+WF1 and WF2 also send a `schema`, so the reply arrives as `parsed` — a real object — instead of a
+paragraph the Code node has to scrape. The scraping fallback is still there for a provider that
+ignores the schema, but it should never be the path taken.
+
 **A 503 must stop the workflow.** Every brain node here is followed by an `ok?` IF, and the false
 branch sends a "STOPPED — nothing was written" message. A queue filled with the words
 "brain unavailable" is worse than an empty queue.
