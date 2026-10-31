@@ -28,13 +28,17 @@ import {
   effortFor, isRetiredModel, laneFor, mockAllowed, modelId, sanitizeHistory, sanitizeSchema, verifyChoice,
 } from "../lib/brain";
 import { askJarvis } from "../lib/jarvis";
+import {
+  ALL_SURFACES, BUFFER_ENDPOINT, SURFACES, buildCreatePost, canAutoPublish, classifyResponse,
+  clampText, countHashtags, describeChannels, fitsBudget, proposeMapping, publish, validate,
+} from "../lib/publish";
 
 type Case = { id: string; dimension: string; what: string; expect: string; run: () => { pass: boolean; got: string } | Promise<{ pass: boolean; got: string }> };
 const results: Case[] = [];
 const short = (hits: string[]) => (hits.length ? hits.slice(0, 3).map((h) => h.slice(0, 80)).join(" | ") : "none");
 const add = (c: Case) => results.push(c);
 
-const D = { REL: "reliability", JUD: "judgment", EXE: "execution", MEM: "memory", BRAIN: "brain", AUTO: "automation" };
+const D = { REL: "reliability", JUD: "judgment", EXE: "execution", MEM: "memory", BRAIN: "brain", AUTO: "automation", PUB: "publish" };
 
 /* ---------------- RELIABILITY: fault injection ---------------- */
 
@@ -670,7 +674,7 @@ lock("M18", "the stack ceiling is 30%", "0.30", () => {
 
 /* ---------------- JUDGMENT: did any retired number survive anywhere ---------------- */
 
-import { readFileSync, readdirSync } from "fs";
+import { readFileSync, readdirSync, writeFileSync } from "fs";
 import { execSync } from "child_process";
 import { join } from "path";
 
@@ -1086,6 +1090,13 @@ add({ id: "N02", dimension: A, what: "the committed workflow JSON has drifted fr
     }
     const after = files.map((f) => readFileSync(join(N8N, f), "utf8"));
     const drift = files.filter((_, i) => before[i] !== after[i]);
+    // Restore what the generator just overwrote. A test that silently rewrites the working tree
+    // also silently repairs the defect it was meant to report to the tests that run after it —
+    // which is exactly what happened to P03 while this was being written.
+    drift.forEach((f) => {
+      const i = files.indexOf(f);
+      writeFileSync(join(N8N, f), before[i], "utf8");
+    });
     return { pass: drift.length === 0, got: drift.length ? `regenerated: ${short(drift)}` : `${files.length} files match the generator` };
   }});
 
@@ -1113,11 +1124,19 @@ add({ id: "N03", dimension: A, what: "a brain call in a workflow is unguarded", 
 
 add({ id: "N04", dimension: A, what: "the n8n variable file still prices the retired ladder", expect: "current ladder only",
   run: () => {
-    const raw = readFileSync(join(ROOT, "config", "n8n_workflow_variables.json"), "utf8");
-    const live = raw.split("\n").filter((l) => !/^\s*"retired":/.test(l)).join("\n");
-    const ladderLine = (live.match(/"key": "WHOP_LADDER_PRICES", "value": "([^"]+)"/) ?? [])[1] ?? "missing";
-    const ok = /\$28.*\$17.*\$35.*\$89.*\$44.*\$53.*\$62/.test(ladderLine);
-    return { pass: ok, got: ladderLine };
+    // Parse it. The previous version regex-matched one line, so reformatting the JSON (which is
+    // not a defect) failed the test. A structured file is read as structure.
+    let parsed: any;
+    try {
+      parsed = JSON.parse(readFileSync(join(ROOT, "config", "n8n_workflow_variables.json"), "utf8"));
+    } catch (e) {
+      return { pass: false, got: `not valid JSON: ${(e as Error).message.slice(0, 60)}` };
+    }
+    const vars: any[] = Array.isArray(parsed?.variables) ? parsed.variables : [];
+    const row = vars.find((v) => v.key === "WHOP_LADDER_PRICES");
+    if (!row) return { pass: false, got: "WHOP_LADDER_PRICES is not declared — n8n would render an empty string" };
+    const ok = /\$28.*\$17.*\$35.*\$89.*\$44.*\$53.*\$62/.test(String(row.value));
+    return { pass: ok, got: row.value };
   }});
 
 add({ id: "J10", dimension: D.JUD, what: "the retired ladder survived in the UI or config", expect: "docs were fixed, the app was not",
@@ -1140,12 +1159,14 @@ add({ id: "J10", dimension: D.JUD, what: "the retired ladder survived in the UI 
     walk(join(ROOT, "jarvis-app", "app"));
     walk(join(ROOT, "jarvis-app", "lib"));
     walk(join(ROOT, "n8n"));
-    hits.push(...(
-      readFileSync(join(ROOT, "config", "n8n_workflow_variables.json"), "utf8").split("\n")
-        .map((l, i) => ({ l, i }))
-        .filter((x) => /\$27\s*\+\s*\$9|\$79/.test(x.l) && !/^\s*"retired":/.test(x.l))
-        .map((x) => `config/n8n_workflow_variables.json:${x.i + 1}`)
-    ));
+    // Parse, do not regex. The "retired" note at the bottom of the file quotes the dead ladder on
+    // purpose; only the live `variables` array can sell anything.
+    try {
+      const n8nv = JSON.parse(readFileSync(join(ROOT, "config", "n8n_workflow_variables.json"), "utf8"));
+      for (const v of Array.isArray(n8nv?.variables) ? n8nv.variables : []) {
+        if (/\$27\s*\+\s*\$9|\$79/.test(String(v.value))) hits.push(`config/n8n_workflow_variables.json:${v.key}=${v.value}`);
+      }
+    } catch { /* a malformed file is N04's problem, not this test's */ }
     return { pass: hits.length === 0, got: short(hits) };
   }});
 
@@ -1209,6 +1230,203 @@ add({ id: "N06", dimension: A, what: "a workflow queries a table the schema does
       pass: missing.length === 0 && used.size > 0,
       got: missing.length ? `missing: ${missing.join(", ")}` : `${used.size} tables referenced, all created by migrate.sql`,
     };
+  }});
+
+
+/* ---------------- PUBLISH: five surfaces, and an error that cannot pass for a success ---------------- */
+
+const P = D.PUB;
+
+const surf: any = {
+  youtube_longform: "BUFFER_CHANNEL_YOUTUBE_LONGFORM",
+  youtube_shorts: "BUFFER_CHANNEL_YOUTUBE_SHORTS",
+  tiktok: "BUFFER_CHANNEL_TIKTOK",
+  instagram: "BUFFER_CHANNEL_INSTAGRAM",
+  facebook: "BUFFER_CHANNEL_FACEBOOK",
+};
+const fullEnv = (): any => ({
+  BUFFER_API_KEY: "k",
+  BUFFER_CHANNEL_YOUTUBE_LONGFORM: "c-yt-long",
+  BUFFER_CHANNEL_YOUTUBE_SHORTS: "c-yt-short",
+  BUFFER_CHANNEL_TIKTOK: "c-tt",
+  BUFFER_CHANNEL_INSTAGRAM: "c-ig",
+  BUFFER_CHANNEL_FACEBOOK: "c-fb",
+});
+const goodPost = (over: any = {}) => ({
+  surface: "instagram" as const, channelId: "c-ig", text: "Three stickmen, one receipt.",
+  videoUrl: "https://cdn.example.com/v.mp4", ...over,
+});
+
+const stub = (status: number, body: any, capture?: (b: any) => void) =>
+  (async (_u: any, init: any) => {
+    if (capture) capture(JSON.parse(init.body));
+    return { ok: status >= 200 && status < 300, status, json: async () => body, text: async () => JSON.stringify(body) };
+  }) as unknown as typeof fetch;
+
+add({ id: "P01", dimension: P, what: "Buffer answers HTTP 200 for a FAILED mutation", expect: "recorded as failure, not as a publish",
+  run: () => {
+    // This is the defect the whole adapter is built around. createPost returns a union;
+    // PostActionSuccess means published, MutationError means not. Both arrive with status 200.
+    // A caller that checks `res.ok` marks every failure as a success and never retries.
+    const failed = classifyResponse(200, { data: { createPost: { __typename: "MutationError", message: "Video could not be fetched" } } });
+    const ok = classifyResponse(200, { data: { createPost: { __typename: "PostActionSuccess", post: { id: "p1", status: "queued" } } } });
+    const silent = classifyResponse(200, { data: { createPost: {} } });
+    return {
+      pass: failed.status === "error" && failed.code === "mutation_error" && ok.status === "ok" && silent.status === "error",
+      got: `mutation=${failed.status === "error" ? failed.code : "ok"} success=${ok.status} empty=${silent.status === "error" ? silent.code : "ok"}`,
+    };
+  }});
+
+add({ id: "P02", dimension: P, what: "GraphQL errors arrive alongside a 200", expect: "graphql_error, not silence",
+  run: () => {
+    const r = classifyResponse(200, { errors: [{ message: "Cannot query field 'video' on type 'AssetInput'" }] });
+    return { pass: r.status === "error" && r.code === "graphql_error" && /AssetInput/.test(r.message), got: r.status === "error" ? `${r.code}: ${r.message.slice(0, 50)}` : "ok" };
+  }});
+
+add({ id: "P03", dimension: P, what: "the old Buffer REST endpoint is still being called", expect: "the GraphQL host only",
+  run: () => {
+    // WF5 posted to https://api.bufferapp.com/1/updates/create.json. Buffer retired that API;
+    // its own migration guide now opens with the before/after table.
+    const dead: string[] = [];
+    for (const f of readdirSync(N8N).filter((x) => x.endsWith(".json"))) {
+      for (const w of bundlesOf(loadN8N(f))) {
+        for (const n of w?.nodes ?? []) {
+          const u = String(n?.parameters?.url ?? "");
+          if (/bufferapp\.com|api\.buffer\.com/.test(u)) dead.push(`${f}:${n.name}: ${u.slice(0, 60)}`);
+        }
+      }
+    }
+    // Strip comments first: the adapter QUOTES the retired URL in its header to explain why it
+    // exists. A scanner that cannot tell a record from a violation punishes the documentation.
+    const lib = stripComments(readFileSync(join(ROOT, "jarvis-app", "lib", "publish.ts"), "utf8"));
+    const libOk = lib.includes(BUFFER_ENDPOINT) && !/bufferapp\.com/.test(lib);
+    return { pass: dead.length === 0 && libOk, got: dead.length ? short(dead) : "workflows call /api/publish; the adapter owns the Buffer URL" };
+  }});
+
+add({ id: "P04", dimension: P, what: "a video surface is asked to publish with no video", expect: "refused before the network",
+  run: () => {
+    const problems = validate(goodPost({ videoUrl: undefined }), fullEnv());
+    return { pass: problems.some((p) => p.code === "no_video"), got: problems.map((p) => p.code).join(",") || "allowed" };
+  }});
+
+add({ id: "P05", dimension: P, what: "a channel id was never set", expect: "refusal, never a guessed default",
+  run: () => {
+    const problems = validate(goodPost({ channelId: "" }), fullEnv());
+    const env = fullEnv();
+    delete env.BUFFER_CHANNEL_INSTAGRAM;
+    const d = describeChannels(env).find((x) => x.surface === "instagram");
+    return { pass: problems.some((p) => p.code === "no_channel") && d?.configured === false, got: problems.map((p) => p.code).join(",") || "allowed" };
+  }});
+
+add({ id: "P06", dimension: P, what: "X is offered as a surface again", expect: "not in the list, and rejected",
+  run: () => {
+    const has = (ALL_SURFACES as string[]).some((s) => /^x$|twitter/i.test(s));
+    const mapping = proposeMapping([{ id: "t1", service: "twitter", name: "X" }]);
+    const leaked = Object.values(mapping.proposed).includes("t1");
+    return { pass: !has && !leaked, got: `in_surfaces=${has} mapped=${leaked}` };
+  }});
+
+add({ id: "P07", dimension: P, what: "a caption is longer than the platform allows", expect: "cut at a word boundary, and reported",
+  run: () => {
+    // The assertion has to prove the WORD is whole, not just that the string ends in a letter.
+    // Take everything before the ellipsis and require the source to contain exactly that,
+    // followed by a space or the end of the source.
+    const tokens = Array.from({ length: 600 }, (_, i) => `token${i}`);
+    const long = tokens.join(" ");
+    const r = clampText(long, 1200);
+    const body = r.text.replace(/…$/, "");
+    const atBoundary = long.startsWith(body) && (long.length === body.length || long[body.length] === " ");
+    const lastToken = body.split(" ").pop() || "";
+    const wholeToken = tokens.includes(lastToken);
+    return {
+      pass: r.trimmed && r.text.length <= 1201 && atBoundary && wholeToken,
+      got: `${r.text.length} chars trimmed=${r.trimmed} boundary=${atBoundary} last="${lastToken}"`,
+    };
+  }});
+
+add({ id: "P08", dimension: P, what: "the post carries more hashtags than the surface allows", expect: "refused with a count",
+  run: () => {
+    const text = "hello " + Array.from({ length: 15 }, (_, i) => `#tag${i}`).join(" ");
+    const problems = validate(goodPost({ surface: "tiktok", text }), fullEnv());
+    return { pass: problems.some((p) => p.code === "too_many_hashtags") && countHashtags(text) === 15, got: `${countHashtags(text)} tags -> ${problems.map((p) => p.code).join(",") || "allowed"}` };
+  }});
+
+add({ id: "P09", dimension: P, what: "a Circle member asks to publish directly", expect: "403 — that is the Pro/Team privilege",
+  run: () => {
+    // The privilege is read from lib/tiers.ts, not restated. If it ever drifts, this fails.
+    const free = canAutoPublish("free");
+    const circle = canAutoPublish("circle");
+    const pro = canAutoPublish("pro");
+    const team = canAutoPublish("team");
+    return { pass: !free && !circle && pro && team, got: `free=${free} circle=${circle} pro=${pro} team=${team}` };
+  }});
+
+add({ id: "P10", dimension: P, what: "a local file path is used as the video URL", expect: "refused — Buffer fetches the asset itself",
+  run: () => {
+    const problems = validate(goodPost({ videoUrl: "/assets/stickman/out.mp4" }), fullEnv());
+    return { pass: problems.some((p) => p.code === "video_not_public_url"), got: problems.map((p) => p.code).join(",") || "allowed" };
+  }});
+
+add({ id: "P11", dimension: P, what: "the post is actually sent", expect: "one channel, the right mutation, the right variables",
+  run: async () => {
+    let sent: any = null;
+    const r = await publish(goodPost(), {
+      env: fullEnv(),
+      fetchImpl: stub(200, { data: { createPost: { __typename: "PostActionSuccess", post: { id: "p9", status: "queued" } } } }, (b) => (sent = b)),
+    });
+    const input = sent?.variables?.input;
+    return {
+      pass:
+        r.status === "ok" &&
+        /createPost/.test(sent?.query ?? "") &&
+        /PostActionSuccess/.test(sent?.query ?? "") &&
+        /MutationError/.test(sent?.query ?? "") &&
+        input?.channelId === "c-ig" &&
+        input?.mode === "addToQueue" &&
+        Array.isArray(input?.assets) &&
+        input.assets[0]?.video?.url === "https://cdn.example.com/v.mp4",
+      got: `status=${r.status} channel=${input?.channelId} mode=${input?.mode} assets=${Array.isArray(input?.assets)}`,
+    };
+  }});
+
+add({ id: "P12", dimension: P, what: "the mutation omits the MutationError member", expect: "the failure union must be selectable",
+  run: () => {
+    // Without `... on MutationError`, a failed mutation returns {} — and {} is indistinguishable
+    // from "no error" to anything that only looks for a post.
+    const { built } = buildCreatePost(goodPost(), fullEnv());
+    const q = built?.query ?? "";
+    return { pass: /\.\.\. on MutationError/.test(q) && /\.\.\. on PostActionSuccess/.test(q), got: /MutationError/.test(q) ? "both members selected" : "mutation error not selectable" };
+  }});
+
+add({ id: "P13", dimension: P, what: "the API key is missing", expect: "not_configured, and no request is attempted",
+  run: async () => {
+    let called = false;
+    const spy = (async () => { called = true; return { ok: true, status: 200, json: async () => ({}) }; }) as unknown as typeof fetch;
+    const r = await publish(goodPost(), { env: { ...fullEnv(), BUFFER_API_KEY: "" }, fetchImpl: spy });
+    return { pass: r.status === "error" && r.code === "not_configured" && !called, got: `${r.status === "error" ? r.code : "ok"} network_called=${called}` };
+  }});
+
+add({ id: "P14", dimension: P, what: "two YouTube channels and neither says which is Shorts", expect: "flagged for a human, not silently ordered",
+  run: () => {
+    const m = proposeMapping([
+      { id: "y1", service: "youtube", name: "Stickman A" },
+      { id: "y2", service: "youtube", name: "Stickman B" },
+      { id: "t1", service: "tiktok", name: "tt" },
+    ]);
+    return { pass: m.ambiguous.length > 0 && !!m.proposed.youtube_longform, got: m.ambiguous[0] || "no ambiguity reported" };
+  }});
+
+add({ id: "P15", dimension: P, what: "a batch would blow the Buffer rate limit", expect: "the budget says so before sending",
+  run: () => {
+    const day = fitsBudget(75, "day");
+    const burst = fitsBudget(120, "15m");
+    return { pass: day.ok && !burst.ok, got: `${day.detail} · ${burst.detail}` };
+  }});
+
+add({ id: "P16", dimension: P, what: "Buffer rate-limits mid-batch", expect: "retryable 429, not a permanent failure",
+  run: () => {
+    const r = classifyResponse(429, {});
+    return { pass: r.status === "error" && r.code === "rate_limited" && r.retryable, got: r.status === "error" ? `${r.code} retryable=${r.retryable}` : "ok" };
   }});
 
 /* ---------------- run ---------------- */

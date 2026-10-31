@@ -614,7 +614,7 @@ def wf_brief():
 
 
 def wf_publish():
-    """WF5 — the G4 gate in front of Buffer. Manual by design."""
+    """WF5 — the G4 gate in front of Buffer. Manual by design, and fan-out per surface."""
     name = "WF5 Publish (G4)"
     return {
         "name": name,
@@ -623,9 +623,15 @@ def wf_publish():
                 name,
                 "### WF5 — Publish\n"
                 "**Manual trigger on purpose.** G4 is a human approving an asset, not a cron job.\n\n"
-                "Only rows that a human moved to `approved` are sent to Buffer. A row still in\n"
-                "`pending_G4` is skipped, and the workflow says so.",
+                "Only rows a human moved to `approved` are sent. For each row this fans out to the five\n"
+                "surfaces and posts to `/api/publish` — one call per surface, because Buffer's API is\n"
+                "one channel per call.\n\n"
+                "**Buffer's old REST endpoint is gone.** `api.bufferapp.com/1/updates/create.json` was\n"
+                "retired; the adapter speaks GraphQL at `api.buffer.com`. And a failed mutation returns\n"
+                "**HTTP 200**, so the node is set to continue on error and the results are inspected —\n"
+                "a batch where two of five surfaces failed must not report five successes.",
                 [-380, 0],
+                height=340,
             ),
             node(name, "Manual G4", MANUAL, {}, [0, 0], type_version=1),
             node(
@@ -634,7 +640,7 @@ def wf_publish():
                 POSTGRES,
                 {
                     "operation": "executeQuery",
-                    "query": "SELECT id, caption, video_url FROM publisher_queue38 WHERE status = 'approved' AND scheduled_for <= NOW() ORDER BY id LIMIT 25",
+                    "query": "SELECT id, caption, video_url FROM publisher_queue38 WHERE status = 'approved' AND scheduled_for IS NOT NULL AND scheduled_for <= NOW() ORDER BY id LIMIT 5",
                     "options": {},
                 },
                 [220, 0],
@@ -660,33 +666,113 @@ def wf_publish():
             ),
             node(
                 name,
-                "Send to Buffer",
-                HTTP,
+                "Fan out 5 surfaces",
+                CODE,
                 {
+                    "jsCode": "\n".join(
+                        [
+                            "// One row in the queue becomes five posts: YouTube longform, YouTube Shorts,",
+                            "// TikTok, Instagram, Facebook. X was removed 2026-10-31 and is not offered.",
+                            "const SURFACES = ['youtube_longform','youtube_shorts','tiktok','instagram','facebook'];",
+                            "const out = [];",
+                            "for (const row of $input.all()) {",
+                            "  for (const surface of SURFACES) {",
+                            "    out.push({ json: {",
+                            "      queue_id: row.json.id,",
+                            "      surface,",
+                            "      text: row.json.caption || '',",
+                            "      videoUrl: row.json.video_url || '',",
+                            "      // Pro is the tier whose privilege this is; the app re-reads lib/tiers.ts anyway.",
+                            "      tier: 'pro',",
+                            "    } });",
+                            "  }",
+                            "}",
+                            "if (out.length === 0) throw new Error('nothing to publish');",
+                            "return out;",
+                        ]
+                    )
+                },
+                [660, -60],
+                type_version=2,
+            ),
+            {
+                "parameters": {
                     "method": "POST",
-                    "url": "https://api.bufferapp.com/1/updates/create.json",
+                    "url": "={{ $vars.JARVIS_BRAIN_URL }}/api/publish",
                     "sendHeaders": True,
-                    "headerParameters": {"parameters": [{"name": "Authorization", "value": "=Bearer {{ $vars.BUFFER_TOKEN }}"}]},
+                    "headerParameters": {"parameters": [{"name": "Authorization", "value": "=Bearer {{ $vars.N8N_BRAIN_TOKEN }}"}]},
                     "sendBody": True,
                     "specifyBody": "json",
-                    "jsonBody": "={{ JSON.stringify({ text: $json.caption, media: { link: $json.video_url }, now: false }) }}",
-                    "options": {"timeout": 20000},
+                    "jsonBody": "={{ JSON.stringify({ surface: $json.surface, text: $json.text, videoUrl: $json.videoUrl, tier: $json.tier }) }}",
+                    "options": {"timeout": 45000},
                 },
-                [660, -80],
-                type_version=4.2,
+                "onError": "continueRegularOutput",
+                "id": nid(name, "Publish per surface"),
+                "name": "Publish per surface",
+                "type": HTTP,
+                "typeVersion": 4.2,
+                "position": [880, -60],
+            },
+            node(
+                name,
+                "Collect results",
+                CODE,
+                {
+                    "jsCode": "\n".join(
+                        [
+                            "// A failed mutation returns HTTP 200 from Buffer, so the app reports `ok` and a",
+                            "// `code`. Only surfaces that came back ok count as published.",
+                            "const rows = $input.all();",
+                            "const byQueue = {};",
+                            "for (let i = 0; i < rows.length; i++) {",
+                            "  const src = $('Fan out 5 surfaces').all()[i]?.json || {};",
+                            "  const body = rows[i].json || {};",
+                            "  const ok = body.ok === true;",
+                            "  const key = src.queue_id ?? 'unknown';",
+                            "  byQueue[key] = byQueue[key] || { id: key, ok: 0, failed: 0, detail: [] };",
+                            "  if (ok) byQueue[key].ok++;",
+                            "  else { byQueue[key].failed++; byQueue[key].detail.push(`${src.surface}: ${body.error || 'failed'}`); }",
+                            "}",
+                            "const summary = Object.values(byQueue);",
+                            "const complete = summary.filter(s => s.failed === 0 && s.ok === 5).map(s => s.id);",
+                            "return [{ json: {",
+                            "  complete,",
+                            "  incomplete: summary.filter(s => !(s.failed === 0 && s.ok === 5)),",
+                            "  message: complete.length === summary.length",
+                            "    ? `All ${summary.length} asset(s) published to all 5 surfaces.`",
+                            "    : `${summary.length - complete.length} asset(s) only partially published — see incomplete.`,",
+                            "} }];",
+                        ]
+                    )
+                },
+                [1100, -60],
+                type_version=2,
             ),
             node(
                 name,
-                "Mark published",
+                "Mark complete rows",
                 POSTGRES,
                 {
                     "operation": "executeQuery",
-                    "query": "UPDATE publisher_queue38 SET status = 'published', published_at = NOW() WHERE id = $1",
-                    "options": {"queryReplacement": "={{ $('Approved rows').item.json.id }}"},
+                    "query": "UPDATE publisher_queue38 SET status = 'published', published_at = NOW() WHERE id = ANY($1::bigint[])",
+                    "options": {"queryReplacement": "={{ JSON.stringify($json.complete) }}"},
                 },
-                [880, -80],
+                [1320, -160],
                 PG_CRED,
                 type_version=2.4,
+            ),
+            node(
+                name,
+                "Telegram Sir",
+                TELEGRAM,
+                {
+                    "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+                    "text": "=WF5 — {{ $('Collect results').first().json.message }}",
+                    "additionalFields": {},
+                },
+                [1540, -60],
+                TG_CRED,
+                type_version=1.2,
             ),
             node(
                 name,
@@ -694,10 +780,10 @@ def wf_publish():
                 TELEGRAM,
                 {
                     "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
-                    "text": "=WF5 ran — nothing is approved for this window. G4 still holds {{ $('Approved rows').all().length }} rows.",
+                    "text": "=WF5 ran — nothing is approved for this window. G4 still holds the queue.",
                     "additionalFields": {},
                 },
-                [660, 120],
+                [660, 140],
                 TG_CRED,
                 type_version=1.2,
             ),
@@ -707,11 +793,20 @@ def wf_publish():
             "Approved rows": {"main": [[{"node": "Anything approved?", "type": "main", "index": 0}]]},
             "Anything approved?": {
                 "main": [
-                    [{"node": "Send to Buffer", "type": "main", "index": 0}],
+                    [{"node": "Fan out 5 surfaces", "type": "main", "index": 0}],
                     [{"node": "Nothing approved", "type": "main", "index": 0}],
                 ]
             },
-            "Send to Buffer": {"main": [[{"node": "Mark published", "type": "main", "index": 0}]]},
+            "Fan out 5 surfaces": {"main": [[{"node": "Publish per surface", "type": "main", "index": 0}]]},
+            "Publish per surface": {"main": [[{"node": "Collect results", "type": "main", "index": 0}]]},
+            "Collect results": {
+                "main": [
+                    [
+                        {"node": "Mark complete rows", "type": "main", "index": 0},
+                        {"node": "Telegram Sir", "type": "main", "index": 0},
+                    ]
+                ]
+            },
         },
         "settings": {"executionOrder": "v1"},
         "pinData": {},

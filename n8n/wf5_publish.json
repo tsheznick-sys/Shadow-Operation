@@ -3,8 +3,8 @@
   "nodes": [
     {
       "parameters": {
-        "content": "### WF5 — Publish\n**Manual trigger on purpose.** G4 is a human approving an asset, not a cron job.\n\nOnly rows that a human moved to `approved` are sent to Buffer. A row still in\n`pending_G4` is skipped, and the workflow says so.",
-        "height": 260,
+        "content": "### WF5 — Publish\n**Manual trigger on purpose.** G4 is a human approving an asset, not a cron job.\n\nOnly rows a human moved to `approved` are sent. For each row this fans out to the five\nsurfaces and posts to `/api/publish` — one call per surface, because Buffer's API is\none channel per call.\n\n**Buffer's old REST endpoint is gone.** `api.bufferapp.com/1/updates/create.json` was\nretired; the adapter speaks GraphQL at `api.buffer.com`. And a failed mutation returns\n**HTTP 200**, so the node is set to continue on error and the results are inspected —\na batch where two of five surfaces failed must not report five successes.",
+        "height": 340,
         "width": 420,
         "color": 4
       },
@@ -31,7 +31,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT id, caption, video_url FROM publisher_queue38 WHERE status = 'approved' AND scheduled_for <= NOW() ORDER BY id LIMIT 25",
+        "query": "SELECT id, caption, video_url FROM publisher_queue38 WHERE status = 'approved' AND scheduled_for IS NOT NULL AND scheduled_for <= NOW() ORDER BY id LIMIT 5",
         "options": {}
       },
       "id": "fe2f98b7-5dee-5c42-8c71-32e11d6b5d99",
@@ -84,48 +84,75 @@
     },
     {
       "parameters": {
+        "jsCode": "// One row in the queue becomes five posts: YouTube longform, YouTube Shorts,\n// TikTok, Instagram, Facebook. X was removed 2026-10-31 and is not offered.\nconst SURFACES = ['youtube_longform','youtube_shorts','tiktok','instagram','facebook'];\nconst out = [];\nfor (const row of $input.all()) {\n  for (const surface of SURFACES) {\n    out.push({ json: {\n      queue_id: row.json.id,\n      surface,\n      text: row.json.caption || '',\n      videoUrl: row.json.video_url || '',\n      // Pro is the tier whose privilege this is; the app re-reads lib/tiers.ts anyway.\n      tier: 'pro',\n    } });\n  }\n}\nif (out.length === 0) throw new Error('nothing to publish');\nreturn out;"
+      },
+      "id": "0d6e1b36-c984-52da-9db0-560d0fee39cd",
+      "name": "Fan out 5 surfaces",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        -60
+      ]
+    },
+    {
+      "parameters": {
         "method": "POST",
-        "url": "https://api.bufferapp.com/1/updates/create.json",
+        "url": "={{ $vars.JARVIS_BRAIN_URL }}/api/publish",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
               "name": "Authorization",
-              "value": "=Bearer {{ $vars.BUFFER_TOKEN }}"
+              "value": "=Bearer {{ $vars.N8N_BRAIN_TOKEN }}"
             }
           ]
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ text: $json.caption, media: { link: $json.video_url }, now: false }) }}",
+        "jsonBody": "={{ JSON.stringify({ surface: $json.surface, text: $json.text, videoUrl: $json.videoUrl, tier: $json.tier }) }}",
         "options": {
-          "timeout": 20000
+          "timeout": 45000
         }
       },
-      "id": "da94a211-8960-5bd9-86f2-e8399a157960",
-      "name": "Send to Buffer",
+      "onError": "continueRegularOutput",
+      "id": "920d1fba-6b46-515f-8308-1b382bf969c3",
+      "name": "Publish per surface",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        660,
-        -80
+        880,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// A failed mutation returns HTTP 200 from Buffer, so the app reports `ok` and a\n// `code`. Only surfaces that came back ok count as published.\nconst rows = $input.all();\nconst byQueue = {};\nfor (let i = 0; i < rows.length; i++) {\n  const src = $('Fan out 5 surfaces').all()[i]?.json || {};\n  const body = rows[i].json || {};\n  const ok = body.ok === true;\n  const key = src.queue_id ?? 'unknown';\n  byQueue[key] = byQueue[key] || { id: key, ok: 0, failed: 0, detail: [] };\n  if (ok) byQueue[key].ok++;\n  else { byQueue[key].failed++; byQueue[key].detail.push(`${src.surface}: ${body.error || 'failed'}`); }\n}\nconst summary = Object.values(byQueue);\nconst complete = summary.filter(s => s.failed === 0 && s.ok === 5).map(s => s.id);\nreturn [{ json: {\n  complete,\n  incomplete: summary.filter(s => !(s.failed === 0 && s.ok === 5)),\n  message: complete.length === summary.length\n    ? `All ${summary.length} asset(s) published to all 5 surfaces.`\n    : `${summary.length - complete.length} asset(s) only partially published — see incomplete.`,\n} }];"
+      },
+      "id": "2fb78b2b-7b21-5d83-a124-2d37791f85a4",
+      "name": "Collect results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        -60
       ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "UPDATE publisher_queue38 SET status = 'published', published_at = NOW() WHERE id = $1",
+        "query": "UPDATE publisher_queue38 SET status = 'published', published_at = NOW() WHERE id = ANY($1::bigint[])",
         "options": {
-          "queryReplacement": "={{ $('Approved rows').item.json.id }}"
+          "queryReplacement": "={{ JSON.stringify($json.complete) }}"
         }
       },
-      "id": "5c43c53e-837f-5fea-b465-c55b962edf46",
-      "name": "Mark published",
+      "id": "0b6e6227-c032-524b-b210-d09d58c109f6",
+      "name": "Mark complete rows",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
       "position": [
-        880,
-        -80
+        1320,
+        -160
       ],
       "credentials": {
         "postgres": {
@@ -137,7 +164,28 @@
     {
       "parameters": {
         "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
-        "text": "=WF5 ran — nothing is approved for this window. G4 still holds {{ $('Approved rows').all().length }} rows.",
+        "text": "=WF5 — {{ $('Collect results').first().json.message }}",
+        "additionalFields": {}
+      },
+      "id": "2914f3ff-e590-58ef-ac54-ddfda0c9db6d",
+      "name": "Telegram Sir",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1540,
+        -60
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_TELEGRAM",
+          "name": "Jarvis Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+        "text": "=WF5 ran — nothing is approved for this window. G4 still holds the queue.",
         "additionalFields": {}
       },
       "id": "01a1bf8c-bfe9-5c96-a621-dfb17ab43a1d",
@@ -146,7 +194,7 @@
       "typeVersion": 1.2,
       "position": [
         660,
-        120
+        140
       ],
       "credentials": {
         "telegramApi": {
@@ -183,7 +231,7 @@
       "main": [
         [
           {
-            "node": "Send to Buffer",
+            "node": "Fan out 5 surfaces",
             "type": "main",
             "index": 0
           }
@@ -197,11 +245,38 @@
         ]
       ]
     },
-    "Send to Buffer": {
+    "Fan out 5 surfaces": {
       "main": [
         [
           {
-            "node": "Mark published",
+            "node": "Publish per surface",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publish per surface": {
+      "main": [
+        [
+          {
+            "node": "Collect results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect results": {
+      "main": [
+        [
+          {
+            "node": "Mark complete rows",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Telegram Sir",
             "type": "main",
             "index": 0
           }

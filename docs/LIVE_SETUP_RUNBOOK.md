@@ -99,10 +99,45 @@ whose false branch announces *STOPPED — nothing was written*. Do not remove th
 - Auth is `Authorization: Key ID:SECRET` — **not** Bearer. Endpoint `POST https://api.higgsfield.ai/wan/v2.7/image-to-video`, response `{ video: { url } }`.
 - Engine order: **paid Higgsfield is the render path** (`lib/render-paid.ts`). The stickman repo is the animation style, not a free renderer; Wan is the fallback when Higgsfield is unavailable. The earlier "free first, pay only when the cheap path fails" line was reversed on 2026-10-31.
 
-## Step 6 — Publish
+## Step 6 — Publish (five surfaces)
 
-- https://buffer.com → Settings → Apps and Extras → Access Token → `BUFFER_TOKEN`.
-- Connect five surfaces once: YouTube longform, YouTube shorts, TikTok, Instagram, Facebook. **X is deliberately not connected.**
+Buffer's REST API is retired. The adapter speaks GraphQL at `api.buffer.com`; nothing else in this
+repo calls Buffer.
+
+1. https://publish.buffer.com → avatar → **Settings → API access → Generate personal access token**
+   → `BUFFER_API_KEY`.
+2. **Connect the five channels once**, in Buffer: YouTube ×2 (longform and Shorts), TikTok,
+   Instagram, Facebook. **X is deliberately not connected** — it was removed on 2026-10-31 and
+   `/api/publish` rejects it.
+3. **Name the two YouTube channels differently in Buffer** — one must have "Shorts" in its name, or
+   the automatic mapping refuses to guess which is which.
+4. Discover the ids:
+
+   ```
+   POST /api/publish?discover=1      (Authorization: Bearer $N8N_BRAIN_TOKEN)
+   ```
+
+   It returns your channels plus a `proposed` mapping and, if anything is ambiguous, says so. Copy
+   the ids you recognise into `BUFFER_CHANNEL_YOUTUBE_LONGFORM`, `_YOUTUBE_SHORTS`, `_TIKTOK`,
+   `_INSTAGRAM`, `_FACEBOOK`.
+5. **Dry run before the first real post:**
+
+   ```
+   POST /api/publish?dry=1   { "surface": "instagram", "text": "...", "videoUrl": "https://..." }
+   ```
+
+   It validates and shows the exact GraphQL body without sending anything.
+
+**Two things worth knowing about this API:**
+
+- A **failed** mutation returns **HTTP 200** with a `MutationError` union member. `lib/publish.ts`
+  treats a missing `post` as failure (`P01`). A caller that checks only the status code records
+  every failure as a successful publish.
+- Rate limits are **100 per 15 minutes, 250–500 a day**. At full scale this operation sends 75/day
+  (5 surfaces × 5 pages × 3 posts) — inside the budget, but it is close enough to watch.
+
+**Direct publish is a Pro and Team privilege.** A Circle member receives the finished asset to post
+themselves; `/api/publish` returns 403 for any tier below Pro, read from `lib/tiers.ts`.
 
 ## Step 7 — Email
 
