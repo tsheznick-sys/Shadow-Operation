@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSql } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { audit, rateLimit } from "@/lib/limits";
 import adaptable from "@/config/adaptable.json";
 
 /**
@@ -34,6 +35,11 @@ const PRICES: Record<Tier, number> = (() => {
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
+  const lim = rateLimit(`upgrade:${req.headers.get("x-forwarded-for") ?? "local"}`, "money");
+  if (!lim.allowed) {
+    return NextResponse.json({ ok: false, error: "rate_limited", retry_after_s: lim.retry_after_s }, { status: 429 });
+  }
+
   const session = getSession();
   if (!session) return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   // Only the owner moves money. The social and content seats can see a plan, never change one.
@@ -80,9 +86,16 @@ export async function POST(req: NextRequest) {
     if (sql) {
       await sql`INSERT INTO retention_events (id, user_id, action, offer)
                 VALUES (${`upg_${Date.now()}`}, ${whopUserId}, 'plan_change', ${toTier})`;
+      // Money moved. It gets written down or it did not happen.
+      await audit(
+        { actor: session.email, role: session.role, action: "plan_change", target: whopUserId, result: res.ok ? "ok" : "error", meta: { toTier, price: PRICES[toTier] } },
+        sql,
+      );
     }
     return NextResponse.json({ ok: res.ok, tier: toTier, price: PRICES[toTier], whop: data }, { status: res.ok ? 200 : 502 });
   } catch (e: any) {
+    const sql = getSql();
+    if (sql) await audit({ actor: session.email, role: session.role, action: "plan_change", target: whopUserId, result: "error", meta: { error: e?.message } }, sql);
     return NextResponse.json({ ok: false, error: "whop_request_failed", detail: e?.message }, { status: 502 });
   }
 }

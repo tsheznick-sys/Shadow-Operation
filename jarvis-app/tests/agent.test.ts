@@ -17,6 +17,8 @@ import { cronAllowed } from "../lib/cron-auth";
 import { createHmac } from "crypto";
 import { planFor, tierFromProduct, verifySignature } from "../lib/webhook";
 import { pickEngine, preflight, render } from "../lib/render";
+import { LIMITS, moneyRouteReady, rateLimit, resetLimits } from "../lib/limits";
+import { authHeader, credentials, higgsfieldRender } from "../lib/render-paid";
 
 type Case = { id: string; dimension: string; what: string; expect: string; run: () => { pass: boolean; got: string } | Promise<{ pass: boolean; got: string }> };
 const results: Case[] = [];
@@ -352,6 +354,99 @@ add({ id: "P06", dimension: D.EXE, what: "render with no engine", expect: "ok=fa
   async run() {
     const r = await render({ script: "x".repeat(300), niche: "S", format: "short", tier: "free" }, { rulesPassed: true, policyPassed: true });
     return { pass: !r.ok && !r.asset_url && !!r.reason, got: r.reason ?? "no reason" };
+  }});
+
+/* ---------------- LIMITS: burst control on money routes ---------------- */
+
+add({ id: "L01", dimension: SEC, what: "the login limit allows 8 then refuses", expect: "6 allowed for money, then 429",
+  run: () => {
+    resetLimits();
+    const n = LIMITS.money.limit;
+    let allowed = 0;
+    for (let i = 0; i < n + 3; i++) if (rateLimit("k1", "money").allowed) allowed++;
+    return { pass: allowed === n, got: `${allowed} allowed of ${n + 3}` };
+  }});
+
+add({ id: "L02", dimension: SEC, what: "a blocked key reports a retry time", expect: "retry_after_s > 0",
+  run: () => {
+    resetLimits();
+    for (let i = 0; i < LIMITS.money.limit; i++) rateLimit("k2", "money");
+    const r = rateLimit("k2", "money");
+    return { pass: !r.allowed && r.retry_after_s > 0, got: `${r.allowed} / ${r.retry_after_s}s` };
+  }});
+
+add({ id: "L03", dimension: SEC, what: "the window resets", expect: "allowed again after the window",
+  run: () => {
+    resetLimits();
+    const t0 = Date.now();
+    for (let i = 0; i < LIMITS.money.limit; i++) rateLimit("k3", "money", t0);
+    const blocked = rateLimit("k3", "money", t0).allowed;
+    const after = rateLimit("k3", "money", t0 + LIMITS.money.windowMs + 1).allowed;
+    return { pass: !blocked && after, got: `blocked=${!blocked} recovered=${after}` };
+  }});
+
+add({ id: "L04", dimension: SEC, what: "two keys do not share a budget", expect: "independent",
+  run: () => {
+    resetLimits();
+    for (let i = 0; i < LIMITS.money.limit; i++) rateLimit("a", "money");
+    const b = rateLimit("b", "money").allowed;
+    return { pass: b, got: `${b}` };
+  }});
+
+add({ id: "L05", dimension: SEC, what: "the money route has limit, audit, session and owner gate", expect: "all four present",
+  run: () => {
+    const src = readFileSync(join(ROOT, "jarvis-app", "app", "api", "whop", "upgrade", "route.ts"), "utf8");
+    const r = moneyRouteReady(src);
+    return { pass: r.ok, got: r.ok ? "ready" : r.missing.join(", ") };
+  }});
+
+/* ---------------- PAID RENDER: Higgsfield, against their documented contract ---------------- */
+
+const fakeFetch = (status: number, body: any) =>
+  (async () => ({ ok: status < 400, status, json: async () => body }) as any) as unknown as typeof fetch;
+
+add({ id: "H01", dimension: D.EXE, what: "the auth header format", expect: "'Key id:secret' — not Bearer",
+  run: () => {
+    const h = authHeader({ keyId: "ID123", keySecret: "SEC456" });
+    return { pass: h === "Key ID123:SEC456" && !h.startsWith("Bearer"), got: h.replace("SEC456", "***") };
+  }});
+
+add({ id: "H02", dimension: D.EXE, what: "no credentials", expect: "refuses and states nothing was charged",
+  run: async () => {
+    const r = await higgsfieldRender({ imageUrl: "https://x/f.jpg" }, { env: {} as any });
+    return { pass: !r.ok && !("url" in r) && /charged/.test(r.reason), got: r.reason };
+  }});
+
+add({ id: "H03", dimension: D.EXE, what: "a completed render", expect: "video.url parsed",
+  run: async () => {
+    let seenUrl = "", seenAuth = "";
+    const f = (async (url: string, init: any) => {
+      seenUrl = url; seenAuth = init.headers.Authorization;
+      return { ok: true, status: 200, json: async () => ({ status: "completed", request_id: "r1", video: { url: "https://cdn/v.mp4" } }) } as any;
+    }) as unknown as typeof fetch;
+    const r = await higgsfieldRender({ imageUrl: "https://x/f.jpg" }, { fetchImpl: f, env: { HIGGSFIELD_KEY_ID: "i", HIGGSFIELD_KEY_SECRET: "s" } as any });
+    const rightEndpoint = seenUrl === "https://api.higgsfield.ai/wan/v2.7/image-to-video";
+    return { pass: r.ok && r.url === "https://cdn/v.mp4" && rightEndpoint && seenAuth.startsWith("Key "), got: `${seenUrl} → ${r.ok ? r.url : r.reason}` };
+  }});
+
+add({ id: "H04", dimension: D.EXE, what: "credentials rejected", expect: "401 explained, not swallowed",
+  run: async () => {
+    const r = await higgsfieldRender({ imageUrl: "https://x/f.jpg" }, { fetchImpl: fakeFetch(401, {}), env: { HIGGSFIELD_KEY_ID: "i", HIGGSFIELD_KEY_SECRET: "s" } as any });
+    return { pass: !r.ok && /credentials rejected/.test(r.reason), got: r.reason };
+  }});
+
+add({ id: "H05", dimension: D.EXE, what: "accepted but still rendering", expect: "pending, with a request id and no url",
+  run: async () => {
+    const r = await higgsfieldRender({ imageUrl: "https://x/f.jpg" }, { fetchImpl: fakeFetch(200, { status: "processing", request_id: "rq9" }), env: { HIGGSFIELD_KEY_ID: "i", HIGGSFIELD_KEY_SECRET: "s" } as any });
+    return { pass: !r.ok && r.pending && r.requestId === "rq9" && !("url" in r), got: r.reason };
+  }});
+
+add({ id: "H06", dimension: D.EXE, what: "every request carries an idempotency key", expect: "present, so a retry cannot double-bill",
+  run: async () => {
+    let key = "";
+    const f = (async (_u: string, init: any) => { key = init.headers["Idempotency-Key"]; return { ok: true, status: 200, json: async () => ({ video: { url: "https://cdn/v.mp4" } }) } as any; }) as unknown as typeof fetch;
+    await higgsfieldRender({ imageUrl: "https://x/f.jpg" }, { fetchImpl: f, env: { HIGGSFIELD_KEY_ID: "i", HIGGSFIELD_KEY_SECRET: "s" } as any });
+    return { pass: !!key && key.length > 3, got: key };
   }});
 
 /* ---------------- MEMORY: does the code still match the locks ---------------- */
