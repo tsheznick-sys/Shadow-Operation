@@ -1819,6 +1819,29 @@ add({ id: "SC20", dimension: D.SCH, what: "a surface already has its full per-da
 
 const R = D.RUN;
 
+add({ id: "RN23", dimension: R, what: "the migration runner is pointed at the wrong database", expect: "it refuses before writing — no URL, a direct endpoint, or no TLS",
+  run: () => {
+    // A migration that runs against the direct endpoint works locally and exhausts connections on
+    // Vercel; one without sslmode fails after the first statement. Both are refused up front.
+    const { spawnSync } = require("node:child_process");
+    const script = join(ROOT, "jarvis-app", "scripts", "migrate.mjs");
+    const cases = [
+      { env: { DATABASE_URL: "" }, want: /DATABASE_URL is not set/ },
+      { env: { DATABASE_URL: "postgresql://u:p@ep-x.us-east-2.aws.neon.tech/db?sslmode=require" }, want: /pooled endpoint/ },
+      { env: { DATABASE_URL: "postgresql://u:p@ep-x-pooler.neon.tech/db" }, want: /sslmode=require/ },
+    ];
+    const got: string[] = [];
+    let pass = true;
+    for (const c of cases) {
+      const r = spawnSync(process.execPath, [script], { env: { ...process.env, ...c.env }, encoding: "utf8", timeout: 20000 });
+      const out = `${r.stdout || ""}${r.stderr || ""}`;
+      if (r.status !== 2 || !c.want.test(out)) pass = false;
+      got.push(`${r.status}:${(out.trim().split("\n").pop() || "").slice(0, 44)}`);
+    }
+    return { pass, got: got.join(" | ") };
+  }});
+
+
 add({ id: "RN22", dimension: R, what: "the two-factor mail fails to send", expect: "the API never returns the code unless demo logins are explicitly on",
   run: () => {
     // `devCode: result.sent ? undefined : currentCodeForDemo(email)` is a second factor that

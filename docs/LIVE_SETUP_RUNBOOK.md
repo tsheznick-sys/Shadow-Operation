@@ -14,10 +14,24 @@ Why first: in production the app refuses to boot without it, by design.
 1. https://console.neon.tech → New Project → `shadow-operation` → nearest region.
 2. **Connect** → copy the connection string (use the **pooled** one, it contains `-pooler`).
 3. Keep it on the clipboard for Step 2. Do not paste it into any document.
-4. Create the tables: open the Neon SQL Editor, paste all of `jarvis-app/scripts/migrate.sql`, run it. It is idempotent.
-5. Verify: `SELECT count(*) FROM information_schema.tables WHERE table_schema='public';` → **33 or more**. If 0, the editor ran against the wrong database.
+4. Create the tables from a terminal, not the SQL editor:
 
-   The file creates 33 tables. Three of them — `creators`, `publisher_queue38`, `post_analytics` — were added on 2026-10-31 because the n8n workflows wrote to them and nothing created them. If your count is short by exactly those three, you pasted an older copy of the file.
+   ```bash
+   cd jarvis-app
+   DATABASE_URL="postgresql://…-pooler…?sslmode=require" npm run migrate
+   ```
+
+   The runner refuses a connection string without `-pooler` (serverless plus the direct endpoint
+   exhausts Neon's slots) and without `sslmode=require`. It then re-counts
+   `information_schema.tables` and exits non-zero unless **34** tables exist and
+   `agent_members`, `agent_runs` and `agent_schedule` are among them. A migration that half-applied
+   and exited 0 is how a "finished" setup breaks on the first run three days later.
+
+5. Expected last line: `tables=34 columns=… required_missing=[]` then `schema is in place`.
+
+   The file creates **34** tables. Three of them — `creators`, `publisher_queue38`, `post_analytics` —
+   were added on 2026-10-31 because the n8n workflows wrote to them and nothing created them. If your
+   count is short, you ran an older copy of the file.
 
 ## Step 2 — Vercel (hosting)
 

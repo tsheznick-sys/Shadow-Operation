@@ -9,7 +9,8 @@
     "start": "next start -H 0.0.0.0 -p 3000",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test:agent": "tsc tests/agent.test.ts --outDir .test-build --module commonjs --target es2020 --moduleResolution node --skipLibCheck --esModuleInterop --resolveJsonModule && REPO_ROOT=.. NODE_PATH=$PWD/node_modules node .test-build/tests/agent.test.js"
+    "test:agent": "tsc tests/agent.test.ts --outDir .test-build --module commonjs --target es2020 --moduleResolution node --skipLibCheck --esModuleInterop --resolveJsonModule && REPO_ROOT=.. NODE_PATH=$PWD/node_modules node .test-build/tests/agent.test.js",
+    "migrate": "node scripts/migrate.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
