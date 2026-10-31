@@ -1,121 +1,196 @@
 # SHADOW OPERATION — A TO Z SUMMARY FOR THE BROZ
 
-**Branch `arena/6c47af3d-shadow-operation` `pr_open` | 2026-10-30 EAT | ZIP `jarvis_self_3man_bundle.zip` 3.0M | Drive `17KpzZCm...` | Live `https://github.com/tsheznick-sys/Shadow-Operation`**
+**Branch `arena/6c47af3d-shadow-operation` `pr_open` | 2026-10-31 EAT | ZIP `jarvis_self_3man_bundle.zip` 1.7M / 123 files | Drive `1tHjh66Z...` | Live `https://github.com/tsheznick-sys/Shadow-Operation`**
 
-> **One sentence:** Jarvis does everything while you sleep — you only swipe SEND + sign + collect — from finding niches to posting 6/day to getting paid on Whop.
+> **One sentence:** Jarvis does everything while you sleep — you only swipe SEND, sign, and collect — from finding niches to posting 6/day to getting paid on Whop.
 
-**New twist per Content Guy:** **Main Page 1 = Stickman Finance** (retains churn: finance RPM $8-15 keeps members paying, stickman stories explain loans/budget while holding retention) + **Other niches stay Page 2+** (Psychology/Dark Psych/Marketing History etc) — hybrid cloud free GitHub+Vercel Hobby+Neon $0.
-
----
-
-## A — What we built (Full Stack SCALE $160/mo)
-
-**Squad 3-man self-only:** Content G4 (queue38 approve) + Social (Buffer one-app) + Admin (whole pipeline) — equal SEND, you super-admin money/sign. Vercel PWA `0.0.0.0:3000` embeds n8n+Buffer+Chatfuel one frontend.
-
-**Engine chain (nobody opens apps) — Hybrid both_engines:** `ALL pages: stickman-video-director free renders 30m longform + Shorts (one master prompt + one reference frame locks character)` (TubeGen $29 fallback only) → `OpusClip 5-8 shorts virality 9.2 9:16 (stickman character lock)` → `Higgsfield polish $0.08 — cleans longform AND shorts` → `Claude Max SEO` → `Buffer 6/day serious IG/TikTok/YT + X 1-2 discovery filler` — Higgsfield longform+shorts polish replaces LUT
-
-**Fall engine:** Wan 1.3B T4 free Colab `WAN_T4_URL` — TubeGen missing → Wan auto, Higgsfield alone cannot make source.
-
-**Alternatives (adaptable `ENGINE_PROVIDER` env):** `tubegen $29` primary kept | `pictory $25` Marketing History | `fliki $21` Dark Psych voice | `invideo $17` Finance | `heygen $24` Wolf avatar | `frameloop $19` dailies — switch via `ENGINE_PROVIDER=fliki` + `FLIKI_API_KEY` no code.
+**The whole system, at a glance:** `docs/n8n_workflow_map.png` (14 workflows, 6 lanes) · node-level detail `docs/N8N_WORKFLOW_DIAGRAM_FULL.md` · raw image `https://github.com/tsheznick-sys/Shadow-Operation/raw/arena/6c47af3d-shadow-operation/docs/n8n_workflow_map.png`
 
 ---
 
-## B — How money is made
+## A — The engine chain (what actually makes the videos)
 
-**Ladder `WHOP_API_KEY` + `WHOP_PRODUCT_LITE_ID/PRO_ID`:** `GOOD $27` manual Pillow+Wan → `BETTER $79` TubeGen presets (Lite $9 unlocks 1 domain 3/day) → `BEST $79+$29/mo` 5 domains 6/day auto (Pro $29 unlocks) → `Circle $19/mo` pod streak. Whop takes 3% + Stripe 2.7%+$0.30 (~$4.70 on $79) before payout.
+**`stickman_all` on every page.** `kaomei/stickman-video-director` (git clone, **free**) renders the **30-minute longform AND the Shorts** — one master prompt + one reference frame locks the character across both.
 
-**Trigger auto:** Demand `1%+25` IG/TikTok/YT only (X ignored) `replies >= max(25, ceil(views*1%))` → Whop product auto-create → Chatfuel push `VAULT`.
+```
+WF1 daily 08:00 whole-internet scan (X / Reddit / YouTube / Trends / rivals)
+   → Claude action plan per niche: angle · hook · CTA · day · proof
+WF2 daily 02:00  → 6 scripts/domain (4,500 words = 30 min) → stickman render 30m + Shorts → queue70
+WF3 webhook      → OpusClip 6 clips @ virality 9.2 → Higgsfield polish $0.08/clip on LONG **and** SHORTS + character lock
+WF4 06:00 G4     → the ONLY publish gate → Buffer
+WF4 buffer       → 6 Shorts/day serious + longform Mon/Wed/Fri + X 1–2 discovery
+```
 
-**Math:** MVP $61/mo 1 brand → 3 sales $81 covers. SCALE $189 5 brands → 7 sales $189 covers. Year1 pocket $189×12=$1,920 + $60 PSTN = $2,328 you fund → net $1K/mo for 3 bros 30/20/50 → 100K gross same flat.
+- **TubeGen $29 = fallback only.** Missing → Wan T4 free (`WAN_T4_URL`) → if Higgsfield alone, stop (it polishes, it cannot source).
+- **Alternatives, env switch `ENGINE_PROVIDER`:** `pictory $25` Marketing History · `fliki $21` Dark Psych voice · `invideo $17` Finance · `heygen $24` Wolf avatar · `frameloop $19` dailies.
+- **LUT is gone.** Watermarks (`@premiereprotutos`) gone. Never come back.
 
 ---
 
-## C — The 3 Gates (no gate = no Whop)
+## B — The 2-channel YouTube split (new)
 
-- **GREEN `<50+5%+` ratio+ER + buyer_pool_x3** → `Comments→DM→Whop Purchase` same day 3-email → FINAL TERMS 10pts superfast
-- **AMBER `50-70+3-5%`** → `Comments→DM→14-day→Whop` drip Day1-3 value Day4-7 teardown Day8-14 close $19 Circle daily CTA, YES any day → jump to GREEN
-- **RED `>70 or <3%`** → HOLD → improve loop (A/B Higgsfield/OpusClip + daily ER + weekly Grok 1000 niches re-rank + Whop A/B) no G4 tweaks
+| Channel | What it carries | Cadence |
+|---|---|---|
+| `<Brand> Shorts` | every clip from WF3 | 6/day via Buffer |
+| `<Brand>` longform | the 30-min renders | 3×/week, Mon/Wed/Fri |
 
-**Why fast:** leak→expand daily 05:45 leak finder `operator_context` → weekly Grok top5 expand → auto.
+**5 brands = 10 YouTube channels**, plus TikTok, IG and X discovery for every brand.
+
+**Why:** Shorts channels earn subscriber velocity from volume; longform channels protect watch-time and RPM. One mixed channel splits the algorithm signal and depresses RPM. `YT_CHANNELS_PER_BRAND=2` (set `1` for legacy).
 
 ---
 
-## D — The 9 Workflows (n8n Cloud $20)
+## C — How money is made
+
+**Ladder `WHOP_API_KEY`:** `Circle $19/mo` · `Lite $9` (1 domain, 3/day) · `GOOD $27` manual → `BETTER $79` TubeGen presets → `Pro $29/mo` across 5 domains 6/day. Jarvis **consults the owner with live market data before changing any price** — it never reprices quietly.
+
+**Two ways in:**
+- **GREEN** → `Comments → DM → Whop` **same day**, 3-email cap, then FINAL TERMS.
+- **AMBER** → the **monthly 14-day Growth Operator sequence** per the playbook: Warm-Up 1–3 / Value 4–9 / Money 10–14 with **11 buy buttons**. Higgsfield renders the slides → Buffer. G4 approves once per cycle.
+
+**Save offers:** pause $5/mo · 50% off · Lite $9 — **one per 30 days**.
+
+**Funding is self-funding:** $19 Circle · tools $165 paid first · prizes $750 pro-rata · annual fund $133/mo. **Break-even 48 members · recommended 51** (final floor from 60 days of real data). **Autopay is HELD** until you grant it.
+
+---
+
+## D — The 14 workflows
 
 | WF | When | What |
 |---|---|---|
-| **WF1** Mon 08:00 Grok | Rank 1000 niches `config/adaptable.json` pool → top5 `solo_domains` |
-| **WF2** 02:00 daily Claude | 6 scripts/domain → TubeGen/Wan 30m → queue38 |
-| **WF3** webhook | OpusClip clips + Higgsfield per-clip LUT |
-| **WF4** G4 approve | SEO Claude → Buffer Team 6/day serious + X 1-2 discovery |
-| **WF5 GREEN** 09:00 | Demand fast-close `VAULT` Chatfuel IG&TK + ManyChat YT |
-| **WF5A AMBER** | 14-day nurture same channels |
-| **WF6** 05:45 + Gmail `brand@*` | Daily brief + leak→expand |
-| **WF7** Vapi Jive `+25418XXXX710` Vesper 20yo | 3 legs parallel Africa $0.06→Twilio $0.22, Whisper → Drive/Neon |
-| **WF8** Whop cancel/failed | Save Pause $5 / 50% off / Downgrade $9 → 44% saves 1.4% churn |
-| **WF9** Sun 09:00 + 05:45 | WWS + leaderboard Pod Red 28 vs Blue 22 + pods ≤5 accountability |
+| **WF1** | **daily 08:00** | Whole-internet scan + Claude action plan → top5 by buyer pool ×3, ratio <50, ER ≥5% |
+| **WF2** | daily 02:00 | 6 scripts/domain → stickman 30m + Shorts on all pages → queue70; publishes M/W/F |
+| **WF3** | webhook | OpusClip 6 @9.2 + Higgsfield polish on longform and shorts |
+| **WF4** | 06:00 | **G4 → the only gate** → Buffer 6/day + longform M/W/F + X 1–2 discovery |
+| **WF5** | 09:00 | GREEN same-day fast-close, Chatfuel IG/TK + ManyChat YT |
+| **WF5A** | on AMBER | Enrolls the monthly 14-day sequence |
+| **WF6** | 05:45 + daily | Leak finder → expand; alerts at 2.0% churn, 5-pod cap, weekly expand |
+| **WF7** | webhook | Vessy on Vapi `+25418XXXX710`, 3 legs, Whisper → Neon; **calls any seat silent 10 min** |
+| **WF8** | Whop webhook | Save offers, autopay prep (held), revenue ledger |
+| **WF9** | Sun 09:00 / 05:45 | WWS, leaderboard, pods ≤5 |
+| **WF10** | 1st of month 07:00 | 14-day sequence: slides → Higgsfield → Buffer → G4 once |
+| **WF11** | 72h after test | **Demand test** (not followers): 3-slide Stories → 50+ PASS / 25–49 AMBER / <25 RED |
+| **WF12** | weekly | Interview digest → sets each seat's authority |
+| **WF13** | any outbound run | **Global pause check** — Big Red Button, owner-only resume |
 
-All thresholds `THRESHOLD_*` env-overridable, platforms `PLATFORMS` + `BUFFER_*` adaptable, pages `PAGES_COUNT=5` any N.
-
----
-
-## E — Accounts (split locked)
-
-- **Admin master `scott.abuya@gmail.com`:** Vercel/Neon/n8n/Claude/Grok/Whop/Wise/Linear/Telegram/Signal/Jive — never social
-- **Social master `info.wolf@gmail.com`:** 5 YT brands TT/IG/X via Buffer Team — never admin
+Every threshold is `THRESHOLD_*` env-overridable. Pages `PAGES_COUNT=5`. Platforms via `PLATFORMS` + `BUFFER_*`.
 
 ---
 
-## F — Churn 1-2% locked (not hoped)
+## E — The three seats
 
-System M1-M5 teaches 90% → Agent Lite $9/Pro $29 stuck 48h → Proof WWS Sun 09:00. Cancel → save screen before churn counts. `lib/entitlement.ts` mirrors Whop `has_access`. Team `TEAM_ID` $59 for 3-man.
+| Seat | Receives | Cannot |
+|---|---|---|
+| **Content** | G4, queue, video pages | Money, DMs |
+| **Social** | Inbound, DM threads, Big DMs | Money, publishing outside G4 |
+| **Admin** | Whole pipeline, exceptions | Move money |
 
----
+Three ways in: **Google OAuth** (only the 3 seeded emails work) · email/password + HMAC `shadow_session` 7 days · **6-digit 2FA on `/money` and `/admin`**. Each seat answers an **18-question interview**; under **60%** = no unsupervised authority. Lives at `/onboarding` → `/autonomy`.
 
-## G — What each Bro does daily (2 min)
-
-1. Open `https://your-vercel.app` → see `Sir, 6 videos live 2.1K views 18 replies` (WF6 05:45)
-2. `/drafts` swipe SEND (you human, not Jarvis)
-3. `/content` G4 approve queue38 → `/social` give Jarvis autopublish → done
-4. Reply YT comments → Gmail triage → Jarvis drafts 3-cap → you SEND → Whop auto
-
-**Total:** 6 videos/day/brand ×5 = 30/day publish, 1-2 X filler discovery only.
+**Logins:** admin master `scott.abuya@gmail.com` (Vercel/Neon/n8n/Claude/Grok/Whop/Wise/Linear/Telegram/Signal/Jive — never social) · social master `info.wolf@gmail.com` (all brand channels — never admin).
 
 ---
 
-## H — Live Links (click to setup)
+## F — Signals: how Jarvis reaches you
 
-`vercel.com/new` `neon.tech` `n8n.cloud` `console.anthropic.com` `console.x.ai` `whop.com/dashboard` `buffer.com` `chatfuel.com` `vapi.ai` `elevenlabs.io` `wise.com` `console.cloud.google.com` — full list `docs/LIVE_LINKS_SETUP.md`
+Every message is signed **as Vessy**, the agent — not as a system notice.
 
----
+1. **Daily email to all 3 seats** — the shared record.
+2. **In-app PWA update** — free, opens like an app.
+3. **SMS when a seat is offline.**
+4. **Voice call if no reply in 10 minutes.**
 
-## I — Costs (monthly / annual prepaid after discounts)
-
-| Plan | Monthly | Annual ×12 | Annual Prepaid | Save |
-|---|---|---|---|---|
-| **MVP 1 brand** | $61 | $732 | $576 (n8n annual) | $156 |
-| **SCALE 5 brands** | $189 | $1,920 (+$60 PSTN $2,328) | ~$1,992 | $336 |
-
-Pay monthly until $1K net, then prepaid to save.
+Full detail: `docs/SIGNALS_CONTROLS_RETENTION.md`.
 
 ---
 
-## J — How to run fully adaptable (no hardcode)
+## G — The Big Red Button
 
-Edit `config/adaptable.json` OR Vercel env `NICHES_POOL` `THRESHOLD_RATIO_GREEN=50` `PAGES_COUNT=5` `WHOP_LADDER_PRICES=$27+$9+$79+$19` `ENGINE_PROVIDER=tubegen` → redeploy, no code. See `docs/FULLY_ADAPTABLE_GUIDE.md`.
+`/control` (owner only) — one switch stops **publishing, DMs, voice and money**.
 
----
+- **Stops:** WF4 Buffer, WF5/WF5A, WF7 voice, WF8/WF10 autopay and sequences, WF11 unlocking.
+- **Keeps running:** WF1 research (free, keeps the pool fresh), WF2/WF3 rendering (assets stack in R2), WF6/FW9/WF12, inbound Whop webhooks.
+- **Rules:** only the owner resumes · nothing auto-resumes · every pause and resume is written to `audit_log` with actor, time and reason · works from the phone via "press 1" on the Jive call (signed owner token).
 
-## K — What to do today
-
-1. Clone `git clone -b arena/6c47af3d-shadow-operation https://github.com/tsheznick-sys/Shadow-Operation.git` → open `jarvis-app/` in Claude Code
-2. Paste `docs/CLAUDE_MASTER_PROMPT_JARVIS.md` into Claude Project instructions (or `00_MASTER_SYSTEM_PROMPT.md` → `CLAUDE.md`)
-3. `cp .env.example .env.local` → run `bash scripts/setup_claude_key.sh` (prompts `ANTHROPIC_API_KEY` + Grok + adaptable vars, writes `.env.local` + offers Vercel add)
-4. Deploy Vercel + Neon `migrate.sql` + n8n import `n8n_workflows_self_3man.json` + Variables `config/n8n_workflow_variables.json`
-5. Import 1,000 niches `data/creator_db_faceless_1000_FINAL.csv` → WF1 Monday top5 → sleep, WF2 02:00 makes your first 30m → wake to queue38 → G4 → live.
-
-**Vesper is live:** Vapi Jive One `+25418XXXX710` 3 legs parallel — say `Hey Jarvis` on PWA mic → Claude → Vesper `Hey Sir it's Vesper!` — `audio/vesper_voice_*` + `lib/voice.ts` bundled.
+Implementation: `jarvis-app/lib/control.ts` (`mayActOutbound()` is called *before* any outbound workflow acts), `/api/control`, `/control`, and the `/admin` button.
 
 ---
 
-*Anything hard-coded before is now env. One ZIP rule: main in repo `jarvis_self_3man_bundle.zip` → copy to Drive `NUMINOUS_WHOP_DEPLOY/17KpzZCmxxz13vJfkKv96EZZ5e7KTft8G`.*
+## H — Retention & offline
+
+| Asset | Kept |
+|---|---|
+| Longform masters | **30 days**, then deleted (regenerable from script + character lock) |
+| Published assets | **forever** |
+| Transcripts / call recordings | 12 months |
+| Neon index rows | forever |
+
+Storage: **R2 canonical** (content), **Neon** index, **Drive** deliverables and docs only. The 30-day rule keeps R2 on the $5 tier.
+
+**Offline = full autonomy continues** + a daily SMS feedback line to all three seats.
+
+---
+
+## I — Autonomy: you asked "what runs alone?"
+
+**Overall 80%**, money excluded from the average.
+
+| Lane | % | Lane | % |
+|---|---|---|---|
+| Research | 95 | Publish | 70 |
+| Clip + polish | 90 | Voice | 60 |
+| Retention saves | 90 | **Money** | **40 (capped — prepares, you approve)** |
+| Sequence | 85 | DMs | 75 |
+| Render | 80 | | |
+
+Floors are enforced in `lib/autonomy.ts`, so a 2am edit cannot hand away more than you agreed. Three lanes earn their way up: publish +15 after 30 clean G4s · DMs +10 after a 100% social interview · money +20 after 90 clean days. Full table: `docs/AUTONOMY_MATRIX.md`, live at `/autonomy`.
+
+---
+
+## J — Costs
+
+| Plan | Monthly | Notes |
+|---|---|---|
+| **MVP 1 brand** | **$61** | 3 sales cover it |
+| **SCALE 5 brands** | **~$165–175** | adds R2 $5 + SMS ~$10; 7 sales cover it |
+
+n8n Cloud $20 · Buffer Team $60 · Claude · OpusClip · Higgsfield $0.08/clip · stickman $0 · Wan T4 $0. Pay monthly until $1K net, then prepay annually for the discount.
+
+---
+
+## K — Go-live (today)
+
+**All 5 pages at once.**
+
+1. Neon → run `jarvis-app/scripts/migrate.sql` (16 tables)
+2. n8n → import `n8n/n8n_workflows_self_3man.json` (**14 workflows**) + `config/n8n_workflow_variables.json`
+3. Vercel → env matrix + crons + domain
+4. All three seats sign in → `/onboarding` (18 questions each) → owner reviews `/autonomy` and `/control`
+5. Import `data/creator_db_faceless_1000_FINAL.csv`
+6. Start WF1 → WF2 → WF3 → WF4 for **every page at once**, 2 YT channels per brand
+7. First 72 hours: watch the G4 queue, `/autonomy`, and the first demand test
+
+**First-week target:** 5 pages live · **30 clips out** · **first 3 Circle members.**
+
+**Phase 2:** once the Shadow Operation role converts the required clients, Jarvis gets the full backend — run the pipeline end to end, monetise the pages, make the sales itself.
+
+---
+
+## L — Adaptable, no code
+
+`config/adaptable.json` (or Vercel env): `PAGES_COUNT` `NICHES_POOL` `THRESHOLD_RATIO_GREEN` `THRESHOLD_ER_GREEN` `ENGINE_PROVIDER` `YT_CHANNELS_PER_BRAND` `BUFFER_*` `WHOP_LADDER_PRICES` `LONGFORM_PUBLISH_DAYS` `RETENTION_MASTERS_DAYS` `CALLBACK_MINUTES` `AUTONOMY_*` `TEAM_*`. Redeploy — never edit code. Guide: `docs/FULLY_ADAPTABLE_GUIDE.md`.
+
+---
+
+## M — Verify it all still builds
+
+```
+cd jarvis-app && npm install && npx tsc --noEmit && npm run build   # 31 pages, 17 routes
+python3 -c "import json;json.load(open('../n8n/n8n_workflows_self_3man.json'))"   # 14 WFs
+python3 scripts/make_workflow_map.py                                # poster
+python3 scripts/make_bundle.py                                      # zip
+```
+
+---
+
+*Everything hard-coded before is now env. One ZIP rule: main in repo `jarvis_self_3man_bundle.zip` → Drive `NUMINOUS_WHOP_DEPLOY` (`17KpzZCmxxz13vJfkKv96EZZ5e7KTft8G`).*
