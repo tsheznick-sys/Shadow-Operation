@@ -147,7 +147,7 @@ d.text(
 mx = 2960
 for line in reversed([
     "branch arena/6c47af3d-shadow-operation",
-    "17 workflows · 36 routes",
+    "17 workflows · 37 routes",
     "WF1 daily 08:00 internet scan",
     "6/day serious + X 1-2",
 ]):
@@ -173,7 +173,7 @@ LANES = [
              "writes solo_domains.top5 + action_plan", C_TEAL),
             ("WF2", "Longform Engine", "cron daily 02:00 EAT",
              ["Claude writes 6 scripts/domain = 4,500 words / 30 min",
-              "2 YT channels per brand: Shorts + Longform (10 at 5 pages)",
+              "6 channels/niche: 2 YT + TikTok + IG + FB + X (30 at 5)",
               "ALL pages -> stickman-video-director FREE (git clone $0)",
               "TubeGen $29 / Wan T4 = fallback only if render fails",
               "R2 upload (canonical, off Drive) · 9:16 master",
@@ -213,7 +213,7 @@ LANES = [
               "GREEN: ratio < 50 & ER >= 5% & gate GREEN (strict kept)",
               "ChatFuel IG/TK + ManyChat YT auto-DM 'VAULT' in 2 min",
               "3-email cap -> FINAL TERMS 10 pts (no free audit)",
-              "Whop $28 first shot -> $17 / $35 / $89 / $44 / $26/mo (only 28 is not an 8)"],
+              "$28 shot -> $17/$35/$89/$53/$44 (only 28 is not an 8)"],
              "GREEN -> same-day close · else AMBER", C_AMBER),
             ("WF5A", "AMBER / Monthly 14-Day", "branch from WF5 09:00",
              ["AMBER: ratio 50-70 & ER 3-5% -> enroll",
@@ -230,12 +230,12 @@ LANES = [
               "Every macro injected with the Social interview answers"],
              "conversations write members / replies", C_VIOLET),
             ("WHOP", "Whop Vault + Wise", "money layer",
-             ["$28 first shot · $17 Lite · $35 GOOD · $89 BETTER · $44 Pro · $26 Circle",
+             ["$28 shot · $17 Lite · $35 GOOD · $89 BETTER · $53 Pro · $44 Circle",
               "Entitlement -> lib/entitlement.ts has_access",
               "Webhooks: cancelled + payment_failed -> WF8",
               "Revenue -> revenue_log -> funding_ledger",
               "Every price reduces to 8 — except the $28 first shot (the 1)"],
-             "44 members cover tools+prizes · 53 everything (net)", C_GREEN),
+             "26 members cover tools+prizes · 35 everything", C_GREEN),
             ("WF11", "Demand-Test Gate", "72h after the 3-slide test",
              ["3-slide carousel in Stories only — never a feed post",
               "50+ comments = PASS -> full sequence runs immediately",
@@ -372,7 +372,7 @@ LANES = [
              "replaces asking you the same questions twice", C_BLUE),
             ("FUNDING", "/money", "self-funding model",
              ["Circle $26: tools $165 first, prizes to $710, annual fund $133",
-              "Break-even 44 · recommended 53 · solved on NET after fees",
+              "Break-even 26 · recommended 35 · 35/44 at median ARPU",
               "Prize pool scales with revenue — never a fixed promise",
               "Payments HELD until owner grants; grant is audited"],
              "35 = tools + prizes · 44 = everything funded", C_GREEN),
@@ -488,7 +488,7 @@ def rail(bg, bottom):
     ry += 22
 
     section("FUNDING (SELF)")
-    for k, v in [("Circle price", "$26"), ("Tools / mo", "$165"), ("Prize cap", "$710"), ("Annual fund", "$133 / mo"), ("Break-even", "44 members"), ("Recommended", "53 members")]:
+    for k, v in [("Circle price", "$44"), ("Tools / mo", "$165"), ("Prize cap", "$710"), ("Annual fund", "$133 / mo"), ("Break-even", "26 members"), ("Recommended", "35 members")]:
         kv(k, v, vcol=C_GREEN)
 
     section("AUTONOMY (RECOMMENDED)")

@@ -29,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <a href="/n8n" className="px-3 py-1.5 rounded-full bg-teal-500 text-black font-bold">n8n 6/day</a>
               <a href="/ledger" className="px-3 py-1.5 rounded-full bg-teal-400 text-black font-bold">Live Ledger</a>
               <a href="/challenge" className="px-3 py-1.5 rounded-full bg-amber-400 text-black font-bold">14-Day</a>
+              <a href="/reliability" className="px-3 py-1.5 rounded-full bg-lime-400 text-black font-bold">98%</a>
               <a href="/improve" className="px-3 py-1.5 rounded-full bg-violet-400 text-black font-bold">Improve</a>
               <a href="/scale" className="px-3 py-1.5 rounded-full bg-sky-400 text-black font-bold">Scale</a>
               <a href="/proof" className="px-3 py-1.5 rounded-full bg-teal-400 text-black font-bold">Proof</a>

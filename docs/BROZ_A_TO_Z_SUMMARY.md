@@ -10,6 +10,12 @@
 
 ## A — The engine chain (what actually makes the videos)
 
+**Finance is gone as a niche (2026-10-31).** YouTube's July 2026 clarification names *"AI personas giving advice on health, finance, legal"* as a permanent-removal risk. **Page 1 is now Consumerism** — business-adjacent RPM without being advice. No finance, health, legal or medical page, ever.
+
+**Dual output.** Every script is cut twice: **RAW → Whop private community** (no edits, includes the mistakes — no platform to demonetise it) and **EDITED → YouTube/TikTok/IG/FB/X** (must pass the policy gate, or it does not ship). The raw cut exists nowhere public — that is the reason to pay.
+
+**Two ledgers.** One for the community (views, ER, comments, revenue opt-in) and one for the team (plus policy strikes, demonetisation risk, raw-vs-edited gap, margin). The team needs the wound; the prospect does not.
+
 **`stickman_all` on every page.** `kaomei/stickman-video-director` (git clone, **free**) renders the **30-minute longform AND the Shorts** — one master prompt + one reference frame locks the character across both.
 
 ```
@@ -22,7 +28,7 @@ WF4 buffer       → 6 Shorts/day serious + longform Mon/Wed/Fri + X 1–2 disco
 ```
 
 - **TubeGen $29 = fallback only.** Missing → Wan T4 free (`WAN_T4_URL`) → if Higgsfield alone, stop (it polishes, it cannot source).
-- **Alternatives, env switch `ENGINE_PROVIDER`:** `pictory $25` Marketing History · `fliki $21` Dark Psych voice · `invideo $17` Finance · `heygen $24` Wolf avatar · `frameloop $19` dailies.
+- **Alternatives, env switch `ENGINE_PROVIDER`:** `pictory $25` Marketing History · `fliki $21` Dark Psych voice · `invideo $17` Consumerism · `heygen $24` Wolf avatar · `frameloop $19` dailies.
 - **LUT is gone.** Watermarks (`@premiereprotutos`) gone. Never come back.
 
 ---
@@ -34,7 +40,7 @@ WF4 buffer       → 6 Shorts/day serious + longform Mon/Wed/Fri + X 1–2 disco
 | `<Brand> Shorts` | every clip from WF3 | 6/day via Buffer |
 | `<Brand>` longform | the 30-min renders | 3×/week, Mon/Wed/Fri |
 
-**5 brands = 10 YouTube channels**, plus TikTok, IG and X discovery for every brand.
+**Every niche runs 6 channels:** 2 YouTube (Shorts + **Longform = page 1, the main page**) + 1 TikTok + 1 IG + 1 FB + 1 X. **5 niches = 30 channels.**
 
 **Why:** Shorts channels earn subscriber velocity from volume; longform channels protect watch-time and RPM. One mixed channel splits the algorithm signal and depresses RPM. `YT_CHANNELS_PER_BRAND=2` (set `1` for legacy).
 
@@ -42,7 +48,7 @@ WF4 buffer       → 6 Shorts/day serious + longform Mon/Wed/Fri + X 1–2 disco
 
 ## C — How money is made
 
-**Ladder `WHOP_API_KEY` — numerology_8:** `$28 first shot` (one-time, 14 days all-access) → `$17 Lite/mo` (1 domain, 3/day) → `$35 GOOD` manual → `$89 BETTER` TubeGen presets → `$44 Pro/mo` across 5 domains 6/day → `$26 Circle/mo` → `$62 Team`.
+**Ladder `WHOP_API_KEY` — numerology_8:** `$28 first shot` (one-time, 14 days all-access) → `$17 Lite/mo` → `$35 GOOD` → `$89 BETTER` → `$53 Pro/mo` across 5 domains 6/day → `$44 Circle/mo` → `$62 Team`.
 
 **Every price reduces to 8** — except the $28 first shot, which reduces to 1 (2+8=10→1, the Leader). Shortcut: an aligned price satisfies `n % 9 == 8`. Jarvis **consults the owner with live market data before changing any price** — it never reprices quietly. Full detail: `docs/PRICING_NUMEROLOGY.md`.
 
@@ -50,9 +56,9 @@ WF4 buffer       → 6 Shorts/day serious + longform Mon/Wed/Fri + X 1–2 disco
 - **GREEN** → `Comments → DM → Whop` **same day**, 3-email cap, then FINAL TERMS.
 - **AMBER** → the **monthly 14-day Growth Operator sequence** per the playbook: Warm-Up 1–3 / Value 4–9 / Money 10–14 with **11 buy buttons**. Higgsfield renders the slides → Buffer. G4 approves once per cycle.
 
-**Save offers:** pause **$8/mo** · **35% off → $17** for 3 months · Lite **$17** — **one per 30 days**. (35% of $26 is $16.90, quoted as $17 — rate and price both reduce to 8.)
+**Save offers:** pause **$8/mo** · downgrade to **Lite $17** — **one per 30 days**. No percentage discount: at $44 every clean rate lands off-pattern, and discounting a premium price tells the member the price was never real.
 
-**Funding is self-funding:** $26 Circle · tools $165 paid first · prizes **$710** pro-rata · annual fund $133/mo. **Break-even 44 members · recommended 53** — solved on **NET** revenue (fees cost $1.78 of every $26), then snapped up to an 8. At 44: net `$1,065.59 − $165 − $710 = $190.59`. At 53: net `$1,283.55 − $165 − $710 − $133 = $275.55 reserve`. *The earlier 35/44 was fee-blind and $27 short of its own prize pool.* **Autopay is HELD** until you grant it.
+**Funding is self-funding:** $44 Circle · tools $165 paid first · prizes **$710** pro-rata · annual fund $133/mo. **Break-even 26 members · recommended 35** at full ARPU — and **35 / 44** at the industry-median ARPU of 71.2%. Circle moved $26 → $44 because price is the strongest known lever on churn (curated high-ticket rooms run 2–3%/mo; the $27–97 band runs 8–12%, and $26 sat in it while we targeted 2%). At 26: net `$1,070.94 − $165 − $710 = $195.94`. At 35: net `$1,441.65 − $165 − $710 − $133 = $433.65 reserve`. **Autopay is HELD** until you grant it.
 
 ---
 

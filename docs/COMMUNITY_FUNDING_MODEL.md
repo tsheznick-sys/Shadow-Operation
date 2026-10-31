@@ -2,9 +2,9 @@
 
 **Question asked (2026-10-31):** keep the community running and churn super low — what is the recommended split, where does the money need to go, and when does Jarvis get authority to connect payments?
 
-**Short answer:** the community funds itself from **44 active Circle members** for tools + prizes, and **53** for everything including the annual renewal. (Corrected 2026-10-31: the earlier 35/44 was solved on **gross** revenue and ignored the 3% + 2.7% + $0.30 the processor takes.) Below that, prizes scale with revenue instead of sitting at a fixed cap. Payments authority stays **held** until the owner grants it in `/money` — Jarvis proposes, never moves money.
+**Short answer:** the community funds itself from **26 active Circle members** for tools + prizes, and **35** for everything including the annual renewal — because Circle moved **$26 → $44**, which is the strongest lever on churn and the whole reason those counts fell. (Corrected 2026-10-31: the earlier 35/44 was solved on **gross** revenue and ignored the 3% + 2.7% + $0.30 the processor takes.) Below that, prizes scale with revenue instead of sitting at a fixed cap. Payments authority stays **held** until the owner grants it in `/money` — Jarvis proposes, never moves money.
 
-**Every number in this document is 8-aligned** (see `docs/PRICING_NUMEROLOGY.md`): $26 Circle · $710 prizes · 35 break-even · 44 recommended.
+**Every number in this document is 8-aligned** (see `docs/PRICING_NUMEROLOGY.md`): $44 Circle · $710 prizes · 26 break-even · 35 recommended.
 
 ---
 
@@ -22,27 +22,31 @@
 
 ## 2. The arithmetic
 
-At **$26/mo** Circle:
+At **$44/mo** Circle:
 
 | Line | Members | Monthly Circle revenue | What it means |
 |---|---|---|---|
 | Tools only | **7** | $182 | covers the $165 stack |
-| Break-even | **44** | $1,144 gross / **$1,065.59 net** | − $165 − $710 = **$190.59 spare** |
-| **Recommended floor** | **53** | $1,378 gross / **$1,283.55 net** | − $165 − $710 − $133 = **$275.55 reserve** |
-| Comfortable | **62** | $1,612 gross / **$1,501.52 net** | everything funded, **$493 reserve** |
+| Break-even | **26** | $1,144 gross / **$1,070.94 net** | − $165 − $710 = **$195.94 spare** |
+| **Recommended floor** | **35** | $1,540 gross / **$1,441.65 net** | − $165 − $710 − $133 = **$433.65 reserve** |
+| Comfortable | **44** | $1,936 gross / **$1,812.36 net** | everything funded, **$804 reserve** |
 
 **How the two headline numbers were derived — not picked:**
 
 ```
-net per member = 26 − (26 × 5.7% + 0.30) = $24.22
+net per member = 44 − (44 × 5.7% + 0.30) = $41.19
 
-break-even  = (165 + 710)          ÷ 24.22 = 36.13 → 37 → snap UP to 44
-recommended = (165 + 710 + 133)×1.10 ÷ 24.22 = 45.78 → 46 → snap UP to 53
+break-even  = (165 + 710)          ÷ 41.19 = 21.24 → 22 → snap UP to 26
+recommended = (165 + 710 + 133)×1.10 ÷ 41.19 = 26.92 → 27 → snap UP to 35
+
+ARPU reality check (industry median is 71.2% of sticker):
+  median ARPU $31.33 → net $29.24 → break-even 35 · recommended 44
+  25th pct    $23.41 → net $21.77 → break-even 44 · recommended 53
 ```
 
 They snap **up**, never down: a floor has to stay a floor. `jarvis-app/lib/funding.ts` does this in code (`nextEight`), so the page can never show a number that doesn't fund the operation.
 
-So: **7 members keep the lights on, 44 covers tools + prizes, 53 funds everything.**
+So: **7 members keep the lights on, 26 covers tools + prizes, 35 funds everything** — at full price. At median ARPU it is 35 and 44. Both are shown on `/money`, because the flattering one alone is a lie with a chart.
 
 ---
 
@@ -57,7 +61,7 @@ So: **7 members keep the lights on, 44 covers tools + prizes, 53 funds everythin
 
 **Order of operations is the recommendation:** tools → prizes → annual fund → reserve. Not the reverse. A community that pays prizes before it pays its engine dies in month three.
 
-**Pro-rata rule until 44 members:** prize pool = `max(0, Circle revenue − $165)`, capped at $710. At 17 members that is $277 in prizes, not $710. Announce it as a formula, not a promise.
+**Pro-rata rule until 26 members:** prize pool = `max(0, Circle revenue − $165)`, capped at $710. At 17 members that is $277 in prizes, not $710. Announce it as a formula, not a promise.
 
 ---
 
@@ -89,13 +93,13 @@ Granting writes an `audit_log` row and is reversible with one click (**Keep held
 
 | Lever | Setting | Effect |
 |---|---|---|
-| Save offers | Pause **$8** → **35% off ($17)** → Lite **$17**, one per 30 days | Paused members count as active — 0% churn |
+| Save offers | Pause **$8** → Lite **$17**, one per 30 days (no % discount at a premium price) | Paused members count as active — 0% churn |
 | Churn alert | **2.0%** weekly (tightened 2026-10-31 from 2.5%) | Voice escalation earlier |
 | Pods | 5 pods, streaks visible | Belonging beats discounting |
 | WWS loop | Sun 09:00 deck + Tue/Fri proof clips | Members see other members winning |
 | Prize formula | Scales with membership | Never a broken promise, never a cash hole |
 
-**Why 35% and not 50%:** 35% of $26 is **$16.90**, quoted as **$17** — rate and price both reduce to 8. A 50% discount lands on $13, outside the pattern; 44% lands on $14.56 (a 7), so one side of the equation always breaks.
+**Why no percentage discount:** at $44 every clean rate lands off-pattern — 35% = $28.60 (a 2), 36% = $28.16 (a 2), 44% = $24.64 (a 7). More importantly, discounting a premium price tells the member the price was never real. The save menu is Pause $8 or Lite $17.
 
 ---
 

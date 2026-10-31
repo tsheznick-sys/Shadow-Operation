@@ -299,3 +299,41 @@ CREATE TABLE IF NOT EXISTS page_portfolio (
 
 COMMENT ON TABLE page_portfolio IS
   'Duplication rule: a page must clear all eight graduation gates before its template may be cloned.';
+
+-- ── RELIABILITY (three separate targets, never one headline) ─────────────────
+-- correct_or_caught = correct OR blocked before shipping (caught errors count as wins)
+-- end_to_end        = full 8-stage runs completing correctly
+-- money             = prices, payouts, entitlements, refunds, ledger rows (100%, human gate)
+CREATE TABLE IF NOT EXISTS reliability_daily (
+  day                DATE PRIMARY KEY,
+  outbound_total     INT NOT NULL DEFAULT 0,
+  outbound_ok        INT NOT NULL DEFAULT 0,
+  outbound_blocked   INT NOT NULL DEFAULT 0,
+  runs_total         INT NOT NULL DEFAULT 0,
+  runs_ok            INT NOT NULL DEFAULT 0,
+  money_total        INT NOT NULL DEFAULT 0,
+  money_ok           INT NOT NULL DEFAULT 0,
+  policy_blocks      INT NOT NULL DEFAULT 0,
+  silent_failures    INT NOT NULL DEFAULT 0,   -- the only number that is never acceptable
+  created_at         TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+COMMENT ON TABLE reliability_daily IS
+  'Three targets, three columns. A caught error is a win; a silent one is the only real failure.';
+
+-- ── DUAL OUTPUT (raw -> Whop, edited -> public) ──────────────────────────────
+CREATE TABLE IF NOT EXISTS asset_cuts (
+  id             TEXT PRIMARY KEY,
+  script_id      TEXT NOT NULL,
+  kind           TEXT NOT NULL CHECK (kind IN ('raw','edited')),
+  destination    TEXT NOT NULL,
+  policy_pass    BOOLEAN NOT NULL DEFAULT false,
+  policy_failed  JSONB,
+  blocked        BOOLEAN NOT NULL DEFAULT false,
+  body_hash      TEXT,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_asset_cuts_blocked ON asset_cuts (blocked) WHERE blocked = true;
+
+COMMENT ON TABLE asset_cuts IS
+  'One script, two cuts. If the public cut fails the policy gate the asset does not ship — the raw cut still reaches the community.';

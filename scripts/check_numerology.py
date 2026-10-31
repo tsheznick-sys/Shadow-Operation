@@ -16,7 +16,7 @@ import re
 import sys
 
 # Prices that must reduce to 8.
-EIGHT_PRICES = [17, 35, 89, 44, 26, 62, 710, 8]
+EIGHT_PRICES = [17, 35, 89, 53, 44, 62, 710, 8]
 # Deliberate non-8 (the Leader).
 LEADER_PRICES = [28]
 # Allowed non-product numbers (tool costs, seat counts, thresholds — not the ladder).
@@ -54,7 +54,7 @@ def check_config(path: str) -> list[str]:
     # Every *price* in the ladder block.
     prices = {}
     for k, v in pay.get("save_prices", {}).items():
-        if isinstance(v, int) and k != "discount_rate_pct" and k != "discount_months":
+        if isinstance(v, int) and v > 0 and k not in ("discount_rate_pct", "discount_months"):
             prices[f"save_prices.{k}"] = v
     ladder_text = pay.get("ladder", "")
     for n in re.findall(r"\$(\d+)", ladder_text):
@@ -74,8 +74,8 @@ def check_config(path: str) -> list[str]:
             problems.append(f"{path}: community_funding.{key} = {n} reduces to {digital_root(n)}, expected 8")
 
     # Nothing advertised below the $17 floor except the $8 save pause.
-    if fund.get("circle_price") != 26:
-        problems.append(f"{path}: circle_price is {fund.get('circle_price')}, expected 26")
+    if fund.get("circle_price") != 44:
+        problems.append(f"{path}: circle_price is {fund.get('circle_price')}, expected 44")
 
     # The fee-blind arithmetic that shipped once must never come back.
     problems += check_solvency(fund, path)
@@ -142,6 +142,8 @@ def check_env(path: str) -> list[str]:
         if k == "TIER_FIRST_SHOT_PRICE":
             if n != 28:
                 problems.append(f"{path}: {k}={n}, expected 28")
+        elif k in ("TIER_SAVE_DISCOUNT_PCT", "RELIABILITY_MONEY_GATE"):
+            continue  # a rate, not a price
         elif k == "TIER_HIDDEN_TEST_PRICE":
             if n != 9:
                 problems.append(f"{path}: {k}={n}, expected 9 (private A/B control)")

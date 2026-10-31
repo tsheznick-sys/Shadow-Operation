@@ -62,7 +62,7 @@ function n(env: string, fallback: number): number {
 
 export function fundingInputs(membersFromDb?: number): FundingInputs {
   return {
-    circlePrice: n("TIER_CIRCLE_PRICE", 26),
+    circlePrice: n("TIER_CIRCLE_PRICE", 44),
     members: membersFromDb ?? n("FUNDING_MEMBERS", 0),
     toolsMonthly: n("FUNDING_TOOLS_MONTHLY", 165),
     prizeTarget: n("FUNDING_PRIZE_TARGET", 710),

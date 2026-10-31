@@ -28,8 +28,8 @@ That is why this is a *rule* and not a vibe — it can be checked by a script, b
 | **Lite** | **$17**/mo | 1+7=**8** | $9 | +$8 |
 | **GOOD** | **$35** | 3+5=**8** | $27 | +$8 |
 | **BETTER** | **$89** | 8+9=17 → 1+7=**8** | $79 | +$10 |
-| **Pro** | **$44**/mo | 4+4=**8** | $29 | +$15 |
-| **Circle** | **$26**/mo | 2+6=**8** | $19 | +$7 |
+| **Pro** | **$53**/mo | 5+3=**8** | $29 | +$24 (moved off 44) |
+| **Circle** | **$44**/mo | 4+4=**8** | $19 → $26 → **$44** | churn lever |
 | **Team** (3 seats) | **$62** | 6+2=**8** | $59 | +$3 |
 | *Save pause* | **$8**/mo | **8** | $5 | +$3 |
 | *Save discount* | **35% off → $16.90, quoted $17**/3 mo | 3+5=8 → 1+7=**8** | 50% off | reframed |

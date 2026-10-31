@@ -5,20 +5,18 @@
     "created": "2026-10-30",
     "branch": "arena/6c47af3d-shadow-operation",
     "status": "pr_open",
-    "updated": "2026-10-31 PRICING FIX + SELF-IMPROVEMENT + SCALEOUT: funding is fee-aware (break-even 44, recommended 53 \u2014 the old 35 was $27 short of its own prize pool). Jarvis now runs a measured weekly learning loop (self -> operation -> money, in that order) and duplicates only GRADUATED pages, in parallel lanes with hard isolation."
+    "updated": "2026-10-31 MARKET SCAN APPLIED: Finance dropped (policy), Circle $26->$44 & Pro $44->$53, 6 channels/niche (2 YT + TikTok + IG + FB + X), dual output (raw->Whop, edited->socials), two ledgers (community/team), rule-based verification on every step, three separate 98% targets, daily market watch."
   },
   "niches": {
     "strategy": "Grok weekly re-rank via WF1, not hardcoded",
     "default_pool": [
-      "Stickman Finance",
       "Psychology",
       "Dark Psychology",
       "Marketing History",
       "Mindset",
       "Wolf Mindset",
       "Consumerism",
-      "Self-Improvement",
-      "Finance Behavior"
+      "Self-Improvement"
     ],
     "custom_own": "Add any niche via ADMIN_EMAIL in /admin \u2192 Create Niche (writes to Neon solo_domains top5)",
     "faceless_db": "data/creator_db_faceless_1000_FINAL.csv (1,000 verified via Social Blade alternatives \u2014 use this as seed, not hardcode)",
@@ -26,7 +24,19 @@
     "stickman_finance_note": "Main niche per Content Guy: Stickman Finance matches churn retention objective (finance RPM $8-15 keeps members paying). Other niches preserved as Page 2+",
     "research_cadence": "daily 08:00 EAT (cron 0 8 * * *) \u2014 was weekly Mon",
     "internet_scan": "whole-internet strategy scan daily: X trending + Reddit + YouTube + Google Trends + competitor channels -> Claude extracts every strategy that works now",
-    "action_plan": "Claude emits a per-niche action plan each morning: 3 angles, hook, CTA, posting day, proof asset"
+    "action_plan": "Claude emits a per-niche action plan each morning: 3 angles, hook, CTA, posting day, proof asset",
+    "policy_rule": "NEVER a finance, health, legal or medical page. YouTube's inauthentic-content clarification (16 Jul 2026) names 'AI personas giving advice on sensitive topics \u2014 health, finance, legal' as a permanent-removal risk. Stickman Finance was dropped as the main page on 2026-10-31 for this reason.",
+    "primary": "Consumerism",
+    "primary_why": "Business-adjacent RPM without being advice. Consumerism and Marketing History keep the high-value audience that finance attracts, without sitting in the sensitive-topic bucket.",
+    "banned_topics": [
+      "personal finance advice",
+      "investing",
+      "credit/debt guidance",
+      "health",
+      "medical",
+      "legal"
+    ],
+    "banned_why": "the named bucket in the July 2026 policy \u2014 it is a strike ladder ending in removal from the Partner Program, not a bad week"
   },
   "thresholds": {
     "comment_note": "All thresholds env-overridable via JARVIS_* in .env.example \u2014 no code change needed",
@@ -117,20 +127,56 @@
       "docs": "docs/GROWTH_OPERATOR_14DAY_SEQUENCE.md",
       "gate": "DEMAND-TEST GATE (replaces follower count): run the 3-slide carousel in Stories, read at 72h \u2014 50+ comments = PASS -> proceed with the full sequence immediately; 25-49 = AMBER -> warm up and retest; <25 = RED -> hold. Scans update the DB every cycle."
     },
-    "channels_per_brand": {
-      "rule": "1 brand = 2 YouTube channels (owner 2026-10-31): a Shorts channel and a Longform channel",
-      "at_5_pages": "5 brands x 2 = 10 YouTube channels + each brand's TikTok + IG + X",
-      "brands": [
-        "Stickman Finance",
-        "Psychology",
-        "Dark Psychology",
-        "Marketing History",
-        "Mindset"
-      ],
-      "naming": "YT-Shorts: '<Brand> Shorts' \u00b7 YT-Long: '<Brand>' \u2014 separate handles, shared character lock",
-      "why": "Shorts channels get subscriber velocity from volume; longform channels protect watch-time and ad RPM. Mixing them splits the algorithm signal",
-      "brand_lock": "one master prompt + one reference frame shared across both channels so the character is identical",
-      "env": "YT_CHANNELS_PER_BRAND=2 (1 = legacy single-channel mode)"
+    "channels_per_brand": 6,
+    "channels_per_niche": {
+      "youtube_longform": {
+        "role": "PAGE 1 \u2014 the main page",
+        "posts": "3x/week Mon/Wed/Fri",
+        "content": "edited, policy-safe"
+      },
+      "youtube_shorts": {
+        "role": "volume page",
+        "posts": "6/day",
+        "content": "edited, policy-safe"
+      },
+      "tiktok": {
+        "role": "discovery",
+        "posts": "3/day",
+        "content": "edited"
+      },
+      "instagram": {
+        "role": "community + DMs",
+        "posts": "2/day + Stories",
+        "content": "edited"
+      },
+      "facebook": {
+        "role": "reels + older audience",
+        "posts": "2/day",
+        "content": "edited"
+      },
+      "x": {
+        "role": "discovery + threads",
+        "posts": "3/day",
+        "content": "edited"
+      }
+    },
+    "channel_count_note": "2 YouTube (Shorts + Longform) + TikTok + IG + FB + X = 6 channels per niche. 5 niches = 30 channels.",
+    "dual_output": {
+      "rule": "every asset is cut twice from the same script: RAW and EDITED",
+      "raw": {
+        "destination": "Whop private community only",
+        "why": "no platform to demonetise \u2014 so it can be direct, unfinished and honest",
+        "edits": "none. unlisted, unedited, includes the mistakes",
+        "value": "this is the reason to pay: the unfiltered version does not exist anywhere public"
+      },
+      "edited": {
+        "destination": "YouTube + TikTok + IG + FB + X",
+        "why": "must survive the inauthentic-content policy",
+        "edits": "polished, original commentary, varied format, AI disclosed, no advice phrasing",
+        "gate": "policy check runs BEFORE publish and can block the asset"
+      },
+      "split_point": "the edit decision happens in WF3, not WF4 \u2014 raw is archived to the community bucket before any platform sees it",
+      "env": "DUAL_OUTPUT=true \u00b7 RAW_DESTINATION=whop \u00b7 POLICY_GATE=true"
     }
   },
   "conversion": {
@@ -184,29 +230,30 @@
       "why_28": "reduces to 1 \u2014 the opening move; the only non-8 in the system, by design",
       "env": "TIER_FIRST_SHOT_PRICE"
     },
-    "ladder": "$28 first shot -> $17 Lite/mo -> $35 GOOD -> $89 BETTER -> $44 Pro/mo -> $26 Circle/mo -> $62 Team (env WHOP_LADDER_PRICES)",
+    "ladder": "$28 first shot -> $17 Lite/mo -> $35 GOOD -> $89 BETTER -> $53 Pro/mo -> $44 Circle/mo -> $62 Team (env WHOP_LADDER_PRICES)",
     "good_better_best": {
       "GOOD": "$35 Starter Pillow+Wan manual \u2014 no auto (was $27)",
       "BETTER": "$89 Pro TubeGen+OpusClip presets \u2014 Lite $17 unlocks 1 domain 3 clips/day (was $79)",
-      "BEST": "$89+$44/mo Vault+Agent Pro full stack auto stickman 5 pages 6/day \u2014 Pro unlocks (was $79+$29)",
-      "Circle": "$26/mo Continuity pod streak WWS (was $19)",
+      "BEST": "$89+$53/mo Vault+Agent Pro full stack auto stickman 5 pages 6/day \u2014 Pro unlocks (was $89+$44)",
+      "Circle": "$44/mo Continuity pod streak WWS (was $26 \u2014 raised to cut churn, not to chase revenue)",
       "Team": "$62 three seats (was $59)"
     },
     "floor": "nothing advertised below $17 \u2014 the $8 save pause is the only sub-17 price and only for an existing member",
     "hidden_test_tier": "$9/mo \u2014 never advertised, never in the ladder; private A/B control to prove the $17 floor is not leaving money on the table",
     "save_prices": {
       "pause": 8,
-      "discount_rate_pct": 35,
-      "discount_price": 17,
-      "discount_months": 3,
+      "discount_rate_pct": 0,
+      "discount_price": 0,
+      "discount_months": 0,
       "downgrade": 17
     },
-    "save_math": "35% of $26 = $16.90, quoted as $17 so the member sees an 8 \u2014 the rate (35) and the price (17) both reduce to 8. 44% would land on $14.56 (a 7), so 35% is the only rate that keeps both sides clean. The $0.10 is absorbed deliberately.",
-    "entitlement": "lib/entitlement.ts Lite $17 (30 runs, 1d, 3c/d) / Pro $44 (9999, 5d, 6c/d) via WHOP_PRODUCT_LITE_ID/PRO_ID/TEAM_ID + Whop API v2/memberships",
-    "take": "Whop 3%+2.7%+$0.30 per sale (~$5.37 on $89)",
+    "save_math": "No percentage discount. At $44 every clean rate lands off-pattern: 35% = $28.60 (a 2), 36% = $28.16 (a 2), 44% = $24.64 (a 7). The save menu is now PAUSE $8 or DOWNGRADE to Lite $17 \u2014 both 8s, both honest, and neither teaches a member that the price was negotiable.",
+    "entitlement": "lib/entitlement.ts Lite $17 (30 runs, 1d, 3c/d) / Pro $53 (9999, 5d, 6c/d) via WHOP_PRODUCT_LITE_ID/PRO_ID/TEAM_ID + Whop API v2/memberships",
+    "take": "Whop 3%+2.7%+$0.30 per sale (~$3.11 on $53, ~$2.81 on $44)",
     "consult_owner": "Jarvis never reprices without the owner \u2014 it presents live market data and waits for a decision",
     "code": "jarvis-app/lib/numerology.ts (digitalRoot, nextEight, LADDER) + scripts/check_numerology.py",
-    "docs": "docs/PRICING_NUMEROLOGY.md"
+    "docs": "docs/PRICING_NUMEROLOGY.md",
+    "change_log": "2026-10-31 Circle $26 -> $44. Price is the single biggest lever on churn: curated high-ticket communities run 2-3% monthly vs 8-12% in the $27-97 band, and $26 sat in that band while targeting 2%. Pro moved $44 -> $53 to stay above Circle (it collided at 44). Both reduce to 8."
   },
   "retention": {
     "target": "1.1-1.4% churn \u2192 1-2% lock",
@@ -307,16 +354,16 @@
   },
   "community_funding": {
     "model": "self-funding \u2014 Circle carries tools first, then prizes, then annual fund, then reserve",
-    "circle_price": 26,
+    "circle_price": 44,
     "tools_monthly": 165,
     "prize_target": 710,
     "annual_bills": 1596,
     "annual_fund_per_month": 133,
-    "break_even_members": 44,
-    "recommended_members": 53,
-    "break_even_raw": 37,
-    "recommended_raw": 46,
-    "math": "FEE-AWARE. net = $26 - (3% + 2.7% + $0.30) = $24.22/member. break-even: 37 members clear tools+prizes ($895.9 net - $165 = $730.9 >= $710) -> snap UP to 44. recommended: (165+710+133) x 1.10 / 24.22 = 45.78 -> 46 -> snap UP to 53. At 44: net $1,065.6 - $165 - $710 = $190.6. At 53: net $1,283.6 - $165 - $710 = $408.6, annual fund $133 covered, $275 reserve.",
+    "break_even_members": 26,
+    "recommended_members": 35,
+    "break_even_raw": 22,
+    "recommended_raw": 27,
+    "math": "Circle $44 -> net $41.19 after 3%+2.7%+$0.30. break-even (165+710)/41.19 = 21.24 -> 22 -> snap UP to 26. recommended (165+710+133)x1.10/41.19 = 26.92 -> 27 -> snap UP to 35. At 26: net $1,070.94 - $165 - $710 = $195.94. At 35: net $1,441.65 - $165 - $710 - $133 = $433.65. The nesting is the point: full price 26/35, median ARPU 35/44, 25th pct 44/53 - every level an 8.",
     "why_710": "closest 8 to the old $750 cap (750 -> 746 is nearer but unreadable; 710 keeps a round prize number and 7+1+0=8)",
     "order": [
       "tools",
@@ -327,11 +374,32 @@
     "prize_rule": "prize pool = max(0, circle revenue - tools), cap 710 \u2014 scales with members, never a fixed promise",
     "ledger": "Neon funding_ledger",
     "docs": "docs/COMMUNITY_FUNDING_MODEL.md",
-    "decide_from_data": "final floor locked from 60 days of real churn + conversion data, not from a model",
-    "net_per_member": 24.22,
+    "decide_from_data": "final floor from 60 days of real churn + ARPU data \u2014 not from a model",
+    "net_per_member": 41.19,
     "processor_fees": "3% Whop + 2.7% Stripe + $0.30 = $1.78 on a $26 charge -> $24.22 net",
     "previous_error": "The $35 break-even was computed on GROSS revenue and ignored processor fees. At 35 members net revenue is $847.6 - $165 = $682.6, which is $27 SHORT of the $710 prize pool. Fixed 2026-10-31 by solving on net. Off by 9 members.",
-    "note_53": "53 is also the challenge cohort size \u2014 the room that produces the next 53 members is the one that funds it."
+    "note_53": "53 is also the challenge cohort size \u2014 the room that produces the next 53 members is the one that funds it.",
+    "arpu_scenarios": {
+      "full_price": {
+        "arpu": 44.0,
+        "net": 41.19,
+        "break_even": 26,
+        "recommended": 35
+      },
+      "median_71_2pct": {
+        "arpu": 31.33,
+        "net": 29.24,
+        "break_even": 35,
+        "recommended": 44
+      },
+      "p25_53_2pct": {
+        "arpu": 23.41,
+        "net": 21.77,
+        "break_even": 44,
+        "recommended": 53
+      }
+    },
+    "price_rationale": "Raised $26 -> $44 because price is the strongest known lever on community churn: curated high-ticket communities run 2-3%/mo while the $27-97 band runs 8-12%. At $26 we were priced in the churn band while targeting 2%. $44 buys the retention the funding model already assumed."
   },
   "autopay": {
     "state_default": "not_granted",
@@ -412,6 +480,21 @@
         "GET /api/ledger"
       ],
       "env": "PROOF_PUBLIC / PROOF_LAG_HOURS / PROOF_INCLUDE_FAILURES / LEDGER_REFRESH_SECONDS"
+    },
+    "market_watch": {
+      "workflow": "WF1 (extended)",
+      "cadence": "daily 08:00 before the action plan",
+      "watches": [
+        "YouTube inauthentic-content enforcement",
+        "platform policy changes",
+        "niche saturation",
+        "competitor offers and pricing",
+        "Whop/Stripe fee changes",
+        "churn and ARPU benchmarks"
+      ],
+      "output": "a dated diff: what changed since yesterday, what it threatens, what Jarvis recommends",
+      "trigger": "any policy change touching our niches -> Red Button review notice to all 3 seats within the hour",
+      "env": "MARKET_WATCH=true \u00b7 MARKET_WATCH_ALERT=policy"
     }
   },
   "trust": {
@@ -472,6 +555,21 @@
           "totals_lag": "none \u2014 cumulative counters only, never a single day",
           "daily_rows_lag_hours": 24,
           "why": "a cumulative total cannot be gamed by picking a good hour; a single day can. So totals feel live and the audited rows stay sealed for 24h."
+        },
+        "ledgers": {
+          "community": {
+            "who": "members + prospects",
+            "shows": "views, ER, comments, replies, posts, churn, days live",
+            "revenue": "per-brand opt-in only",
+            "policy_events": "hidden \u2014 a demonetisation scare on a sales page destroys trust for no gain"
+          },
+          "team": {
+            "who": "the 3 seats + owner",
+            "shows": "everything in community PLUS policy strikes, demonetisation risk, raw-vs-edited performance gap, cost per clip, margin",
+            "why": "the team needs the wound; the prospect does not",
+            "surface": "/ledger?scope=team (owner/team only)"
+          },
+          "rule": "two ledgers, one database. Scope decides what renders, never what is recorded."
         }
       },
       "do": {
@@ -737,5 +835,31 @@
     "autonomy": "duplication runs at AUTONOMY_SEQUENCE 85% once a template exists; creating a NEW template needs the owner",
     "env": "SCALE_PARALLEL_CAP=3 \u00b7 SCALE_MAX_PAGES=10 \u00b7 SCALE_GRAD_MIN_DAYS=30 \u00b7 SCALE_GRAD_MIN_BUYERS=3 \u00b7 SCALE_KILL_AFTER_FAILS=2",
     "workflow": "WF16"
+  },
+  "reliability": {
+    "policy": "98% reported as THREE SEPARATE numbers. A single 98% headline hides which part is failing.",
+    "targets": {
+      "correct_or_caught": {
+        "target_pct": 98,
+        "metric": "% of outbound actions that are correct OR stopped before shipping",
+        "industry_baseline": "91% (silent failure 9%, GaaS 2026)",
+        "achievable": "yes \u2014 this is a system property, not a model property"
+      },
+      "end_to_end": {
+        "target_pct": 98,
+        "metric": "% of full 17-step runs that complete correctly",
+        "math": "98% per step x 17 = 70.9%. Needs 99.881% per step, or the chain cut to 8 verified stages.",
+        "plan": "group the 17 workflows into 8 verified stages so the target is reachable"
+      },
+      "money": {
+        "target_pct": 100,
+        "metric": "prices, payouts, entitlements, refunds, ledger rows",
+        "note": "0 tolerance. Not 98 \u2014 100, behind a human gate."
+      }
+    },
+    "verify_engine": "rule-based on EVERY step: schema, range, link resolves, number reconciles, price matches config, math agrees",
+    "why_rules": "most real failures are format and fact, not judgment \u2014 rules catch those cheaply and deterministically",
+    "escalation": "a rule failure retries once, then escalates to a human. It never silently passes.",
+    "env": "RELIABILITY_TARGET_CORRECT=98 \u00b7 RELIABILITY_TARGET_E2E=98 \u00b7 RELIABILITY_MONEY_GATE=human"
   }
 }

@@ -6,6 +6,7 @@
       "name": "WF1 - Research DAILY 08:00 (Grok + whole-internet strategy scan + action plan) - 7 days",
       "trigger": "cron 0 8 * * * (daily 08:00 EAT — was weekly Mon)",
       "nodes": [
+        "MARKET WATCH (daily 08:00, before the scan): diff yesterday vs today on YouTube inauthentic-content enforcement, platform policy changes, niche saturation, competitor offers/pricing, Whop+Stripe fee changes, churn and ARPU benchmarks -> dated diff -> any policy change touching our niches raises a Red Button review notice to all 3 seats within the hour",
         "Postgres SELECT 50 creators: SELECT handle,platform,followers,avg_comments,buyer_pool_x3,ratio,er,gate FROM creators WHERE gate='GREEN' ORDER BY buyer_pool_x3*er DESC LIMIT 50 (1,462 GREEN)",
         "HTTP Request Social Blade + HypeAuditor + NotJustAnalytics/Picuki + Grok X trending (xAI GROK_API_KEY) - buyer_pool_x3,ratio,ER live",
         "HTTP Request WHOLE-INTERNET strategy scan daily: X trending + Reddit + YouTube search + Google Trends + competitor channels -> Claude extracts every monetizable strategy that works right now",
@@ -43,7 +44,9 @@
         "Higgsfield polish (HIGGSFIELD_API_KEY) $0.08/clip — cleans BOTH the 30m longform master AND every short before Buffer (2026-10-31 answer) — no teal/purple LUT/watermark",
         "Stickman character lock (one master prompt + one reference frame per page) applied at render, verified after polish",
         "Postgres INSERT publisher_queue38 (date,caption,video_url,status='pending_G4') queue70 schedule38",
-        "Linear Create Issue SHA 'longform + 6 clips ready content guy G4' + Telegram for content guy"
+        "Linear Create Issue SHA 'longform + 6 clips ready content guy G4' + Telegram for content guy",
+        "DUAL OUTPUT (lib/split.ts): from the same script produce RAW (destination Whop private community, no edits, includes mistakes) and EDITED (YouTube+TikTok+IG+FB+X). Split happens HERE, before any platform sees the asset.",
+        "POLICY GATE: the public cut must pass no_advice + policy_safe (original commentary present, no slideshow/TTS signature, AI disclosure). If it fails, the asset is BLOCKED — not softened — and only the RAW cut reaches the community. Every cut logged to asset_cuts."
       ],
       "flow_tier": "stickman_all: free stickman longform + shorts -> OpusClip 9.2 -> Higgsfield polish longform+shorts -> character lock -> Buffer (G4 only)"
     },
