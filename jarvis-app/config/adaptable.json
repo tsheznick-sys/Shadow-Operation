@@ -4,11 +4,13 @@
   "meta": {
     "created": "2026-10-30",
     "branch": "arena/6c47af3d-shadow-operation",
-    "status": "pr_open"
+    "status": "pr_open",
+    "updated": "2026-10-31 stickman-finance main + both_engines + stickman character lock replaces LUT"
   },
   "niches": {
     "strategy": "Grok weekly re-rank via WF1, not hardcoded",
     "default_pool": [
+      "Stickman Finance",
       "Psychology",
       "Dark Psychology",
       "Marketing History",
@@ -20,7 +22,8 @@
     ],
     "custom_own": "Add any niche via ADMIN_EMAIL in /admin \u2192 Create Niche (writes to Neon solo_domains top5)",
     "faceless_db": "data/creator_db_faceless_1000_FINAL.csv (1,000 verified via Social Blade alternatives \u2014 use this as seed, not hardcode)",
-    "source": "GROK_API_KEY + HypeAuditor + NotJustAnalytics + Picuki (not Social Blade alone)"
+    "source": "GROK_API_KEY + HypeAuditor + NotJustAnalytics + Picuki (not Social Blade alone)",
+    "stickman_finance_note": "Main niche per Content Guy: Stickman Finance matches churn retention objective (finance RPM $8-15 keeps members paying). Other niches preserved as Page 2+"
   },
   "thresholds": {
     "comment_note": "All thresholds env-overridable via JARVIS_* in .env.example \u2014 no code change needed",
@@ -37,7 +40,7 @@
     "stuck_detector_hours": 48
   },
   "content": {
-    "engine": "Wan 1.3B T4 free Colab fallback WAN_T4_URL + TubeGen $29 auto \u2014 direct to OpusClip, no LUT step (removed per Content Guy)",
+    "engine": "Hybrid both_engines: TubeGen $29 auto longform 30m (or Wan T4 free fallback) + kaomei/stickman-video-director free open-source for Shorts \u2014 direct OpusClip virality no LUT",
     "scripts_per_domain": 6,
     "words_per_longform": 4500,
     "clip_targets": "3x8s short + 2x32s long + 1x60s deep from 30m p01_32s_9x16.mp4 Katana queue70",
@@ -60,6 +63,11 @@
         "frameloop": "$19 120 faceless/$39 daily shorts budget"
       },
       "switch_env": "ENGINE_PROVIDER=wan|tubegen|pictory|fliki|invideo|heygen|frameloop + paired API key, fallback WAN_T4_URL auto"
+    },
+    "engine_hybrid": {
+      "longform": "TubeGen $29 auto (fallback WAN_T4_URL) -> 30m p01_32s_9x16.mp4 -> queue38",
+      "shorts": "stickman-video-director free GitHub kaomei -> stickman Finance scenes (one master prompt + one reference frame locks character) -> captions/SFX -> OpusClip 9:16",
+      "brand_lock": "Stickman Finance branding: one master prompt writes everything + one reference frame locks character + start/end frames control motion (5 rules) \u2014 replaces teal/purple LUT"
     }
   },
   "conversion": {

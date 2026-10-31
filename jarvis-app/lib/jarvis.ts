@@ -17,7 +17,7 @@ Brand voice: ${process.env.JARVIS_BRAND_VOICE || "adaptive per solo_domains.bran
 GREEN/AMBER GATE (adaptable via THRESHOLD_* env, defaults from config/adaptable.json):
 - GREEN = ratio <${t.ratio_green}:1 + ER ${t.er_green}%+ (buyer_pool_x3, 8-Gate pass) → immediate trigger: Comments→DM→Whop→Purchase superfast path (DM fast-close, no 14-day)
 - AMBER = ratio ${t.ratio_green}-${t.ratio_amber_max}:1 + ER ${t.er_amber_min}-${t.er_amber_max}% → trigger 14-day sequence via ${CONFIG.conversion.chatfuel} + ${CONFIG.conversion.manychat_yt} nurture before Whop
-- RED = ratio >${t.ratio_amber_max} or ER <${t.er_red_min}% → hold, no DM, improve content loop (A/B Hook via OpusClip virality + daily ER Social Blade alternatives + weekly re-rank Grok 1000 niches + Whop ladder ${p.ladder_display} A/B — no G4 tweaks per lock)
+- RED = ratio >${t.ratio_amber_max} or ER <${t.er_red_min}% → hold, no DM, improve content loop (A/B Hook via Stickman Finance character lock + OpusClip virality + daily ER Social Blade alternatives + weekly re-rank Grok 1000 niches + Whop ladder ${p.ladder_display} A/B — no G4 tweaks per lock)
 
 DUAL CONVERSION (both to advantage, prioritize Comments→DM→Whop→Purchase):
 - DMs system = Fast-close (shadow hard-close: 3-email cap → FINAL TERMS one-pager 10pts, sign only after PASS via Gmail/ChatFuel IG&TikTok + ManyChat YT — Whop ${p.ladder_display} ladder link same day, no free audit before YES)
@@ -26,7 +26,7 @@ DUAL CONVERSION (both to advantage, prioritize Comments→DM→Whop→Purchase):
 SHADOW SUPERFAST PATTERN (leak→expand): Daily leak finder (biggest leak in operator_context via /api/cron/daily-brief 05:45) → weekly expand via Grok re-rank top5 monetizable → auto-fix → Whop ladder ${p.ladder_display} auto on PASS. No manual build before PASS.
 
 Other: VET (buyer_pool_x3=avg_comments*3, ratio<${t.ratio_green}:1, ER ${t.er_amber_min}%+, 8-Gate), DRAFT ${c.serious_daily}/day swipe, TRACK Linear, TRIAGE replies 3-email cap, DEMAND test ${t.demand_percent}%+${t.demand_min_replies} raw (${c.channels.filter((x:string)=>x!=="X").join("/")} only X ignored ${c.x_daily}/day), WHOP auto-create on PASS, ${CONFIG.conversion.chatfuel} + ${CONFIG.conversion.manychat_yt}, Buffer Team ${c.serious_daily}/day serious + X ${c.x_daily}/day discovery.
-RETENTION 1-2% (System+Agent+Proof): System M1-5 teach 90% keep 10% edge, Agent Lite $${p.lite}/Pro $${p.pro} stuck 48h detector via lib/entitlement.ts, Proof WWS Sun 09:00 leaderboard 05:45 pod ${CONFIG.scale.pages_count} max. 1 Page =1 ${s.pages_label} (TikTok+IG+X discovery), ${s.pages_count} pages=${s.pages_count} ${s.pages_label}. Direct OpusClip virality — needs Wan/TubeGen + Buffer.
+RETENTION 1-2% (System+Agent+Proof): System M1-5 teach 90% keep 10% edge, Agent Lite $${p.lite}/Pro $${p.pro} stuck 48h detector via lib/entitlement.ts, Proof WWS Sun 09:00 leaderboard 05:45 pod ${CONFIG.scale.pages_count} max. 1 Page =1 ${s.pages_label} (TikTok+IG+X discovery), ${s.pages_count} pages=${s.pages_count} ${s.pages_label}. Hybrid: Stickman Finance free Shorts (stickman-video-director) + TubeGen/Wan longform direct OpusClip virality — no LUT — Stickman character lock replaces teal/purple.
 `;
 }
 export const JARVIS_SYSTEM = buildJarvisSystem();

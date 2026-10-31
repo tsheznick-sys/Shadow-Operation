@@ -4,13 +4,15 @@
 
 > **One sentence:** Jarvis does everything while you sleep — you only swipe SEND + sign + collect — from finding niches to posting 6/day to getting paid on Whop.
 
+**New twist per Content Guy:** **Main Page 1 = Stickman Finance** (retains churn: finance RPM $8-15 keeps members paying, stickman stories explain loans/budget while holding retention) + **Other niches stay Page 2+** (Psychology/Dark Psych/Marketing History etc) — hybrid cloud free GitHub+Vercel Hobby+Neon $0.
+
 ---
 
 ## A — What we built (Full Stack SCALE $189/mo)
 
 **Squad 3-man self-only:** Content G4 (queue38 approve) + Social (Buffer one-app) + Admin (whole pipeline) — equal SEND, you super-admin money/sign. Vercel PWA `0.0.0.0:3000` embeds n8n+Buffer+Chatfuel one frontend.
 
-**Engine chain (nobody opens apps):** `TubeGen 30m 2h faceless 4.5k words/6 scripts` → `OpusClip 5-8 shorts virality 9.2 9:16` → `Claude Max SEO` → `Buffer 6/day serious IG/TikTok/YT + X 1-2 discovery filler`
+**Engine chain (nobody opens apps) — Hybrid both_engines:** `Page1 Stickman Finance: stickman-video-director free Shorts (one master prompt + one reference frame locks character)` + `Page2+ Other niches: TubeGen 30m 2h faceless 4.5k words/6 scripts` → `OpusClip 5-8 shorts virality 9.2 9:16 (stickman character lock)` → `Claude Max SEO` → `Buffer 6/day serious IG/TikTok/YT + X 1-2 discovery filler` — no teal/purple LUT per Content Guy
 
 **Fall engine:** Wan 1.3B T4 free Colab `WAN_T4_URL` — TubeGen missing → Wan auto, Higgsfield alone cannot make source.
 
