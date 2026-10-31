@@ -3,6 +3,7 @@ import { getSql, MissingDatabaseError } from "@/lib/db";
 import { bearered } from "@/lib/cron-auth";
 import { channelsFromEnv, type Surface } from "@/lib/publish";
 import { SCHEDULABLE_SURFACES, planAsset, type Tier } from "@/lib/schedule";
+import { split } from "@/lib/split";
 
 /**
  * THE AGENT'S CALENDAR.
@@ -123,11 +124,34 @@ export async function POST(req: Request) {
          AND publish_at > NOW() - INTERVAL '1 day'
          AND gate_status IN ('pending','g4_review','pass','published')
     `;
-  } catch { booked = []; }
+  } catch (e: any) {
+    // An unreadable calendar is not an empty calendar. Swallowing this planned every asset as if
+    // the day were free — the same shape of bug that hid a missing column in publish-due.
+    return NextResponse.json(
+      { ok: false, error: "calendar_unreadable", detail: String(e?.message || e).slice(0, 160) },
+      { status: 503 },
+    );
+  }
 
   const surfaces: Surface[] = Array.isArray(body?.surfaces)
     ? body.surfaces.filter((s: any) => SCHEDULABLE_SURFACES.includes(s))
     : SCHEDULABLE_SURFACES;
+
+  // Same failure as the run route had: three flags read off the request body as `!== false`, so
+  // omitting them asserted compliance. Anything that reaches Buffer is verified here from the
+  // script itself; a schedule with no script cannot be checked, so it cannot go automatic.
+  const script = typeof body?.script === "string" ? body.script.trim() : "";
+  const auto = tier !== "free";
+  if (auto && !script) {
+    return NextResponse.json(
+      { ok: false, error: "script_required_for_auto", detail: "a scheduled post is checked against the script; without it there is no verdict to trust" },
+      { status: 422 },
+    );
+  }
+  const cut = script ? split(script, { title: typeof body?.title === "string" ? body.title : assetId, niche: "general", format: String(body?.format || "short") }) : null;
+  const verdict = cut
+    ? { rules_ok: cut.policy.pass, policy_ok: !cut.blocked, disclosure_ok: cut.edited.disclosure.trim().length > 0 }
+    : { rules_ok: false, policy_ok: false, disclosure_ok: false };
 
   const plan = planAsset(
     {
@@ -137,9 +161,7 @@ export async function POST(req: Request) {
       caption: typeof body?.caption === "string" ? body.caption : "",
       member_id: memberId || undefined,
       tier,
-      rules_ok: body?.rules_ok !== false,
-      policy_ok: body?.policy_ok !== false,
-      disclosure_ok: body?.disclosure_ok !== false,
+      ...verdict,
       flagged,
       passes,
       surfaces,

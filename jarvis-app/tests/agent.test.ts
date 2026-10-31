@@ -1819,6 +1819,59 @@ add({ id: "SC20", dimension: D.SCH, what: "a surface already has its full per-da
 
 const R = D.RUN;
 
+add({ id: "RN19", dimension: R, what: "any route takes a gate verdict from the request body", expect: "none does — the sweep, not just the two I already fixed",
+  run: () => {
+    const hits: string[] = [];
+    const walk = (dir: string) => {
+      for (const f of readdirSync(dir, { withFileTypes: true })) {
+        const full = join(dir, f.name);
+        if (f.isDirectory()) { if (!/node_modules|\.next/.test(full)) walk(full); continue; }
+        if (!/\.(ts|tsx)$/.test(f.name)) continue;
+        const t = readFileSync(full, "utf8");
+        if (/body\?\.(rules_ok|policy_ok|disclosure_ok)/.test(t)) hits.push(full.replace(ROOT + "/", ""));
+      }
+    };
+    walk(join(ROOT, "jarvis-app", "app"));
+    return { pass: hits.length === 0, got: hits.length ? hits.join(", ") : "no route self-asserts compliance" };
+  }});
+
+add({ id: "RN20", dimension: R, what: "the calendar query fails before an asset is booked", expect: "503, not an empty day — silence is not a booking",
+  run: () => {
+    const route = readFileSync(join(ROOT, "jarvis-app", "app", "api", "schedule", "route.ts"), "utf8");
+    const swallow = /catch \{ booked = \[\]; \}/.test(route);
+    const failsClosed = /error: "calendar_unreadable"/.test(route);
+    const needsScript = /error: "script_required_for_auto"/.test(route);
+    return { pass: !swallow && failsClosed && needsScript, got: `swallow=${swallow} 503=${failsClosed} script_required=${needsScript}` };
+  }});
+
+
+add({ id: "RN16", dimension: R, what: "two runs read the same counter at the same instant", expect: "the write is conditional on what was read — Postgres decides the race",
+  run: () => {
+    // reserve() is pure and cannot see a race. The route's UPDATE is the only thing that can, and
+    // it used to be a blind absolute SET of a value computed from a read: both requests wrote 42.
+    const route = readFileSync(join(ROOT, "jarvis-app", "app", "api", "agent", "run", "route.ts"), "utf8");
+    const guarded = /UPDATE agent_members[\s\S]{0,600}AND used_in_window = \$\{quota\.used_in_window\}[\s\S]{0,200}AND used_this_month = \$\{quota\.used_this_month\}[\s\S]{0,200}RETURNING used_in_window/.test(route);
+    const reReads = /again: any\[\] = await sql`SELECT \* FROM agent_members/.test(route);
+    const refuses = /error: "run_busy"/.test(route);
+    return { pass: guarded && reReads && refuses, got: `guarded=${guarded} reread=${reReads} refuses=${refuses}` };
+  }});
+
+add({ id: "RN17", dimension: R, what: "a refund lands after another run has already reserved", expect: "decrement, never write back an old absolute count",
+  run: () => {
+    const route = readFileSync(join(ROOT, "jarvis-app", "app", "api", "agent", "run", "route.ts"), "utf8");
+    const decrements = /GREATEST\(used_in_window - 1, 0\)/.test(route) && /GREATEST\(used_this_month - 1, 0\)/.test(route);
+    const absolute = /giveBack[\s\S]{0,400}SET used_in_window = \$\{back\.used_in_window\}/.test(route);
+    return { pass: decrements && !absolute, got: `decrement=${decrements} absolute_write=${absolute}` };
+  }});
+
+add({ id: "RN18", dimension: R, what: "the renderer throws instead of returning a result", expect: "the reservation is still refunded — no money charged for an exception",
+  run: () => {
+    const route = readFileSync(join(ROOT, "jarvis-app", "app", "api", "agent", "run", "route.ts"), "utf8");
+    const caught = /higgsfieldRender\(\{[\s\S]{0,900}\}\)\.catch\(/.test(route);
+    return { pass: caught, got: `caught=${caught}` };
+  }});
+
+
 add({ id: "RN09", dimension: R, what: "a library module nothing in production imports", expect: "dead = 0, and the test-only ones are named with a reason",
   run: () => {
     // The first version of this check walked app/ and lib/ and called split/render/standard/voice

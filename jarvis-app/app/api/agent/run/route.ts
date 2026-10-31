@@ -90,35 +90,64 @@ export async function POST(req: Request) {
   }
 
   // ---- 2. reserve the run -----------------------------------------------------
-  const quota = quotaFromRow(row);
-  const res = reserve(tier, quota);
-  if (!res.allowed) {
-    return NextResponse.json(
-      { ok: false, error: "quota_exhausted", reason: res.reason, tier, quota: res.next },
-      { status: 429 },
-    );
-  }
+  // The counter is claimed with a CONDITIONAL write, not a read followed by an absolute SET.
+  // Two requests arriving together both read "41 used"; writing 42 twice loses one of them, and
+  // the member gets two renders for one run. The guard re-states what was read, so Postgres
+  // decides the race: the loser updates zero rows, re-reads, and is refused honestly.
+  let quota = quotaFromRow(row);
+  let res = reserve(tier, quota);
+  let claimed = false;
 
-  try {
-    await sql`
-      UPDATE agent_members
-         SET used_in_window = ${res.next.used_in_window},
-             used_this_month = ${res.next.used_this_month},
-             window_started = ${res.next.window_started},
-             month_key = ${res.next.month}
-       WHERE id = ${memberId}
-    `;
-  } catch (e: any) {
-    return NextResponse.json({ ok: false, error: "reserve_failed", detail: String(e?.message || e).slice(0, 160) }, { status: 500 });
+  for (let attempt = 0; attempt < 2 && !claimed; attempt++) {
+    if (!res.allowed) {
+      return NextResponse.json(
+        { ok: false, error: "quota_exhausted", reason: res.reason, tier, quota: res.next },
+        { status: 429 },
+      );
+    }
+    try {
+      const updated: any[] = await sql`
+        UPDATE agent_members
+           SET used_in_window = ${res.next.used_in_window},
+               used_this_month = ${res.next.used_this_month},
+               window_started = ${res.next.window_started},
+               month_key = ${res.next.month}
+         WHERE id = ${memberId}
+           AND used_in_window = ${quota.used_in_window}
+           AND used_this_month = ${quota.used_this_month}
+           AND month_key = ${quota.month}
+         RETURNING used_in_window
+      `;
+      claimed = updated.length > 0;
+    } catch (e: any) {
+      return NextResponse.json({ ok: false, error: "reserve_failed", detail: String(e?.message || e).slice(0, 160) }, { status: 500 });
+    }
+    if (!claimed) {
+      // Someone else moved the counters between our read and our write. Re-read and re-decide.
+      const again: any[] = await sql`SELECT * FROM agent_members WHERE id = ${memberId} LIMIT 1`;
+      if (!again[0]) return NextResponse.json({ ok: false, error: "unknown_member" }, { status: 404 });
+      row = again[0];
+      const live = tierFrom(row.tier);
+      if (live === "free" || live === null) tier = "free";
+      quota = quotaFromRow(row);
+      res = reserve(tier, quota);
+    }
+  }
+  if (!claimed) {
+    return NextResponse.json({ ok: false, error: "run_busy", detail: "the quota counter moved twice; retry" }, { status: 409 });
   }
 
   const giveBack = async (why: string) => {
+    // A decrement, not an absolute write: another request may have legitimately reserved in
+    // between, and writing back an old absolute value would erase their run.
     const back = refund(res.next);
     try {
       await sql`
         UPDATE agent_members
-           SET used_in_window = ${back.used_in_window}, used_this_month = ${back.used_this_month}
+           SET used_in_window = GREATEST(used_in_window - 1, 0),
+               used_this_month = GREATEST(used_this_month - 1, 0)
          WHERE id = ${memberId}
+           AND month_key = ${back.month}
       `;
     } catch {
       // A failed refund leaves the member one run short. It is logged in agent_runs below, which
@@ -167,7 +196,7 @@ export async function POST(req: Request) {
     resolution: spec.resolution,
     // One idempotency key per member per run, so a network retry cannot be billed twice.
     idempotencyKey: `${memberId}-${res.next.month}-${res.next.used_in_window}`,
-  });
+  }).catch((e: any) => ({ ok: false as const, reason: `renderer threw: ${String(e?.message || e).slice(0, 140)}`, requestId: undefined, url: undefined }));
   const ms = Date.now() - started;
 
   if (!out.ok || !out.url) {
