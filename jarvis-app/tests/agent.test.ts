@@ -205,10 +205,23 @@ import { join } from "path";
 const ROOT = process.env.REPO_ROOT ?? join(__dirname, "..", "..");
 const DOCS = join(ROOT, "docs");
 
+/**
+ * META docs quote defects by design. A defect register that names the retired price is doing
+ * its job, not committing a violation — so it must be excluded, or the register becomes
+ * impossible to write.
+ *
+ * This exclusion is deliberately NOT a free pass:
+ *   · it is a fixed list, not a pattern
+ *   · BUG-001 below fails if the list grows, so nobody can quietly add their way out of a test
+ *   · BUG-002 fails if an excluded file stops being a register
+ */
+const META_DOCS = ["QUALITY_GATE.md"];
+
 function scanDocs(pattern: RegExp) {
   const hits: string[] = [];
   for (const f of readdirSync(DOCS)) {
     if (!f.endsWith(".md")) continue;
+    if (META_DOCS.includes(f)) continue;
     const text = readFileSync(join(DOCS, f), "utf8");
     text.split("\n").forEach((line, i) => {
       // match the WHOLE line. An earlier version truncated to 70 chars first and then
@@ -268,6 +281,16 @@ add({ id: "J07", dimension: D.JUD, what: "a doc still promises all five pages li
   run: () => {
     const hits = scanDocs(/all 5 pages|PAGES_COUNT=5 pages|5 pages at once/i).filter((h) => !/PAGE_LAW|MARKET_SCAN/.test(h));
     return { pass: hits.length === 0, got: short(hits) };
+  }});
+
+add({ id: "BUG-001", dimension: D.JUD, what: "the meta-doc exclusion has not quietly grown", expect: "exactly one entry",
+  run: () => ({ pass: META_DOCS.length === 1, got: `${META_DOCS.length}: ${META_DOCS.join(",")}` }) });
+
+add({ id: "BUG-002", dimension: D.JUD, what: "the excluded file is still a defect register", expect: "it records defects",
+  run: () => {
+    const t = readFileSync(join(DOCS, "QUALITY_GATE.md"), "utf8");
+    const isRegister = /defect/i.test(t) && /does NOT prove/i.test(t);
+    return { pass: isRegister, got: isRegister ? "register" : "no longer a register — exclusion is now unjustified" };
   }});
 
 /* ---------------- EXECUTION: run a real asset end to end ---------------- */
