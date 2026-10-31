@@ -34,6 +34,7 @@ CODE = "n8n-nodes-base.code"
 IF = "n8n-nodes-base.if"
 TELEGRAM = "n8n-nodes-base.telegram"
 NOTE = "n8n-nodes-base.stickyNote"
+WEBHOOK = "n8n-nodes-base.webhook"
 
 PG_CRED = {"postgres": {"id": "REPLACE_POSTGRES", "name": "Neon (jarvis)"}}
 TG_CRED = {"telegramApi": {"id": "REPLACE_TELEGRAM", "name": "Jarvis Bot"}}
@@ -774,18 +775,160 @@ SCRIPT_SCHEMA = {
     "required": ["scripts"],
 }
 
+def wf_chatfuel():
+    """WF6 — the DM leg. Chatfuel fires, this replies.
+
+    WHY THIS EXISTS. The 2026-10-31 assessment listed WF5 as carrying a "Chatfuel Push DM
+    (IG/TikTok only, no X/YT)" node. X was dropped, WF5 was rebuilt as a publisher bell, and the
+    DM leg went with it — nothing in this directory mentioned Chatfuel afterwards. Facebook now
+    sits where X sat, and Chatfuel's schema carries facebookTextMessageSend alongside the
+    Instagram and TikTok ones, so the leg has three surfaces, not two.
+
+    WHAT IT DOES NOT DO. It does not hold the Chatfuel token and it does not decide what to say.
+    Chatfuel fires the webhook with the comment that came in; this normalises it and posts it to
+    /api/chatfuel/dm, where the token lives and the message states are checked. A Code node that
+    invents the reply is a second place for the DM policy to live.
+    """
+    name = "WF6 Chatfuel DM"
+    return {
+        "name": name,
+        "nodes": [
+            note(
+                name,
+                "### WF6 — Chatfuel DM reply\n"
+                "Chatfuel's comment automation fires this webhook with the inbound event:\n\n"
+                "```json\n{ \"surface\": \"facebook\", \"conversation_id\": \"…\", \"text\": \"…\" }\n```\n\n"
+                "1. **Normalise** — trim, lower-case the surface, refuse anything that is not\n"
+                "   facebook, instagram or tiktok (YouTube has no DM channel in Chatfuel at all).\n"
+                "2. **POST /api/chatfuel/dm** — the token stays in the app.\n"
+                "3. **Wrong?** — Telegram. A DM that silently did not send is a member who asked a\n"
+                "   question and never heard back.\n\n"
+                "Chatfuel answers **200 with `status: Failed` and a per-message `errors` array** for a\n"
+                "DM it did not deliver, so the route refuses those (`CF04`, `CF05`) — this workflow\n"
+                "only has to read `ok`.\n\n"
+                "**Requires:** `JARVIS_BRAIN_URL`, `CRON_SECRET`, `TELEGRAM_CHAT_ID`.",
+                [-380, 0],
+                height=360,
+            ),
+            node(name, "Chatfuel fires", WEBHOOK, {"httpMethod": "POST", "path": "chatfuel-dm", "responseMode": "lastNode", "options": {}}, [0, 0], type_version=2),
+            node(
+                name,
+                "Normalise",
+                CODE,
+                {
+                    "jsCode": (
+                        "const b = $json.body ?? $json;\n"
+                        "const surface = String(b.surface || '').trim().toLowerCase();\n"
+                        "const conversation_id = String(b.conversation_id || b.conversationId || '').trim();\n"
+                        "const text = String(b.text || b.message || '').trim();\n"
+                        "const allowed = ['facebook','instagram','tiktok'];\n"
+                        "const why = !allowed.includes(surface) ? `surface ${surface || '(none)'} has no Chatfuel DM`\n"
+                        "  : !conversation_id ? 'no conversation_id — a DM is a reply, not a broadcast'\n"
+                        "  : !text ? 'empty text' : null;\n"
+                        "return [{ json: { valid: why === null, why, surface, conversation_id, text } }];"
+                    )
+                },
+                [230, 0],
+            ),
+            node(
+                name,
+                "Sendable?",
+                IF,
+                {
+                    "conditions": {
+                        "options": {"caseSensitive": True, "version": 2},
+                        "conditions": [
+                            {"leftValue": "={{ $json.valid }}", "rightValue": True, "operator": {"type": "boolean", "operation": "true", "singleValue": True}}
+                        ],
+                        "combinator": "and",
+                    }
+                },
+                [460, 0],
+                type_version=2.2,
+            ),
+            node(
+                name,
+                "POST chatfuel/dm",
+                HTTP,
+                {
+                    "method": "POST",
+                    "url": "={{ $vars.JARVIS_BRAIN_URL }}/api/chatfuel/dm",
+                    "sendHeaders": True,
+                    "headerParameters": {"parameters": [{"name": "Authorization", "value": "=Bearer {{ $vars.CRON_SECRET }}"}]},
+                    "sendBody": True,
+                    "specifyBody": "json",
+                    "jsonBody": "={{ JSON.stringify({ surface: $json.surface, conversation_id: $json.conversation_id, text: $json.text }) }}",
+                    "options": {"timeout": 20000},
+                },
+                [690, -80],
+                type_version=4.2,
+            ),
+            node(
+                name,
+                "Delivered?",
+                IF,
+                {
+                    "conditions": {
+                        "options": {"caseSensitive": True, "version": 2},
+                        "conditions": [
+                            {"leftValue": "={{ $json.ok }}", "rightValue": True, "operator": {"type": "boolean", "operation": "true", "singleValue": True}}
+                        ],
+                        "combinator": "and",
+                    }
+                },
+                [920, -80],
+                type_version=2.2,
+            ),
+            node(
+                name,
+                "DM failed",
+                TELEGRAM,
+                {
+                    "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+                    "text": "=Chatfuel DM did not send.\nsurface: {{ $('Normalise').item.json.surface }}\nreason: {{ $json.error || 'unknown' }}\ndetail: {{ ($json.reason || '').toString().slice(0, 200) }}",
+                    "additionalFields": {},
+                },
+                [1150, -160],
+                creds=TG_CRED,
+                type_version=1.2,
+            ),
+            node(
+                name,
+                "Dropped",
+                TELEGRAM,
+                {
+                    "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+                    "text": "=Chatfuel event dropped: {{ $json.why }}",
+                    "additionalFields": {},
+                },
+                [690, 140],
+                creds=TG_CRED,
+                type_version=1.2,
+            ),
+        ],
+        "connections": {
+            "Chatfuel fires": {"main": [[{"node": "Normalise", "type": "main", "index": 0}]]},
+            "Normalise": {"main": [[{"node": "Sendable?", "type": "main", "index": 0}]]},
+            "Sendable?": {"main": [[{"node": "POST chatfuel/dm", "type": "main", "index": 0}], [{"node": "Dropped", "type": "main", "index": 0}]]},
+            "POST chatfuel/dm": {"main": [[{"node": "Delivered?", "type": "main", "index": 0}]]},
+            "Delivered?": {"main": [[], [{"node": "DM failed", "type": "main", "index": 0}]]},
+        },
+    }
+
+
 WORKFLOWS = {
     "wf1_research": wf_research(),
     "wf2_content": wf_content(),
     "wf3_demand": wf_demand(),
     "wf4_brief": wf_brief(),
     "wf5_publish": wf_publish(),
+    "wf6_chatfuel": wf_chatfuel(),
 }
 
 BUNDLES = {
-    "n8n_workflows_self_3man.json": ["wf1_research", "wf2_content", "wf3_demand", "wf4_brief", "wf5_publish"],
+    "n8n_workflows_self_3man.json": ["wf1_research", "wf2_content", "wf3_demand", "wf4_brief", "wf5_publish", "wf6_chatfuel"],
     "n8n_workflows_solo_content.json": ["wf1_research", "wf2_content", "wf4_brief"],
-    "n8n_workflows_squad_hybrid.json": ["wf1_research", "wf2_content", "wf3_demand", "wf4_brief", "wf5_publish"],
+    "n8n_workflows_squad_hybrid.json": ["wf1_research", "wf2_content", "wf3_demand", "wf4_brief", "wf5_publish", "wf6_chatfuel"],
 }
 
 BUNDLE_NOTES = {

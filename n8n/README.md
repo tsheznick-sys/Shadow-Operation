@@ -43,6 +43,7 @@ That is the same defect as a render engine with no callers: a document that read
 | **WF3** Demand | 09:00 daily | PASS = replies ≥ max(25, ⌈views × 1%⌉) | Telegram only — creates **nothing** in Whop |
 | **WF4** Brief | 05:45 daily | Forwards `/api/cron/daily-brief` | nothing |
 | **WF5** Publish | every 15 min | Calls `/api/cron/publish-due` | `agent_schedule` → `published` |
+| **WF6** Chatfuel DM | on Chatfuel webhook | Normalises a comment event → `/api/chatfuel/dm` | one DM into one conversation |
 
 WF5 rings the bell; the app does the work. **G4 did not disappear** — it moved into
 `agent_schedule.gate_status`, where a Pro member's first three publishes sit at `g4_review` until a
@@ -102,8 +103,13 @@ branch sends a "STOPPED — nothing was written" message. A queue filled with th
 ## What is *not* built
 
 The older documents reference WF6–WF14 (retention, pods, proof loop, follower gate, 72h demand
-test, interview digest, global pause). **Those do not exist here.** Five workflows cover the money
+test, interview digest, global pause). **Those do not exist here.** Six workflows cover the money
 loop; the rest is still plan. Do not let a document tell you otherwise — check the node count.
+
+**One number was taken.** Their WF6 was the 05:45 leak finder. `wf6_chatfuel` is the sixth workflow
+that actually exists, and it is the DM leg; the leak finder is still unbuilt and is referred to in
+older documents as WF6. If you are reconciling the two, go by the filename in this directory, not
+by the number in a plan.
 
 ---
 

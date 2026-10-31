@@ -30,6 +30,7 @@ import {
 import { askJarvis } from "../lib/jarvis";
 import { canScheduleToBuffer, publishPathFor } from "../lib/publish";
 import { split } from "../lib/split";
+import { DM_SPEC, chatfuelConfig, clampDmText, dmSurfaceFor, sendDm } from "../lib/chatfuel";
 import { beforeRender, quotaFromRow, refund, renderSpec, reserve, runRecord, tierFrom } from "../lib/run";
 import {
   CLAIM_SQL, LONGFORM_DAYS, MARK_SQL, MAX_ATTEMPTS, SCHEDULABLE_SURFACES, backoffMinutes, batchSize,
@@ -46,7 +47,7 @@ const results: Case[] = [];
 const short = (hits: string[]) => (hits.length ? hits.slice(0, 3).map((h) => h.slice(0, 80)).join(" | ") : "none");
 const add = (c: Case) => results.push(c);
 
-const D = { REL: "reliability", JUD: "judgment", EXE: "execution", MEM: "memory", BRAIN: "brain", AUTO: "automation", PUB: "publish", SCH: "schedule", DB: "schema", RUN: "run" };
+const D = { REL: "reliability", JUD: "judgment", EXE: "execution", MEM: "memory", BRAIN: "brain", AUTO: "automation", PUB: "publish", SCH: "schedule", DB: "schema", RUN: "run", CF: "chatfuel" };
 
 /* ---------------- RELIABILITY: fault injection ---------------- */
 
@@ -1813,6 +1814,189 @@ add({ id: "SC20", dimension: D.SCH, what: "a surface already has its full per-da
     const row = out.rows[0];
     const sameDay = row ? dayKey(row.surface, row.publish_at, 180) === dayKey("youtube_shorts", slot, 180) : true;
     return { pass: out.rows.length === 1 && !sameDay, got: `${out.rows.length} row · ${row ? row.publish_at : "none"} same_day=${sameDay}` };
+  }});
+
+
+/* ---------------- CHATFUEL: the DM leg X used to carry ---------------- */
+
+const CF = D.CF;
+const ENV_OK = { CHATFUEL_BOT_ID: "bot-1", CHATFUEL_TOKEN: "tok-secret-123" } as any;
+
+/** A stub transport that records what was sent and answers with one canned response. */
+const cfStub = (reply: { status?: number; json?: any; throw?: string }) => {
+  const calls: any[] = [];
+  const fetchImpl = (async (url: string, init: any) => {
+    calls.push({ url, init, body: JSON.parse(init.body) });
+    if (reply.throw) throw new Error(reply.throw);
+    return {
+      ok: (reply.status ?? 200) < 400,
+      status: reply.status ?? 200,
+      json: async () => reply.json,
+    } as any;
+  }) as unknown as typeof fetch;
+  return { calls, fetchImpl };
+};
+
+const okReply = (surface: "facebook" | "instagram" | "tiktok", status = "Sent") => {
+  const spec = DM_SPEC[surface];
+  return { data: { [spec.mutation]: { id: "msg-1", text: "hi", [spec.status_field]: status, errors: [] } } };
+};
+
+add({ id: "CF01", dimension: CF, what: "the token is not set", expect: "refuses and names the variable, without calling out",
+  async run() {
+    const { calls, fetchImpl } = cfStub({ json: okReply("facebook") });
+    const cfg = chatfuelConfig({} as any);
+    const r = await sendDm({ surface: "facebook", conversation_id: "c1", text: "hi" }, { fetchImpl, env: {} as any });
+    return {
+      pass: !r.ok && r.code === "not_configured" && /CHATFUEL_TOKEN/.test(r.reason || "") && cfg.ready === false && calls.length === 0,
+      got: `${r.code} calls=${calls.length}`,
+    };
+  }});
+
+add({ id: "CF02", dimension: CF, what: "a Facebook conversation replies normally", expect: "POST to the panel endpoint with the token and the right mutation",
+  async run() {
+    const { calls, fetchImpl } = cfStub({ json: okReply("facebook") });
+    const r = await sendDm({ surface: "facebook", conversation_id: "c1", text: "Thanks for commenting — the full build is live." }, { fetchImpl, env: ENV_OK });
+    const req = calls[0];
+    return {
+      pass: r.ok && r.id === "msg-1" && r.status === "Sent" &&
+        req.url === "https://panel.chatfuel.com/graphql" &&
+        req.init.headers.authorization === "Bearer tok-secret-123" &&
+        /facebookTextMessageSend/.test(req.body.query) &&
+        req.body.variables.conversationID === "c1" &&
+        req.body.variables.message.text.startsWith("Thanks"),
+      got: `${r.ok} ${r.id} ${req ? req.url : "no call"}`,
+    };
+  }});
+
+add({ id: "CF03", dimension: CF, what: "GraphQL answers 200 with an error envelope", expect: "failure — a 200 is not a send",
+  async run() {
+    const { fetchImpl } = cfStub({ json: { errors: [{ message: "Bot not found" }] } });
+    const r = await sendDm({ surface: "instagram", conversation_id: "c2", text: "x" }, { fetchImpl, env: ENV_OK });
+    return { pass: !r.ok && r.code === "graphql" && /Bot not found/.test(r.reason || ""), got: `${r.code} ${r.reason}` };
+  }});
+
+add({ id: "CF04", dimension: CF, what: "the message comes back with an id but status Failed", expect: "failure — an id is not a delivery",
+  async run() {
+    const { fetchImpl } = cfStub({ json: okReply("facebook", "Failed") });
+    const r = await sendDm({ surface: "facebook", conversation_id: "c1", text: "x" }, { fetchImpl, env: ENV_OK });
+    return { pass: !r.ok && r.code === "message_failed" && r.retryable === false, got: `${r.code} retry=${r.retryable}` };
+  }});
+
+add({ id: "CF05", dimension: CF, what: "per-message errors arrive inside a successful payload", expect: "failure, with the platform's own code in the reason",
+  async run() {
+    const spec = DM_SPEC.tiktok;
+    const { fetchImpl } = cfStub({ json: { data: { [spec.mutation]: { id: "m9", text: "x", [spec.status_field]: "Sent", errors: [{ code: "ReceiverNotReachable", originalErrMessage: "user blocked the bot" }] } } } });
+    const r = await sendDm({ surface: "tiktok", conversation_id: "c3", text: "x" }, { fetchImpl, env: ENV_OK });
+    return { pass: !r.ok && r.code === "message_failed" && /blocked the bot/.test(r.reason || ""), got: `${r.code} ${r.reason}` };
+  }});
+
+add({ id: "CF06", dimension: CF, what: "the token is rejected", expect: "auth failure and no retry — retrying a bad key is a loop",
+  async run() {
+    const { fetchImpl } = cfStub({ status: 401, json: {} });
+    const r = await sendDm({ surface: "facebook", conversation_id: "c1", text: "x" }, { fetchImpl, env: ENV_OK });
+    return { pass: !r.ok && r.code === "auth" && r.retryable === false, got: `${r.code} retry=${r.retryable}` };
+  }});
+
+add({ id: "CF07", dimension: CF, what: "somebody asks to DM a YouTube surface", expect: "refused before any request — YouTube has no DM channel",
+  async run() {
+    const { calls, fetchImpl } = cfStub({ json: okReply("facebook") });
+    const r = await sendDm({ surface: "youtube_shorts", conversation_id: "c1", text: "x" } as any, { fetchImpl, env: ENV_OK });
+    return {
+      pass: !r.ok && r.code === "unsupported_surface" && calls.length === 0 && dmSurfaceFor("youtube_longform") === null && dmSurfaceFor("facebook") === "facebook",
+      got: `${r.code} calls=${calls.length}`,
+    };
+  }});
+
+add({ id: "CF08", dimension: CF, what: "a transport error quotes the request", expect: "the token never appears in the reason",
+  async run() {
+    const { fetchImpl } = cfStub({ throw: "connect ECONNREFUSED with authorization: Bearer tok-secret-123" });
+    const r = await sendDm({ surface: "facebook", conversation_id: "c1", text: "x" }, { fetchImpl, env: ENV_OK });
+    return { pass: !r.ok && r.code === "transport" && !/tok-secret-123/.test(r.reason || "") && /redacted/.test(r.reason || ""), got: r.reason || "" };
+  }});
+
+add({ id: "CF09", dimension: CF, what: "the vendored Chatfuel schema changes under us", expect: "the three mutations and three status fields still exist",
+  async run() {
+    // lib/chatfuel.ts names these from chatfuel-app's SDL. If the app is regenerated against a
+    // newer schema and a field is renamed, the send would fail at runtime on a live DM.
+    const sdl = readFileSync(join(ROOT, "chatfuel-app", "src", "vendor", "schema", "schema.graphql"), "utf8");
+    const missing: string[] = [];
+    for (const [surface, spec] of Object.entries(DM_SPEC)) {
+      if (!new RegExp(`\\b${spec.mutation}\\(`).test(sdl)) missing.push(`${surface}:${spec.mutation}`);
+      if (!new RegExp(`\\b${spec.status_field}\\b`).test(sdl)) missing.push(`${surface}:${spec.status_field}`);
+    }
+    return { pass: missing.length === 0, got: missing.length ? `missing ${missing.join(", ")}` : "3 mutations, 3 status fields" };
+  }});
+
+add({ id: "CF10", dimension: CF, what: "a 3,000-character DM on Instagram", expect: "clamped to the platform ceiling, marked truncated, no split surrogate",
+  async run() {
+    const long = "🔥".repeat(1500);
+    const out = clampDmText(long, "instagram");
+    const short = clampDmText("fine", "facebook");
+    return {
+      pass: out.truncated && out.text.length <= DM_SPEC.instagram.text_max && out.text.endsWith("…") && !short.truncated && short.text === "fine",
+      got: `${out.text.length} truncated=${out.truncated}`,
+    };
+  }});
+
+add({ id: "CF11", dimension: CF, what: "the surface table and the DM table disagree", expect: "exactly facebook/instagram/tiktok carry a DM leg, YouTube carries none",
+  async run() {
+    const withDm = (Object.keys(SURFACES) as (keyof typeof SURFACES)[]).filter((k) => SURFACES[k].dm !== null);
+    const bad = withDm.filter((k) => SURFACES[k].dm !== k);
+    const yt = SURFACES.youtube_longform.dm === null && SURFACES.youtube_shorts.dm === null;
+    return {
+      pass: withDm.length === 3 && bad.length === 0 && yt && withDm.includes("facebook"),
+      got: `${withDm.join(",")} · mismatched=[${bad.join(",")}] youtube_none=${yt}`,
+    };
+  }});
+
+add({ id: "CF12", dimension: CF, what: "Chatfuel is unconfigured and the workflow calls the route anyway", expect: "503 and a list of the missing variables",
+  async run() {
+    const route = readFileSync(join(ROOT, "jarvis-app", "app", "api", "chatfuel", "dm", "route.ts"), "utf8");
+    const guarded = /bearered\(/.test(route) && /getSession\(\)/.test(route);
+    const refuses = /error: "chatfuel_not_configured", missing: cfg\.missing/.test(route);
+    const noBroadcast = !/body\?\.(broadcast|audience|segment)/.test(route);
+    return { pass: guarded && refuses && noBroadcast, got: `guarded=${guarded} 503=${refuses} no_broadcast_mode=${noBroadcast}` };
+  }});
+
+add({ id: "CF13", dimension: CF, what: "Chatfuel answers Sending rather than Sent", expect: "accepted — retrying a queued DM sends it twice",
+  async run() {
+    const { fetchImpl } = cfStub({ json: okReply("instagram", "Sending") });
+    const r = await sendDm({ surface: "instagram", conversation_id: "c1", text: "x" }, { fetchImpl, env: ENV_OK });
+    return { pass: r.ok && r.status === "Sending" && r.retryable === false, got: `${r.ok} ${r.status}` };
+  }});
+
+
+add({ id: "CF14", dimension: CF, what: "the Chatfuel workflow is imported but points at a webhook nothing listens to", expect: "one webhook, one HTTP call to the app, no token in the workflow",
+  run: () => {
+    // The leg was "forgotten" once already: a doc claimed WF5 carried it and no file did. So the
+    // workflow is checked as a file, not as a paragraph.
+    const raw = readFileSync(join(ROOT, "n8n", "wf6_chatfuel.json"), "utf8");
+    const wf = JSON.parse(raw);
+    const hooks = wf.nodes.filter((n: any) => n.type === "n8n-nodes-base.webhook");
+    const http = wf.nodes.filter((n: any) => n.type === "n8n-nodes-base.httpRequest");
+    const names = new Set(wf.nodes.map((n: any) => n.name));
+    const dangling = Object.entries(wf.connections).flatMap(([src, c]: any) =>
+      c.main.flatMap((br: any[]) => br.map((t: any) => (names.has(t.node) ? null : `${src}->${t.node}`))),
+    ).filter(Boolean);
+    const postsToRoute = http.some((n: any) => /\/api\/chatfuel\/dm/.test(n.parameters?.url || ""));
+    const noToken = !/CHATFUEL_TOKEN|chatfuel_[a-z0-9]{8,}/i.test(raw);
+    return {
+      pass: hooks.length === 1 && http.length === 1 && postsToRoute && noToken && dangling.length === 0,
+      got: `hooks=${hooks.length} http=${http.length} route=${postsToRoute} token_leak=${!noToken} dangling=[${dangling.join(",")}]`,
+    };
+  }});
+
+add({ id: "CF15", dimension: CF, what: "Chatfuel fires with a YouTube surface or no conversation", expect: "the normaliser drops it with a reason instead of calling the app",
+  run: () => {
+    // Executed as JS in the workflow, so the words that matter are the guard, the allow-list and
+    // the refusal path — not the presence of a node called "Normalise".
+    const wf = JSON.parse(readFileSync(join(ROOT, "n8n", "wf6_chatfuel.json"), "utf8"));
+    const code = String(wf.nodes.find((n: any) => n.name === "Normalise")?.parameters?.jsCode || "");
+    const allowsThree = /'facebook','instagram','tiktok'/.test(code);
+    const needsConversation = /conversation_id/.test(code) && /broadcast/.test(code);
+    const returnsValidity = /valid: why === null/.test(code);
+    return { pass: allowsThree && needsConversation && returnsValidity, got: `${code.length} chars · allow=${allowsThree} conv=${needsConversation}` };
   }});
 
 /* ---------------- RUN: the one route that spends money ---------------- */

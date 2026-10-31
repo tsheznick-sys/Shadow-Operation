@@ -233,7 +233,7 @@
       "priority": "Comments→DM→Whop→Purchase prioritized over feed — both to advantage",
       "red_hold": "ratio >70 or ER <3% HOLD — improve loop (see improve loop, no G4 per lock)"
     },
-    "chatfuel": "IG & TikTok only (user lock) — CHATFUEL_TOKEN",
+    "chatfuel": "Facebook, Instagram and TikTok (Chatfuel schema has facebookTextMessageSend, instagramTextMessageSend, tiktokTextMessageSend; no YouTube/X) — CHATFUEL_TOKEN + CHATFUEL_BOT_ID",
     "manychat": "YT only fallback if MANYCHAT_API_KEY set (8ch optional) — YT comments cannot ChatFuel",
     "yt_triage": "YT comments → Gmail GMAIL_* triage if no ManyChat",
     "hard_rules": "R1 no manual, R2 no free audit before YES, R3 IP gate, R4 human-send, R5 no fabrication, R6 math discipline, R7 3-email→FINAL TERMS, R8 data hygiene, R9 no Whop before PASS, R10 strict 1%+25 IG/TikTok/YT only, R11 personalize voice",

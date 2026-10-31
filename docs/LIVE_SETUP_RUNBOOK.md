@@ -194,6 +194,44 @@ answer, not a fault.
 **Direct publish is a Pro and Team privilege.** A Circle member receives the finished asset to post
 themselves; `/api/publish` returns 403 for any tier below Pro, read from `lib/tiers.ts`.
 
+## Step 6c — Chatfuel (the DM leg)
+
+The post is only half the surface. Someone comments on it, and a DM answers — that leg was listed
+as a WF5 node in the 2026-10-31 assessment and then vanished when WF5 was rebuilt. Facebook sits
+where X sat, and Chatfuel's schema carries Facebook, Instagram and TikTok messages; YouTube has no
+DM channel there at all.
+
+```
+comment → Chatfuel automation → WF6 webhook → /api/chatfuel/dm → Chatfuel GraphQL → DM sent
+```
+
+1. https://panel.chatfuel.com → sign in → pick the bot for the Facebook page.
+2. **Settings → API access** (or https://panel.chatfuel.com/integration/auth/token) → copy the token.
+3. The bot id is in the panel URL: `panel.chatfuel.com/bots/<BOT_ID>/…`.
+4. Set both in Vercel (and locally) — **`CHATFUEL_TOKEN`**, **`CHATFUEL_BOT_ID`**. The token is
+   server-side only; it never reaches a browser, a workflow, or a log line (`CF08`).
+5. In the panel: **Automations → comment automation** on the Facebook page, action = *webhook*,
+   URL = `https://<n8n-host>/webhook/chatfuel-dm` for the n8n instance, body:
+
+   ```json
+   { "surface": "facebook", "conversation_id": "{{conversation.id}}", "text": "…" }
+   ```
+
+6. Import `n8n/wf6_chatfuel.json` (it is also in `n8n_workflows_self_3man.json`). It needs
+   `JARVIS_BRAIN_URL`, `CRON_SECRET`, `TELEGRAM_CHAT_ID` as n8n Variables.
+7. **Verify:** `POST /api/chatfuel/dm` with the cron Bearer and a real conversation id.
+   `{ ok: true, id, status }` is a send. Anything else names its state — `not_configured`, `auth`,
+   `graphql`, `message_failed`, `rate_limited`, `transport`.
+
+**The trap, and it is Buffer's trap one level down.** Chatfuel answers **HTTP 200** for a DM it did
+not deliver. The message object carries `id`, a `status` that can read `Failed`, and an `errors`
+array. A route that checks the status code, or even the GraphQL envelope, records a dropped DM as
+delivered. `lib/chatfuel.ts` refuses all three (`CF03`–`CF05`), and `Sending` counts as accepted
+because retrying a queued DM sends it twice (`CF13`).
+
+**There is no broadcast mode.** A DM goes into one conversation. An endpoint that can message an
+arbitrary audience is the fastest way to have a Meta app restricted.
+
 ## Step 7 — Email
 
 - https://resend.com → API Keys → `RESEND_API_KEY`. Verify the domain (or use their test domain for the first send).

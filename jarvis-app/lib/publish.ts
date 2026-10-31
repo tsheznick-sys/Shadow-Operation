@@ -46,6 +46,12 @@ export type SurfaceSpec = {
   description_max?: number;
   /** every surface this operation posts to is a video surface. Text-only is not a downgrade, it is a different product. */
   video_required: boolean;
+  /**
+   * The DM leg that answers engagement on this surface, or null. Chatfuel reaches exactly these
+   * three; YouTube has no DM channel in its schema at all. Kept on the surface so "does this
+   * post have a follow-up" is answered where the post is defined, not in a second table.
+   */
+  dm: "facebook" | "instagram" | "tiktok" | null;
 };
 
 export const SURFACES: Record<Surface, SurfaceSpec> = {
@@ -58,6 +64,7 @@ export const SURFACES: Record<Surface, SurfaceSpec> = {
     title_max: 100,
     description_max: 5000,
     video_required: true,
+    dm: null,
   },
   youtube_shorts: {
     service: "youtube",
@@ -68,6 +75,7 @@ export const SURFACES: Record<Surface, SurfaceSpec> = {
     title_max: 100,
     description_max: 5000,
     video_required: true,
+    dm: null,
   },
   tiktok: {
     service: "tiktok",
@@ -76,6 +84,7 @@ export const SURFACES: Record<Surface, SurfaceSpec> = {
     caption_max: 2200,
     hashtags_max: 10,
     video_required: true,
+    dm: "tiktok",
   },
   instagram: {
     service: "instagram",
@@ -84,6 +93,7 @@ export const SURFACES: Record<Surface, SurfaceSpec> = {
     caption_max: 2200,
     hashtags_max: 30,
     video_required: true,
+    dm: "instagram",
   },
   facebook: {
     service: "facebook",
@@ -92,6 +102,7 @@ export const SURFACES: Record<Surface, SurfaceSpec> = {
     caption_max: 5000,
     hashtags_max: 10,
     video_required: true,
+    dm: "facebook",
   },
 };
 
