@@ -31,7 +31,7 @@
     },
     {
       "id": "wf3_autoclip_virality",
-      "name": "WF3 - Stickman Finance Shorts (stickman-video-director free) + OpusClip virality + character lock \u2192 queue38",
+      "name": "WF3 - Stickman Finance Shorts + OpusClip virality + Higgsfield short-form polish \u2192 queue38",
       "trigger": "Webhook TubeGen finished -> auto",
       "nodes": [
         "Webhook TubeGen finished per domain",
@@ -39,7 +39,7 @@
         "Postgres INSERT publisher_queue38 (date,caption,video_url,status='pending_G4') queue70 schedule38",
         "Linear Create Issue SHA '6 clips ready content guy G4' + Telegram for content guy"
       ],
-      "flow_tier": "Hybrid both_engines: stickman free Shorts + TubeGen longform -> OpusClip virality -> character lock -> Buffer (no LUT)"
+      "flow_tier": "Hybrid both_engines: stickman free Shorts + TubeGen longform -> OpusClip 9.2 virality -> Higgsfield $0.08 short-form polish -> character lock -> Buffer"
     },
     {
       "id": "wf4_seo_publisher_buffer",
@@ -78,7 +78,7 @@
         "ChatFuel {{$env.CHATFUEL_SCOPE || IG&TikTok}} + ManyChat YT enroll: Day1-3 Value Proof (1 script moving to {{$env.THRESHOLD_RATIO_GREEN || 50}}+{{$env.THRESHOLD_ER_GREEN || 5}}%+ + value clip WF3 proof), Day4-7 DM scripts+teardown quietwolfzz 514K case + GS variants, Day8-14 DM close + Whop ${{$env.TIER_CIRCLE_PRICE || 19}}/mo Circle \u2014 same shadow conversion tempo daily CTA",
         "IF reply YES any day 1-14 -> EXIT 14-day -> goto WF5-GREEN fast-close FINAL TERMS 10pts (both to advantage)",
         "Both AMBER+GREEN share Whop ladder $27+$9+$79+$19/mo \u2014 AMBER exits to GREEN fast-close on YES",
-        "Post-14d no YES -> HOLD -> WF6 leak finder + WF1 weekly re-rank \u2014 improve loop: A/B OpusClip virality 9.2 + daily ER Social Blade alternatives + weekly Grok 1000 niches re-rank + Whop ladder A/B (no G4 per lock)"
+        "Post-14d no YES -> HOLD -> WF6 leak finder + WF1 weekly re-rank \u2014 improve loop: A/B Higgsfield short-form + OpusClip virality 9.2 + daily ER Social Blade alternatives + weekly Grok 1000 niches re-rank + Whop ladder A/B (no G4 per lock)"
       ],
       "rule": "AMBER Comments->DM->14-day->Whop \u2014 daily CTA, not 3-email cap. Both GREEN+AMBER prioritize Comments->DM->Whop->Purchase."
     },
@@ -150,6 +150,7 @@
     "CLAUDE_API_KEY Claude Pro/Max main brain",
     "GROK_API_KEY xAI Grok speciality",
     "STICKMAN_REPO kaomei/stickman-video-director free GitHub open-source for Shorts (no API key, git clone free, $0)",
+    "HIGGSFIELD_API_KEY $0.08/clip short-form polish only (improve final Shorts, not LUT/watermark) \u2014 WF3 short-form final",
     "TUBEGEN_API_KEY 2h $29/mo OR WAN_T4_URL free Colab fallback \u2014  cannot replace engine",
     "OPUSCLIP_API_KEY $15/mo free tier fallback \u2014  cannot clip",
     "BUFFER_TOKEN Team $12/channel approval unlimited \u2014 Publisher fallback if missing",
@@ -165,5 +166,5 @@
   ],
   "total_cost": "MVP 1 domain WWS+Retention+Entitlement: Vercel $0 + Neon $0 + n8n $20 + Claude $20 + Grok $16 + Wan T4 free + OpusClip free + Buffer Free 3ch = $56/mo \u2014 direct publish no LUT \u2192 scale 5 domains: +TubeGen $29 + OpusClip $15 + Buffer Team $60 = $189/mo \u2014 3 Whop sales $81 covers MVP, 7 sales $189 covers scale",
   "next_step": "n8n Cloud Import this JSON -> add WHOP_API_KEY + WHOP_PRODUCT_LITE_ID/PRO_ID + WISE_API_KEY -> Vercel env same + set Whop webhooks membership_cancelled/payment_failed -> test /api/entitlement?whop_user_id=xxx -> WF8 retention save",
-  "self_only": "3-man core self-only scalable 5 domains \u2014 Page1 Stickman Finance (stickman-video-director free Shorts) + Other niches (TubeGen/Wan longform) \u2014 character lock branding (one prompt/one frame) replaces teal/purple LUT \u2014 cloud free GitHub+Vercel Hobby+Neon free"
+  "self_only": "3-man core self-only scalable 5 domains \u2014 Page1 Stickman Finance (stickman-video-director free Shorts) + Other niches (TubeGen/Wan longform) \u2014 OpusClip virality + Higgsfield short-form final polish + character lock (one prompt/one frame) \u2014 cloud free GitHub+Vercel Hobby+Neon free"
 }

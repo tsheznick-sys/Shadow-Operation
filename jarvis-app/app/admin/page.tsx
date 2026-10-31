@@ -12,7 +12,7 @@ export default function AdminPipeline() {
       <div className="grid grid-cols-4 gap-3 text-sm">
         <div className="rounded-xl bg-teal-500 text-black p-4"><div className="font-bold">Monetize {s.pages_count} {s.pages_label}</div><div>Whop ladder {p.ladder_display} per domain scalable — {t.demand_percent}%+{t.demand_min_replies} PASS auto → Whop live — pricing env TIER_* without code</div></div>
         <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4"><div className="font-bold">Claude Max brain 24/7</div><div>n8n Cloud $20 24/7 + Claude Pro/Max main brain — all prompts via n8n Code + CONFIG thresholds — replaces OpenAI</div></div>
-        <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4"><div className="font-bold">Stickman branding</div><div>character lock: one master prompt + one reference frame per Stickman Finance page — open-source free engine for Shorts, TubeGen for longform</div></div>
+        <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4"><div className="font-bold">Higgsfield polish</div><div>Higgsfield improves final Shorts pieces (upscale/clean) + Stickman character lock per Finance page — open-source engine + TubeGen longform</div></div>
         <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4"><div className="font-bold">Grok speciality</div><div>Research competitors + 1000 faceless {pool[0]}/{pool[1]} niches via X trending → WF1 top5 to solo_domains</div></div>
       </div>
       <div className="rounded-2xl bg-[#13131a] border border-zinc-800 p-5">
@@ -20,7 +20,7 @@ export default function AdminPipeline() {
         <ol className="list-decimal ml-5 mt-3 space-y-2 text-sm text-zinc-300">
           <li><b>TubeGen 30min longform faceless 2h →</b> Claude Max auto-scripts {c.words_per_longform} words per domain (scalable {s.pages_count} via PAGES_COUNT) → admin picks domains from Grok top5</li>
           <li><b>OpusClip auto (Claude Pro&Max together n8n automatically clips) →</b> 5-8 shorts virality ranked → admin gets feedback (no approval required) — brand voice per page via solo_domains.brand_voice</li>
-          <li><b>Stickman Shorts + TubeGen longform →</b> OpusClip virality → stickman character lock (one prompt/one frame) → queue38 — Content Guy G4 tweaks → admin views</li>
+          <li><b>Stickman Shorts + TubeGen longform →</b> OpusClip virality → Higgsfield short-form polish → character lock → queue38 — Content Guy G4 tweaks → admin views</li>
           <li><b>Jarvis SEO (Claude Max) → Buffer Team unlimited →</b> social gives Jarvis autopublish approval → live 24/7 without opening platforms ({c.channels.join("/")})</li>
           <li><b>Analytics one-app Vercel embeds n8n+Buffer+Chatfuel →</b> social manager feedback from Jarvis on all platforms → admin sees one dashboard for all 3 bros</li>
           <li><b>Whop ladder auto on PASS {t.demand_percent}%+{t.demand_min_replies} →</b> admin monetizes pages — Whop sales fund n8n loops (MVP ${s.mvp_monthly} → SCALE ${s.scale_monthly} for {s.pages_count} pages)</li>

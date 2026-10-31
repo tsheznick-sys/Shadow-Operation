@@ -5,7 +5,7 @@
     "created": "2026-10-30",
     "branch": "arena/6c47af3d-shadow-operation",
     "status": "pr_open",
-    "updated": "2026-10-31 stickman-finance main + both_engines + stickman character lock replaces LUT"
+    "updated": "2026-10-31 Higgsfield added back for short-form final polish (per user), Stickman Finance main retained"
   },
   "niches": {
     "strategy": "Grok weekly re-rank via WF1, not hardcoded",
@@ -40,7 +40,7 @@
     "stuck_detector_hours": 48
   },
   "content": {
-    "engine": "Hybrid both_engines: TubeGen $29 auto longform 30m (or Wan T4 free fallback) + kaomei/stickman-video-director free open-source for Shorts \u2014 direct OpusClip virality no LUT",
+    "engine": "Hybrid both_engines: TubeGen $29 auto longform 30m (Wan T4 free fallback) + kaomei/stickman-video-director free Shorts \u2014 OpusClip virality 9.2 + Higgsfield improve short-form final pieces (no teal/purple LUT)",
     "scripts_per_domain": 6,
     "words_per_longform": 4500,
     "clip_targets": "3x8s short + 2x32s long + 1x60s deep from 30m p01_32s_9x16.mp4 Katana queue70",
@@ -67,7 +67,8 @@
     "engine_hybrid": {
       "longform": "TubeGen $29 auto (fallback WAN_T4_URL) -> 30m p01_32s_9x16.mp4 -> queue38",
       "shorts": "stickman-video-director free GitHub kaomei -> stickman Finance scenes (one master prompt + one reference frame locks character) -> captions/SFX -> OpusClip 9:16",
-      "brand_lock": "Stickman Finance branding: one master prompt writes everything + one reference frame locks character + start/end frames control motion (5 rules) \u2014 replaces teal/purple LUT"
+      "brand_lock": "Stickman Finance character lock (one prompt/one frame) + Higgsfield short-form final polish replaces teal/purple LUT",
+      "shorts_final": "Higgsfield $0.08/clip short-form polish (upscale/smooth/clean) \u2014 improves final Shorts pieces before Buffer, not LUT/watermark"
     }
   },
   "conversion": {
