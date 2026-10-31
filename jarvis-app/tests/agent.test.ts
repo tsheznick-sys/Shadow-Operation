@@ -35,8 +35,8 @@ import { buildJoinLink, isLinkFailure, isWhopUrl, joinMessage, strayLinks } from
 import { beforeRender, quotaFromRow, refund, renderSpec, reserve, runRecord, tierFrom } from "../lib/run";
 import {
   CLAIM_SQL, LONGFORM_DAYS, MARK_SQL, MAX_ATTEMPTS, SCHEDULABLE_SURFACES, backoffMinutes, batchSize,
-  dayKey, localWeekday, nextSlot, parseHHMM, planAsset, resolveChannel, shouldCountAsPublished,
-  slotInstant, utcOffsetMinutes,
+  DEFAULT_SLOTS, dayKey, localWeekday, nextSlot, parseHHMM, planAsset, resolveChannel, shouldCountAsPublished,
+  slotInstant, slotTimeFor, utcOffsetMinutes,
 } from "../lib/schedule";
 import {
   ALL_SURFACES, BUFFER_ENDPOINT, SURFACES, buildCreatePost, canAutoPublish, classifyResponse,
@@ -48,7 +48,7 @@ const results: Case[] = [];
 const short = (hits: string[]) => (hits.length ? hits.slice(0, 3).map((h) => h.slice(0, 80)).join(" | ") : "none");
 const add = (c: Case) => results.push(c);
 
-const D = { REL: "reliability", JUD: "judgment", EXE: "execution", MEM: "memory", BRAIN: "brain", AUTO: "automation", PUB: "publish", SCH: "schedule", DB: "schema", RUN: "run", CF: "chatfuel" };
+const D = { REL: "reliability", JUD: "judgment", EXE: "execution", MEM: "memory", BRAIN: "brain", AUTO: "automation", PUB: "publish", SCH: "schedule", DB: "schema", RUN: "run", CF: "chatfuel", COMM: "community" };
 
 /* ---------------- RELIABILITY: fault injection ---------------- */
 
@@ -685,7 +685,7 @@ lock("M18", "the stack ceiling is 30%", "0.30", () => {
 
 /* ---------------- JUDGMENT: did any retired number survive anywhere ---------------- */
 
-import { readFileSync, readdirSync, writeFileSync } from "fs";
+import { readFileSync, readdirSync, writeFileSync, existsSync } from "fs";
 import { execSync } from "child_process";
 import { join } from "path";
 
@@ -2142,6 +2142,115 @@ add({ id: "WH12", dimension: CF, what: "the handoff table is queried with a colu
     return {
       pass: /comment_id\s+TEXT NOT NULL UNIQUE/.test(table) && /status/.test(table) && /page_ref/.test(table) && /CHECK \(surface IN \('facebook','instagram','tiktok'\)\)/.test(table),
       got: table ? `${table.split("\n").length} lines` : "missing",
+    };
+  }});
+
+
+/* ---------------- THE COMMUNITY DOCUMENT vs THE CODE ---------------- */
+
+const C = D.COMM;
+const communityDoc = () => readFileSync(join(ROOT, "docs", "WHOP_COMMUNITY.md"), "utf8");
+
+add({ id: "CM01", dimension: C, what: "the community document states a price the code does not charge", expect: "the price table itself matches lib/tiers.ts, tier by tier",
+  run: () => {
+    // Reading the table, not the prose. A grep for "$44" passes on a document that also says
+    // "$19/mo" three lines later; a row-by-row comparison cannot.
+    const doc = communityDoc();
+    const section = doc.slice(doc.indexOf("## 2."), doc.indexOf("## 3."));
+    const rows = section.split("\n").filter((l) => l.trim().startsWith("|") && !/---/.test(l) && !/\|\s*Door\s*\|/i.test(l));
+    const priceOf = (tier: string): number | null => {
+      // first cell only — the tier name — so "Pro" is not found inside a Team description
+      const row = rows.find((r) => r.split("|")[1].toLowerCase().includes(tier.toLowerCase()));
+      if (!row) return null;
+      const m = /\$(\d+)/.exec(row);
+      return m ? Number(m[1]) : null;
+    };
+    const got = { circle: priceOf("Circle"), pro: priceOf("Pro"), team: priceOf("Team"), free: priceOf("Free") };
+    const want = { circle: TIER_SPECS.circle.price, pro: TIER_SPECS.pro.price, team: TIER_SPECS.team.price, free: 0 };
+    const bad = Object.keys(want).filter((k) => got[k as keyof typeof got] !== want[k as keyof typeof want]);
+    const corrections = /## 9\. What this document replaced/.test(doc) && /Vault Circle \$19/.test(doc);
+    return { pass: rows.length >= 4 && bad.length === 0 && corrections, got: `doc=${JSON.stringify(got)} code=${JSON.stringify(want)} bad=[${bad.join(",")}]` };
+  }});
+
+add({ id: "CM02", dimension: C, what: "the document promises a quota the registry does not grant", expect: "every runs/window and runs/month figure appears, and no other tier's number is invented",
+  run: () => {
+    const doc = communityDoc();
+    const wanted = [
+      `${FREE_SPEC.runs_window}/${FREE_SPEC.runs_month}`,
+      `${TIER_SPECS.circle.runs_window}/${TIER_SPECS.circle.runs_month}`,
+      `${TIER_SPECS.pro.runs_window}/${TIER_SPECS.pro.runs_month}`,
+    ];
+    const figures = [FREE_SPEC.runs_window, FREE_SPEC.runs_month, TIER_SPECS.circle.runs_window, TIER_SPECS.circle.runs_month, TIER_SPECS.pro.runs_window, TIER_SPECS.pro.runs_month];
+    const missing = figures.filter((n) => !doc.includes(String(n)));
+    return { pass: missing.length === 0 && wanted.length === 3, got: `missing=[${missing.join(",")}] of [${figures.join(",")}]` };
+  }});
+
+add({ id: "CM03", dimension: C, what: "the document lists a posting time or surface the scheduler does not use", expect: "times match DEFAULT_SLOTS, five surfaces, no X",
+  run: () => {
+    const doc = communityDoc();
+    const bad = (Object.keys(DEFAULT_SLOTS) as (keyof typeof DEFAULT_SLOTS)[]).filter((s) => {
+      const want = slotTimeFor(s, { ...process.env } as any);
+      return !new RegExp(want.replace(":", "\\:")).test(doc);
+    });
+    const surfacesOk = /YouTube longform/.test(doc) && /TikTok/.test(doc) && /Instagram/.test(doc) && /Facebook/.test(doc);
+    const xClaim = /\bX \(Twitter\)|posts to X\b|IG \+ TikTok \+ YT \+ X/.test(doc.split("## 9.")[0]);
+    return { pass: bad.length === 0 && surfacesOk && !xClaim, got: `bad_times=[${bad.join(",")}] surfaces=${surfacesOk} x=${xClaim}` };
+  }});
+
+add({ id: "CM04", dimension: C, what: "the document says a tier publishes on a path it cannot use", expect: "manual/scheduled/direct match publishPathFor",
+  run: () => {
+    const doc = communityDoc();
+    const free = publishPathFor("free") === "manual_download" && /manual_download/.test(doc);
+    const circle = publishPathFor("circle") === "buffer_scheduled" && /buffer_scheduled/.test(doc);
+    const pro = publishPathFor("pro") === "oauth_direct" && /oauth_direct/.test(doc);
+    const team = publishPathFor("team") === "oauth_direct";
+    return { pass: free && circle && pro && team, got: `free=${free} circle=${circle} pro=${pro} team=${team}` };
+  }});
+
+add({ id: "CM05", dimension: C, what: "the document cites a file that does not exist", expect: "every lib/ and app/ path it names is real",
+  run: () => {
+    const doc = communityDoc();
+    const cited = Array.from(doc.matchAll(/`(lib\/[a-z0-9-]+\.ts|app\/api\/[a-z0-9\/-]+)`/g)).map((m) => m[1]);
+    const missing: string[] = [];
+    for (const c of Array.from(new Set(cited))) {
+      const full = join(ROOT, "jarvis-app", c);
+      const alt = join(ROOT, "jarvis-app", c, "route.ts");
+      try { readFileSync(full); } catch { try { readFileSync(alt); } catch { missing.push(c); } }
+    }
+    return { pass: cited.length >= 6 && missing.length === 0, got: `${Array.from(new Set(cited)).length} cited, missing=[${missing.join(",")}]` };
+  }});
+
+add({ id: "CM06", dimension: C, what: "the community document claims an automation nothing performs", expect: "every 'runs itself' row still points at a real route, and the manual list stays honest",
+  run: () => {
+    const doc = communityDoc();
+    const auto = doc.slice(doc.indexOf("## 5."), doc.indexOf("## 6."));
+    const honest = doc.includes("## 6. What is still a human") && /Still manual/.test(doc);
+    const dmRoute = auto.includes("/api/chatfuel/dm") && existsSync(join(ROOT, "jarvis-app", "app", "api", "chatfuel", "dm", "route.ts"));
+    const cron = auto.includes("/api/cron/publish-due") && existsSync(join(ROOT, "jarvis-app", "app", "api", "cron", "publish-due", "route.ts"));
+    const runRoute = auto.includes("/api/agent/run") && existsSync(join(ROOT, "jarvis-app", "app", "api", "agent", "run", "route.ts"));
+    return { pass: honest && dmRoute && cron && runRoute, got: `honest=${honest} dm=${dmRoute} cron=${cron} run=${runRoute}` };
+  }});
+
+
+add({ id: "CM07", dimension: C, what: "the older pipeline document is still selling the $19 community", expect: "its community section now matches the three doors and points at the canonical doc",
+  run: () => {
+    // Two documents disagreeing is worse than one wrong document: whoever reads the older one
+    // will quote $19 to a buyer. The old section is rewritten in place, not just superseded.
+    const doc = readFileSync(join(ROOT, "docs", "SHADOW_OPERATION_FULL_PIPELINE_CONTENT_TO_COMMUNITY.md"), "utf8");
+    const section = doc.slice(doc.indexOf("## 5) PRIVATE COMMUNITIES"), doc.indexOf("## 6) FULL PIPELINE"));
+    const rows = section.split("\n").filter((l) => l.trim().startsWith("|") && !/---/.test(l));
+    const priceOf = (tier: string) => {
+      const row = rows.find((r) => r.split("|")[1].toLowerCase().includes(tier.toLowerCase()));
+      const m = row ? /\$(\d+)/.exec(row) : null;
+      return m ? Number(m[1]) : null;
+    };
+    const got = { circle: priceOf("Circle"), pro: priceOf("Pro"), team: priceOf("Team") };
+    const points = /docs\/WHOP_COMMUNITY\.md/.test(section) && /SUPERSEDED IN PART/.test(doc);
+    // only a TABLE ROW is a claim; the note explaining what was removed is not
+    const stale = section.split("\n").some((l) => l.trim().startsWith("|") && /Shadow Council|\$19/.test(l));
+    return {
+      pass: got.circle === TIER_SPECS.circle.price && got.pro === TIER_SPECS.pro.price && got.team === TIER_SPECS.team.price && points && !stale,
+      got: `doc=${JSON.stringify(got)} points=${points} stale=${stale}`,
     };
   }});
 

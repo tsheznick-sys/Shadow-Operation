@@ -1,4 +1,19 @@
 # SHADOW OPERATION — Full Pipeline
+
+> ⚠️ **SUPERSEDED IN PART — read this first.**
+> The **community** half of this document (§5, and the $19/$79 pricing wherever it appears) was
+> written before the build was final and is **wrong**. The corrected version is
+> **`docs/WHOP_COMMUNITY.md`**, which is pinned to the code by tests CM01–CM06.
+>
+> What changed: Circle **$44** (not $19) · Pro **$53** · Team **$62** (not $79) · Max dropped ·
+> **no Skool**, no Telegram member tier · **Chatfuel** (not ManyChat) · five surfaces including
+> **Facebook, no X** · longform 3×/week + four daily surfaces (not 6 posts/day) · G4 is the
+> **first three** Pro/Team publishes, not six Gmail drafts a morning.
+>
+> Everything else here — the content pillars, the 8s/32s cuts, the demand test — still describes
+> how content is *made*. It does not describe how it is **published**; that is
+> `docs/LIVE_SETUP_RUNBOOK.md` §6b.
+
 ## From Content → Digital Products → Private Communities
 **Branch:** `arena/6c47af3d-shadow-operation` | **PR:** #6 `pr_open` | **Target:** $1M/year by 2030 | **Mode:** Super Quality + Memory
 
@@ -131,42 +146,53 @@
 
 ## 5) PRIVATE COMMUNITIES — Where Buyers Become Cult
 
-**Goal:** Communities are the *product* after the product. They hold retention, create proof, and spawn partners.
+> **Rewritten 2026-10-31.** The old §5 sold a $19 "Vault Circle", a $79 "Shadow Council", a Skool
+> backup and ManyChat. None of that is what was built. The canonical document is
+> **`docs/WHOP_COMMUNITY.md`**; this section is the summary and defers to it.
 
-### A) Two Communities (Start with ONE)
+**Goal:** the community is the *product after the product*. It holds retention, produces proof, and
+spawns partners.
 
-| Community | Price | Platform | Who’s In | What Happens Daily |
-|---|---|---|---|---|
-| **The Vault Circle** | **$19/mo** (continuity buyers) | **Whop Community** (or Skool $99/mo) | Starter/Pro buyers | Daily prompt drop, weekly teardown live, #wins channel, DM review |
-| **Shadow Council** | **$79/mo** or $500/yr | **Private Telegram + Whop** | Pro buyers + 5% who pass demand test | Daily Operator drop, partner invites, 10% override (Rule 3 network) |
+### A) One community, three doors
 
-**Why Whop > Skool/Discord for you:** Whop already holds product + community + payments + affiliate split → one login, no Zap hell. Skool is prettier but extra $99/mo. Discord is free but no paywall natively. Start Whop, migrate winners to Skool later.
+| Door | Price | Seats | Runs / 5h | Runs / month | Publish path |
+|---|---|---|---|---|---|
+| Free | $0 | 1 | 20 | 300 | download the file |
+| **Circle** | **$44** | 1 | 40 | 600 | we publish, scheduled |
+| **Pro** | **$53** | 1 | 80 | 1200 | their own channel, first three reviewed |
+| **Team** | **$62** | 3 | 80 per seat | 1200 per seat | per seat, first three reviewed |
 
-### B) Community SOP (JARVIS Runs 80%)
+There is no second community and no Telegram tier. Max was dropped: at $71 it sat above Team $62.
 
-**Daily (JARVIS auto):**
-- 09:00 Prompt Drop → from `MONETIZATION_VERDICTS.md` → #daily-prompt
-- 12:00 Teardown → from `templates/creator_tracker.csv` GREEN → #teardown
-- 18:00 Win Repost → from `logs/gmail_top100_push_log.csv` → #wins (social proof loop)
+### B) How someone arrives
 
-**Weekly (You, 1 hour):**
-- **Mon 19:00 EAT:** Live Teardown (Zoom → Whop replay) → 30 min + 15 Q&A → clip to 8s/32s content (feeds Phase 1)
-- **Fri:** Partner Spotlight → invite 1 GREEN creator who passed demand test → they pitch → you get 10% override
+A comment, not a form:
 
-**Monthly:**
-- **Vault Update:** 5 new prompts + 1 automation → push to Whop → email → community challenge (e.g., “Post 1 Higgsfield reel → best wins audit”)
+```
+comment → Chatfuel webhook → WF6 → /api/chatfuel/dm
+        → ONE private reply (7-day window) carrying a whop.com link built from env ids
+        → checkout or community → agent_members row → tier, quota, publish path
+```
 
-**Rules (Mirror Hard Rules for Your Members):**
-1. No free audits — PASS demand test first (≥1% views + 25 replies) → then you build for them
-2. 3-email cap on support → FINAL TERMS template (copy/paste from `SHADOW_OPERATION_RULES.md`)
-3. Niche framing → “What works for Leak pillar won’t for Proof”
+The link is built by `lib/whop-links.ts` and refuses any URL that is not whop.com, so the DM cannot
+be turned into a relay for someone else's link.
 
-**Stack:**
-- **Whop Community:** $0 (included) → holds vault + chat + live + DMs
-- **Backup:** Telegram (free) for hot alerts + Signal @scott.428 for 1:1s (from your Ghassen draft)
-- **Bot:** ManyChat 8 channels → auto-welcomes new members → assigns #roles by tier
+### C) What runs without a human
 
-**Growth Loop:** Community wins → you clip → 8s hook → new buyers → community grows → more wins. **This is the flywheel to $1M.** At 200 members × $19 = $3,800 MRR → 1,000 members = $19k MRR → $228k/yr just from continuity.
+Slots are planned by `lib/schedule.ts` (longform **Mon/Wed/Fri 09:00 EAT**; Shorts **12:00**, TikTok
+**17:00**, Instagram **19:00**, Facebook **20:00** daily) and published every 15 minutes by
+`/api/cron/publish-due` driven by n8n WF5. **X is not a surface.** The first three Pro/Team publishes
+sit at `g4_review` with a two-hour SLA.
+
+### D) Rules the community enforces
+
+No free 1:1 audits · three emails then FINAL TERMS · one page at a time · waves of 25 · ledger
+failures published · revenue opt-in, off by default. Full text: `docs/WHOP_COMMUNITY.md` §7.
+
+### E) The money
+
+**26 Circle members** cover tools + prizes; **35** also fund the annual renewal. Churn alert at
+**2.0 %**. Arithmetic: `docs/COMMUNITY_FUNDING_MODEL.md`.
 
 ---
 
