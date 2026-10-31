@@ -1999,6 +1999,20 @@ add({ id: "CF15", dimension: CF, what: "Chatfuel fires with a YouTube surface or
     return { pass: allowsThree && needsConversation && returnsValidity, got: `${code.length} chars · allow=${allowsThree} conv=${needsConversation}` };
   }});
 
+
+add({ id: "CF16", dimension: CF, what: "the leg is documented but never set up", expect: "a setup step for both the DM API and the panel, and the bot id in the env example",
+  run: () => {
+    // The first loss was not code — it was a step that stopped being in the runbook. A route
+    // nobody is told to configure is a route that answers 503 forever.
+    const runbook = readFileSync(join(ROOT, "docs", "LIVE_SETUP_RUNBOOK.md"), "utf8");
+    const env = readFileSync(join(ROOT, "jarvis-app", ".env.example"), "utf8");
+    const hasDmStep = /## Step 6c — Chatfuel/.test(runbook) && /CHATFUEL_TOKEN/.test(runbook) && /CHATFUEL_BOT_ID/.test(runbook);
+    const hasPanelStep = /## Step 6d — The Chatfuel panel/.test(runbook) && /CHATFUEL_OPEN_PROXY/.test(runbook);
+    const envHasBot = /^CHATFUEL_BOT_ID=/m.test(env);
+    const staleLock = /IG\s*&\s*TikTok only/i.test(env) || /IG&TikTok only/i.test(runbook);
+    return { pass: hasDmStep && hasPanelStep && envHasBot && !staleLock, got: `dm=${hasDmStep} panel=${hasPanelStep} bot_env=${envHasBot} stale_lock=${staleLock}` };
+  }});
+
 /* ---------------- RUN: the one route that spends money ---------------- */
 
 const R = D.RUN;

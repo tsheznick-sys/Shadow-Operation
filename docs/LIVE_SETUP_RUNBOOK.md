@@ -232,6 +232,36 @@ because retrying a queued DM sends it twice (`CF13`).
 **There is no broadcast mode.** A DM goes into one conversation. An endpoint that can message an
 arbitrary audience is the fastest way to have a Meta app restricted.
 
+## Step 6d — The Chatfuel panel (`chatfuel-app/`)
+
+The panel is a second deployment in this repository, not a page of the main app: a Vite app whose
+proxy holds the Chatfuel token so a browser never can. It is what makes the DM leg operable —
+inbox, contacts, automations, broadcasts.
+
+1. ```bash
+   cd chatfuel-app
+   npm install
+   npm run deploy          # node scripts/deploy-vercel.mjs
+   ```
+
+   It checks the Vercel CLI and login, links the project, pushes the environment, deploys, then asks
+   the deployment whether it came up configured. Re-running is safe: the project is never re-created
+   and `vercel env add --force` overwrites.
+2. Variables: `CHATFUEL_TOKEN` (runtime only, no `VITE_` prefix, so Vite cannot bake it into the
+   bundle) and `VITE_CHATFUEL_WORKSPACE_ID` (the workspace it opens on — read at build time *and*
+   at runtime, so it goes up as a project variable, not as a build flag).
+3. **Do not set `CHATFUEL_OPEN_PROXY=1` in production.** Open mode on a public host means the master
+   token answers whoever finds the URL. The proxy refuses to serve rather than start that way, and
+   `503 ProxyRefusedToServe` is the correct answer, not a bug. Either install the `auth` module
+   (`npx @chatfuel/wizard --embed`) or bind loopback; `ALLOWED_ORIGINS` must name your origins —
+   `*` with no gate still refuses.
+4. **Verify:** `GET https://<panel-host>/chatfuel/healthz` → `{"ok":true}`. The startup log states the
+   auth mode and nothing else — it never prints the token.
+
+**What the panel is not:** it is not a place the agent publishes from. Publishing is Buffer, in the
+main app, every 15 minutes (`Step 6b`). The panel is where a human reads the DMs the agent's posts
+started.
+
 ## Step 7 — Email
 
 - https://resend.com → API Keys → `RESEND_API_KEY`. Verify the domain (or use their test domain for the first send).
