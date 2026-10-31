@@ -48,7 +48,7 @@ const results: Case[] = [];
 const short = (hits: string[]) => (hits.length ? hits.slice(0, 3).map((h) => h.slice(0, 80)).join(" | ") : "none");
 const add = (c: Case) => results.push(c);
 
-const D = { REL: "reliability", JUD: "judgment", EXE: "execution", MEM: "memory", BRAIN: "brain", AUTO: "automation", PUB: "publish", SCH: "schedule", DB: "schema", RUN: "run", CF: "chatfuel", COMM: "community" };
+const D = { REL: "reliability", JUD: "judgment", EXE: "execution", MEM: "memory", BRAIN: "brain", AUTO: "automation", PUB: "publish", SCH: "schedule", DB: "schema", RUN: "run", CF: "chatfuel", COMM: "community", PL: "pipeline" };
 
 /* ---------------- RELIABILITY: fault injection ---------------- */
 
@@ -2252,6 +2252,96 @@ add({ id: "CM07", dimension: C, what: "the older pipeline document is still sell
       pass: got.circle === TIER_SPECS.circle.price && got.pro === TIER_SPECS.pro.price && got.team === TIER_SPECS.team.price && points && !stale,
       got: `doc=${JSON.stringify(got)} points=${points} stale=${stale}`,
     };
+  }});
+
+
+/* ---------------- THE PIPELINE DOCUMENT vs THE OPERATION ---------------- */
+
+const PL = D.PL;
+const pipelineDoc = () => readFileSync(join(ROOT, "docs", "PIPELINE.md"), "utf8");
+
+add({ id: "PL01", dimension: PL, what: "the pipeline names a route that was renamed or never shipped", expect: "every route it cites resolves to a real route.ts",
+  run: () => {
+    const doc = pipelineDoc();
+    const cited = Array.from(new Set(Array.from(doc.matchAll(/`(?:GET\|POST )?(\/api\/[a-z0-9\/-]+)`/g)).map((m) => m[1])));
+    const missing: string[] = [];
+    for (const c of cited) {
+      const full = join(ROOT, "jarvis-app", "app", c, "route.ts");
+      if (!existsSync(full)) missing.push(c);
+    }
+    const critical = ["/api/agent/run", "/api/schedule", "/api/cron/publish-due", "/api/chatfuel/dm", "/api/funding"];
+    const absent = critical.filter((c) => !doc.includes(c));
+    return { pass: cited.length >= 4 && missing.length === 0 && absent.length === 0, got: `${cited.length} cited · missing=[${missing.join(",")}] absent=[${absent.join(",")}]` };
+  }});
+
+add({ id: "PL02", dimension: PL, what: "a native or desktop app appears anywhere in the repo", expect: "none — the claim that nothing installs on a device is checkable",
+  run: () => {
+    // The answer to "is anything installed on my phone" must be a fact about the tree, not a promise.
+    const hits: string[] = [];
+    const readJson = (p: string) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return null; } };
+    for (const pkg of ["jarvis-app/package.json", "chatfuel-app/package.json"]) {
+      const j = readJson(join(ROOT, pkg));
+      if (!j) continue;
+      const deps = { ...(j.dependencies || {}), ...(j.devDependencies || {}) } as Record<string, string>;
+      for (const banned of ["electron", "react-native", "expo", "cordova", "@capacitor/core", "nw"]) {
+        if (deps[banned]) hits.push(`${pkg}:${banned}`);
+      }
+    }
+    for (const f of ["jarvis-app/public/manifest.json"]) {
+      if (!existsSync(join(ROOT, f))) hits.push(`${f}:missing`);
+    }
+    return { pass: hits.length === 0, got: hits.length ? hits.join(", ") : "no electron, no react-native, no expo, no capacitor" };
+  }});
+
+add({ id: "PL03", dimension: PL, what: "the pipeline claims a deployment count the repo does not have", expect: "exactly two vercel.json files, and the doc names both",
+  run: () => {
+    const found: string[] = [];
+    for (const d of ["jarvis-app", "chatfuel-app"]) if (existsSync(join(ROOT, d, "vercel.json"))) found.push(d);
+    const others = readdirSync(join(ROOT)).filter((n) => existsSync(join(ROOT, n, "vercel.json")) && !found.includes(n));
+    const doc = pipelineDoc();
+    const names = found.every((d) => doc.includes(d));
+    return { pass: found.length === 2 && others.length === 0 && names, got: `found=[${found.join(",")}] others=[${others.join(",")}] named=${names}` };
+  }});
+
+add({ id: "PL04", dimension: PL, what: "the pipeline lists a surface or time the scheduler does not use", expect: "five surfaces, five times, and X explicitly absent",
+  run: () => {
+    const doc = pipelineDoc();
+    const times = Object.keys(DEFAULT_SLOTS) as (keyof typeof DEFAULT_SLOTS)[];
+    const bad = times.filter((t) => !doc.includes(slotTimeFor(t, process.env as any)));
+    const surfaces = ["YouTube", "TikTok", "Instagram", "Facebook"].every((n) => doc.includes(n));
+    const xRemoved = /X is not one of them|X removed|no X/i.test(doc);
+    return { pass: bad.length === 0 && surfaces && xRemoved, got: `bad_times=[${bad.join(",")}] surfaces=${surfaces} x_named=${xRemoved}` };
+  }});
+
+add({ id: "PL05", dimension: PL, what: "the pipeline states the stages out of order", expect: "run before schedule before publish due before the DM before the money",
+  run: () => {
+    // Order is the safety property: booking before rendering, or publishing before the gate, is how
+    // an unvetted asset reaches a channel.
+    const doc = pipelineDoc();
+    const at = (needle: string) => doc.indexOf(needle);
+    const order = [
+      at("POST /api/agent/run"),
+      at("POST /api/schedule"),
+      at("/api/cron/publish-due"),
+      at("POST /api/chatfuel/dm"),
+      at("/api/funding"),
+    ];
+    const ascending = order.every((v, i) => v > -1 && (i === 0 || v > order[i - 1]));
+    const gateBeforeRender = at("lib/split.ts") < at("POST /api/agent/run");
+    return { pass: ascending && gateBeforeRender, got: `order=[${order.join(",")}] ascending=${ascending} gate_first=${gateBeforeRender}` };
+  }});
+
+add({ id: "PL06", dimension: PL, what: "the pipeline repeats the three silent-failure classes it was built to prevent", expect: "Buffer 200, a swallowed query and a body-asserted verdict are all named",
+  run: () => {
+    const doc = pipelineDoc();
+    const names = {
+      buffer: /HTTP 200 for a failed (mutation|post)/i.test(doc),
+      swallow: /missing column read as .?nothing due|swallow/i.test(doc),
+      body: /asserting its own compliance|request body/i.test(doc),
+    };
+    const notBuilt = /## 5\. What is not built/.test(doc);
+    const honest = /render_not_configured/.test(doc);
+    return { pass: names.buffer && names.swallow && names.body && notBuilt && honest, got: `buffer=${names.buffer} swallow=${names.swallow} body=${names.body} honest=${notBuilt && honest}` };
   }});
 
 /* ---------------- RUN: the one route that spends money ---------------- */
