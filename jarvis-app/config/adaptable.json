@@ -986,5 +986,63 @@
       "distinct from every live page"
     ],
     "implementation": "jarvis-app/lib/board.ts + /board"
+  },
+  "stickman_agent": {
+    "role": "the product inside the community — not a library, a staff member",
+    "what_it_does": [
+      "script",
+      "render stickman",
+      "cut longform into shorts + social",
+      "schedule to member's own channels",
+      "audit rules/policy/disclosure",
+      "pods, streaks, next action, public ledger"
+    ],
+    "free_tier": {
+      "window_hours": 5,
+      "runs_per_window": 20,
+      "monthly_cap": 300,
+      "receives": "our content to clip",
+      "watermark": {
+        "apply": true,
+        "label": "STICKMAN",
+        "position": "bottom-right, 40% opacity, static",
+        "never_covers": "character or caption",
+        "why": "free users distribute our brand at their cost, not our ad budget"
+      }
+    },
+    "tiers": {
+      "free": 0,
+      "circle": 44,
+      "pro": 53,
+      "max": 71
+    },
+    "windows": {
+      "free": 20,
+      "circle": 40,
+      "pro": 80,
+      "max": 200
+    },
+    "monthly": {
+      "free": 300,
+      "circle": 600,
+      "pro": 1200,
+      "max": 2400
+    },
+    "cost_per_run": 0.008,
+    "publish_gate": {
+      "always": "rules + policy + disclosure, machine-checked",
+      "first_3_publishes": "G4 human review",
+      "after_3": "earned auto-publish",
+      "flagged": "any flag returns the member to human review",
+      "never": "no tier publishes freely without passing the checks — this is the bucket that gets channels removed"
+    },
+    "funnel_shortcut": {
+      "allowed": true,
+      "price": 44,
+      "discount": 0,
+      "why": "a supporter who already trusts us should not be walked through a funnel built to create trust",
+      "cold_traffic": "still starts at the $28 First Shot"
+    },
+    "implementation": "jarvis-app/lib/stickman-agent.ts + /stickman + 3 tables (agent_members, agent_runs, agent_schedule)"
   }
 }

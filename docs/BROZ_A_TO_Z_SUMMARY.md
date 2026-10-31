@@ -16,6 +16,8 @@
 
 **Two ledgers.** One for the community (views, ER, comments, revenue opt-in) and one for the team (plus policy strikes, demonetisation risk, raw-vs-edited gap, margin). The team needs the wound; the prospect does not.
 
+**Stickman Agent is the product.** Members do not buy a library, they buy a staff member: script, render, cut, schedule, audit. Free tier gets **20 runs per 5-hour window** (300/month cap) and **our content to clip**, with **our watermark on every export** — free users distribute our brand at their cost. Paid tiers are clean. Supporters may skip the funnel and join the community directly at $44; the discount is **0%**, only the path is shorter. Nobody publishes freely until rules, policy and disclosure pass; the first 3 publishes get G4 review, then auto-publish is earned.
+
 **`stickman_all` on every page.** `kaomei/stickman-video-director` (git clone, **free**) renders the **30-minute longform AND the Shorts** — one master prompt + one reference frame locks the character across both.
 
 ```

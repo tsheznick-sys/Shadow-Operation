@@ -414,3 +414,49 @@ CREATE TABLE IF NOT EXISTS board_motions (
 
 COMMENT ON TABLE board_motions IS
   'launch_page, kill_page, price_change, spend, niche_choice and policy_override require 3 of 3. Everything else is 2 of 3.';
+
+-- ============================================================
+-- STICKMAN AGENT (2026-10-31) — the product inside the community.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS agent_members (
+  id             TEXT PRIMARY KEY,
+  tier           TEXT NOT NULL DEFAULT 'free' CHECK (tier IN ('free','circle','pro','max')),
+  joined_via     TEXT NOT NULL DEFAULT 'funnel' CHECK (joined_via IN ('funnel','direct_community','referral')),
+  watermark      BOOLEAN NOT NULL DEFAULT true,
+  publish_passes INT NOT NULL DEFAULT 0,
+  flagged        BOOLEAN NOT NULL DEFAULT false,
+  window_started TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  used_in_window INT NOT NULL DEFAULT 0,
+  used_this_month INT NOT NULL DEFAULT 0,
+  month_key      TEXT NOT NULL DEFAULT to_char(NOW(),'YYYY-MM'),
+  created_at     TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS agent_runs (
+  id          BIGSERIAL PRIMARY KEY,
+  member_id   TEXT REFERENCES agent_members(id) ON DELETE CASCADE,
+  kind        TEXT NOT NULL CHECK (kind IN ('script','render','clip','schedule','audit','community')),
+  status      TEXT NOT NULL DEFAULT 'ok' CHECK (status IN ('ok','blocked','failed','retried')),
+  cost        NUMERIC(8,4) NOT NULL DEFAULT 0.008,
+  asset_id    TEXT,
+  detail      JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS agent_runs_member_time ON agent_runs (member_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS agent_schedule (
+  id          BIGSERIAL PRIMARY KEY,
+  member_id   TEXT REFERENCES agent_members(id) ON DELETE CASCADE,
+  page_ref    TEXT NOT NULL,
+  platform    TEXT NOT NULL CHECK (platform IN ('youtube_longform','youtube_shorts','tiktok','instagram','facebook')),
+  publish_at  TIMESTAMPTZ NOT NULL,
+  asset_id    TEXT NOT NULL,
+  watermark   BOOLEAN NOT NULL DEFAULT true,
+  gate_status TEXT NOT NULL DEFAULT 'pending' CHECK (gate_status IN ('pending','g4_review','pass','blocked','published')),
+  blocked_by  TEXT,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS agent_schedule_due ON agent_schedule (publish_at) WHERE gate_status IN ('pending','g4_review');
+
+COMMENT ON TABLE agent_members IS
+  'Free = 20 runs/5h and a watermark on every export. Paid = clean. Three clean publishes earn auto-publish.';
