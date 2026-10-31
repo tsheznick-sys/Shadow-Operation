@@ -30,7 +30,8 @@ import {
 import { askJarvis } from "../lib/jarvis";
 import { canScheduleToBuffer, publishPathFor } from "../lib/publish";
 import { split } from "../lib/split";
-import { DM_SPEC, chatfuelConfig, clampDmText, dmSurfaceFor, sendDm } from "../lib/chatfuel";
+import { DM_SPEC, chatfuelConfig, checkWindow, clampDmText, dmSurfaceFor, sendDm } from "../lib/chatfuel";
+import { buildJoinLink, isLinkFailure, isWhopUrl, joinMessage, strayLinks } from "../lib/whop-links";
 import { beforeRender, quotaFromRow, refund, renderSpec, reserve, runRecord, tierFrom } from "../lib/run";
 import {
   CLAIM_SQL, LONGFORM_DAYS, MARK_SQL, MAX_ATTEMPTS, SCHEDULABLE_SURFACES, backoffMinutes, batchSize,
@@ -1820,6 +1821,8 @@ add({ id: "SC20", dimension: D.SCH, what: "a surface already has its full per-da
 /* ---------------- CHATFUEL: the DM leg X used to carry ---------------- */
 
 const CF = D.CF;
+/** Two hours ago — inside both the 7-day private-reply window and the 24h DM window. */
+const RECENT = new Date(Date.now() - 2 * 3600_000).toISOString();
 const ENV_OK = { CHATFUEL_BOT_ID: "bot-1", CHATFUEL_TOKEN: "tok-secret-123" } as any;
 
 /** A stub transport that records what was sent and answers with one canned response. */
@@ -1846,7 +1849,7 @@ add({ id: "CF01", dimension: CF, what: "the token is not set", expect: "refuses 
   async run() {
     const { calls, fetchImpl } = cfStub({ json: okReply("facebook") });
     const cfg = chatfuelConfig({} as any);
-    const r = await sendDm({ surface: "facebook", conversation_id: "c1", text: "hi" }, { fetchImpl, env: {} as any });
+    const r = await sendDm({  surface: "facebook", conversation_id: "c1", text: "hi" , kind: "private_reply", comment_id: "cm-test", inbound_at: RECENT }, { fetchImpl, env: {} as any });
     return {
       pass: !r.ok && r.code === "not_configured" && /CHATFUEL_TOKEN/.test(r.reason || "") && cfg.ready === false && calls.length === 0,
       got: `${r.code} calls=${calls.length}`,
@@ -1856,7 +1859,7 @@ add({ id: "CF01", dimension: CF, what: "the token is not set", expect: "refuses 
 add({ id: "CF02", dimension: CF, what: "a Facebook conversation replies normally", expect: "POST to the panel endpoint with the token and the right mutation",
   async run() {
     const { calls, fetchImpl } = cfStub({ json: okReply("facebook") });
-    const r = await sendDm({ surface: "facebook", conversation_id: "c1", text: "Thanks for commenting — the full build is live." }, { fetchImpl, env: ENV_OK });
+    const r = await sendDm({  surface: "facebook", conversation_id: "c1", text: "Thanks for commenting — the full build is live." , kind: "private_reply", comment_id: "cm-test", inbound_at: RECENT }, { fetchImpl, env: ENV_OK });
     const req = calls[0];
     return {
       pass: r.ok && r.id === "msg-1" && r.status === "Sent" &&
@@ -1872,14 +1875,14 @@ add({ id: "CF02", dimension: CF, what: "a Facebook conversation replies normally
 add({ id: "CF03", dimension: CF, what: "GraphQL answers 200 with an error envelope", expect: "failure — a 200 is not a send",
   async run() {
     const { fetchImpl } = cfStub({ json: { errors: [{ message: "Bot not found" }] } });
-    const r = await sendDm({ surface: "instagram", conversation_id: "c2", text: "x" }, { fetchImpl, env: ENV_OK });
+    const r = await sendDm({  surface: "instagram", conversation_id: "c2", text: "x" , kind: "private_reply", comment_id: "cm-test", inbound_at: RECENT }, { fetchImpl, env: ENV_OK });
     return { pass: !r.ok && r.code === "graphql" && /Bot not found/.test(r.reason || ""), got: `${r.code} ${r.reason}` };
   }});
 
 add({ id: "CF04", dimension: CF, what: "the message comes back with an id but status Failed", expect: "failure — an id is not a delivery",
   async run() {
     const { fetchImpl } = cfStub({ json: okReply("facebook", "Failed") });
-    const r = await sendDm({ surface: "facebook", conversation_id: "c1", text: "x" }, { fetchImpl, env: ENV_OK });
+    const r = await sendDm({  surface: "facebook", conversation_id: "c1", text: "x" , kind: "private_reply", comment_id: "cm-test", inbound_at: RECENT }, { fetchImpl, env: ENV_OK });
     return { pass: !r.ok && r.code === "message_failed" && r.retryable === false, got: `${r.code} retry=${r.retryable}` };
   }});
 
@@ -1887,21 +1890,21 @@ add({ id: "CF05", dimension: CF, what: "per-message errors arrive inside a succe
   async run() {
     const spec = DM_SPEC.tiktok;
     const { fetchImpl } = cfStub({ json: { data: { [spec.mutation]: { id: "m9", text: "x", [spec.status_field]: "Sent", errors: [{ code: "ReceiverNotReachable", originalErrMessage: "user blocked the bot" }] } } } });
-    const r = await sendDm({ surface: "tiktok", conversation_id: "c3", text: "x" }, { fetchImpl, env: ENV_OK });
+    const r = await sendDm({  surface: "tiktok", conversation_id: "c3", text: "x" , kind: "private_reply", comment_id: "cm-test", inbound_at: RECENT }, { fetchImpl, env: ENV_OK });
     return { pass: !r.ok && r.code === "message_failed" && /blocked the bot/.test(r.reason || ""), got: `${r.code} ${r.reason}` };
   }});
 
 add({ id: "CF06", dimension: CF, what: "the token is rejected", expect: "auth failure and no retry — retrying a bad key is a loop",
   async run() {
     const { fetchImpl } = cfStub({ status: 401, json: {} });
-    const r = await sendDm({ surface: "facebook", conversation_id: "c1", text: "x" }, { fetchImpl, env: ENV_OK });
+    const r = await sendDm({  surface: "facebook", conversation_id: "c1", text: "x" , kind: "private_reply", comment_id: "cm-test", inbound_at: RECENT }, { fetchImpl, env: ENV_OK });
     return { pass: !r.ok && r.code === "auth" && r.retryable === false, got: `${r.code} retry=${r.retryable}` };
   }});
 
 add({ id: "CF07", dimension: CF, what: "somebody asks to DM a YouTube surface", expect: "refused before any request — YouTube has no DM channel",
   async run() {
     const { calls, fetchImpl } = cfStub({ json: okReply("facebook") });
-    const r = await sendDm({ surface: "youtube_shorts", conversation_id: "c1", text: "x" } as any, { fetchImpl, env: ENV_OK });
+    const r = await sendDm({  surface: "youtube_shorts", conversation_id: "c1", text: "x" , kind: "private_reply", comment_id: "cm-test", inbound_at: RECENT } as any, { fetchImpl, env: ENV_OK });
     return {
       pass: !r.ok && r.code === "unsupported_surface" && calls.length === 0 && dmSurfaceFor("youtube_longform") === null && dmSurfaceFor("facebook") === "facebook",
       got: `${r.code} calls=${calls.length}`,
@@ -1911,7 +1914,7 @@ add({ id: "CF07", dimension: CF, what: "somebody asks to DM a YouTube surface", 
 add({ id: "CF08", dimension: CF, what: "a transport error quotes the request", expect: "the token never appears in the reason",
   async run() {
     const { fetchImpl } = cfStub({ throw: "connect ECONNREFUSED with authorization: Bearer tok-secret-123" });
-    const r = await sendDm({ surface: "facebook", conversation_id: "c1", text: "x" }, { fetchImpl, env: ENV_OK });
+    const r = await sendDm({  surface: "facebook", conversation_id: "c1", text: "x" , kind: "private_reply", comment_id: "cm-test", inbound_at: RECENT }, { fetchImpl, env: ENV_OK });
     return { pass: !r.ok && r.code === "transport" && !/tok-secret-123/.test(r.reason || "") && /redacted/.test(r.reason || ""), got: r.reason || "" };
   }});
 
@@ -1962,7 +1965,7 @@ add({ id: "CF12", dimension: CF, what: "Chatfuel is unconfigured and the workflo
 add({ id: "CF13", dimension: CF, what: "Chatfuel answers Sending rather than Sent", expect: "accepted — retrying a queued DM sends it twice",
   async run() {
     const { fetchImpl } = cfStub({ json: okReply("instagram", "Sending") });
-    const r = await sendDm({ surface: "instagram", conversation_id: "c1", text: "x" }, { fetchImpl, env: ENV_OK });
+    const r = await sendDm({  surface: "instagram", conversation_id: "c1", text: "x" , kind: "private_reply", comment_id: "cm-test", inbound_at: RECENT }, { fetchImpl, env: ENV_OK });
     return { pass: r.ok && r.status === "Sending" && r.retryable === false, got: `${r.ok} ${r.status}` };
   }});
 
@@ -2010,7 +2013,136 @@ add({ id: "CF16", dimension: CF, what: "the leg is documented but never set up",
     const hasPanelStep = /## Step 6d — The Chatfuel panel/.test(runbook) && /CHATFUEL_OPEN_PROXY/.test(runbook);
     const envHasBot = /^CHATFUEL_BOT_ID=/m.test(env);
     const staleLock = /IG\s*&\s*TikTok only/i.test(env) || /IG&TikTok only/i.test(runbook);
-    return { pass: hasDmStep && hasPanelStep && envHasBot && !staleLock, got: `dm=${hasDmStep} panel=${hasPanelStep} bot_env=${envHasBot} stale_lock=${staleLock}` };
+    const hasJoin = /WHOP_PLAN_CIRCLE_ID/.test(runbook) && /WHOP_COMMUNITY_URL/.test(env) && /plan id is not a product id/i.test(runbook);
+    return { pass: hasDmStep && hasPanelStep && envHasBot && hasJoin && !staleLock, got: `dm=${hasDmStep} panel=${hasPanelStep} bot_env=${envHasBot} join=${hasJoin} stale_lock=${staleLock}` };
+  }});
+
+
+/* ---------------- COMMENT → DM → WHOP: the path the product actually sells ---------------- */
+
+const HT = {
+  ...ENV_OK,
+  WHOP_COMMUNITY_URL: "https://whop.com/the-night-shift/",
+  WHOP_PLAN_CIRCLE_ID: "plan_CIRCLEabc123",
+  WHOP_PLAN_PRO_ID: "plan_PROabc123",
+  WHOP_PLAN_TEAM_ID: "plan_TEAMabc123",
+} as any;
+
+add({ id: "WH01", dimension: CF, what: "a comment on a Facebook post, free tier", expect: "one whop.com community link, campaign-tagged, plus an invitation to reply",
+  run: () => {
+    const l = buildJoinLink({ tier: "free", page_ref: "psychology", surface: "facebook", env: HT });
+    const msg = joinMessage({ link: l.ok ? l.url : "", community: "The Night Shift", surface: "facebook" });
+    const urls = strayLinks(msg);
+    return {
+      pass: l.ok && isWhopUrl(l.url) && /utm_source=chatfuel/.test(l.url) && /utm_campaign=psychology/.test(l.url) && urls.length === 0 && /Reply here/.test(msg),
+      got: isLinkFailure(l) ? l.code : l.url.slice(0, 96),
+    };
+  }});
+
+add({ id: "WH02", dimension: CF, what: "a Circle comment", expect: "the checkout link for the plan, not the product page",
+  run: () => {
+    const l = buildJoinLink({ tier: "circle", page_ref: "psychology", surface: "instagram", env: HT });
+    return {
+      pass: l.ok && l.kind === "checkout" && /^https:\/\/whop\.com\/checkout\/plan_CIRCLEabc123\?/.test(l.url),
+      got: isLinkFailure(l) ? l.code : l.url.slice(0, 80),
+    };
+  }});
+
+add({ id: "WH03", dimension: CF, what: "somebody points the checkout at a PRODUCT id", expect: "refused by name — prod_ ids 404 at /checkout/, and the DM could not be resent",
+  run: () => {
+    const l = buildJoinLink({ tier: "pro", page_ref: "p", surface: "facebook", env: { ...HT, WHOP_PLAN_PRO_ID: "prod_pro_xxx" } as any });
+    return {
+      pass: isLinkFailure(l) && l.code === "not_a_plan_id" && /plan_/.test(l.reason) && /prod_/.test(l.reason),
+      got: isLinkFailure(l) ? `${l.code}: ${l.reason.slice(0, 60)}` : l.url,
+    };
+  }});
+
+add({ id: "WH04", dimension: CF, what: "no community URL and no plan id are configured", expect: "refusal, never a guessed link",
+  run: () => {
+    const free = buildJoinLink({ tier: "free", page_ref: "p", surface: "facebook", env: { ...ENV_OK } as any });
+    const paid = buildJoinLink({ tier: "team", page_ref: "p", surface: "facebook", env: { ...ENV_OK } as any });
+    return {
+      pass: isLinkFailure(free) && free.code === "community_url_missing" && isLinkFailure(paid) && paid.code === "plan_id_missing",
+      got: `${isLinkFailure(free) ? free.code : "url"} / ${isLinkFailure(paid) ? paid.code : "url"}`,
+    };
+  }});
+
+add({ id: "WH05", dimension: CF, what: "a comment injects its own URL into the DM text", expect: "refused — the bot cannot be used as a link relay",
+  run: async () => {
+    const { fetchImpl, calls } = cfStub({ json: okReply("facebook") });
+    const r = await sendDm(
+      { surface: "facebook", conversation_id: "c1", kind: "private_reply", comment_id: "cm1", inbound_at: RECENT,
+        text: "Here you go https://whop.com/the-night-shift/ and also https://evil.example/claim" },
+      { fetchImpl, env: HT },
+    );
+    return { pass: !r.ok && r.code === "link_not_allowed" && calls.length === 0, got: `${r.code} calls=${calls.length}` };
+  }});
+
+add({ id: "WH06", dimension: CF, what: "a comment is six days old and one is eight", expect: "the first still gets its private reply, the second is refused",
+  run: () => {
+    const now = new Date("2026-11-04T12:00:00Z");
+    const six = checkWindow("private_reply", "2026-10-29T12:00:00Z", now);
+    const eight = checkWindow("private_reply", "2026-10-27T12:00:00Z", now);
+    return { pass: six.ok && !eight.ok && eight.code === "window_closed", got: `6d=${six.ok} 8d=${eight.code}` };
+  }});
+
+add({ id: "WH07", dimension: CF, what: "a reply to somebody who messaged 30 hours ago", expect: "refused — the 24h window is closed and there is no tag for a robot",
+  run: () => {
+    const now = new Date("2026-11-04T12:00:00Z");
+    const late = checkWindow("reply", "2026-11-03T06:00:00Z", now);
+    const fresh = checkWindow("reply", "2026-11-04T06:00:00Z", now);
+    return { pass: !late.ok && late.code === "window_closed" && fresh.ok, got: `30h=${late.ok} 6h=${fresh.ok}` };
+  }});
+
+add({ id: "WH08", dimension: CF, what: "a forged timestamp from the future arrives", expect: "refused — it would otherwise buy an unlimited window",
+  run: () => {
+    const now = new Date("2026-11-04T12:00:00Z");
+    const forged = checkWindow("private_reply", "2026-11-09T12:00:00Z", now);
+    const none = checkWindow("private_reply", undefined, now);
+    return { pass: !forged.ok && !none.ok && none.code === "comment_required", got: `future=${forged.code} missing=${none.code}` };
+  }});
+
+add({ id: "WH09", dimension: CF, what: "a private reply with no comment id", expect: "refused before any request — one message per comment needs the comment",
+  run: async () => {
+    const { fetchImpl, calls } = cfStub({ json: okReply("facebook") });
+    const r = await sendDm(
+      { surface: "facebook", conversation_id: "c1", kind: "private_reply", inbound_at: RECENT, text: "hi" },
+      { fetchImpl, env: HT },
+    );
+    return { pass: !r.ok && r.code === "comment_required" && calls.length === 0, got: `${r.code} calls=${calls.length}` };
+  }});
+
+add({ id: "WH10", dimension: CF, what: "the same comment is retried after a timeout", expect: "the send carries a clientId derived from the comment, so Chatfuel dedupes it",
+  run: async () => {
+    const { fetchImpl, calls } = cfStub({ json: okReply("instagram") });
+    const r = await sendDm(
+      { surface: "instagram", conversation_id: "c9", kind: "private_reply", comment_id: "cm-77", inbound_at: RECENT,
+        client_id: "cf_cm-77", text: "The Night Shift https://whop.com/the-night-shift/" },
+      { fetchImpl, env: HT },
+    );
+    const sent = calls[0]?.body?.variables?.message?.clientId;
+    return { pass: sent === "cf_cm-77", got: `${sent} calls=${calls.length} r=${JSON.stringify(r).slice(0, 90)}` };
+  }});
+
+add({ id: "WH11", dimension: CF, what: "the route is asked for a DM and Whop is not configured", expect: "503 before Chatfuel — no private reply is spent on a link that does not exist",
+  run: () => {
+    const route = readFileSync(join(ROOT, "jarvis-app", "app", "api", "chatfuel", "dm", "route.ts"), "utf8");
+    const linkFirst = route.indexOf("buildJoinLink(") < route.indexOf("await sendDm(");
+    const refuses = /isLinkFailure\(link\)/.test(route) && /status: 503/.test(route);
+    const claimFirst = route.indexOf("INSERT INTO dm_handoffs") < route.indexOf("await sendDm(");
+    const once = /ON CONFLICT \(comment_id\) DO NOTHING/.test(route) && /already_replied/.test(route);
+    const releases = /DELETE FROM dm_handoffs WHERE comment_id/.test(route);
+    return { pass: linkFirst && refuses && claimFirst && once && releases, got: `link<send=${linkFirst} claim<send=${claimFirst} once=${once} release=${releases}` };
+  }});
+
+add({ id: "WH12", dimension: CF, what: "the handoff table is queried with a column that does not exist", expect: "dm_handoffs exists in the schema with a unique comment — the one-per-comment rule needs it",
+  run: () => {
+    const sqlText = readFileSync(join(ROOT, "jarvis-app", "scripts", "migrate.sql"), "utf8");
+    const table = /CREATE TABLE IF NOT EXISTS dm_handoffs[\s\S]*?\);/i.exec(sqlText)?.[0] || "";
+    return {
+      pass: /comment_id\s+TEXT NOT NULL UNIQUE/.test(table) && /status/.test(table) && /page_ref/.test(table) && /CHECK \(surface IN \('facebook','instagram','tiktok'\)\)/.test(table),
+      got: table ? `${table.split("\n").length} lines` : "missing",
+    };
   }});
 
 /* ---------------- RUN: the one route that spends money ---------------- */

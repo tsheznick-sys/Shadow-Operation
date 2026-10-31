@@ -21,6 +21,8 @@
 // The endpoint and mutations below are the ones in `chatfuel-app/src/vendor/schema/schema.graphql`,
 // not invented here. CF09 fails if that schema ever stops agreeing with this file.
 
+import { strayLinks } from "./whop-links";
+
 export const CHATFUEL_ENDPOINT = "https://panel.chatfuel.com/graphql";
 
 export type DmSurface = "facebook" | "instagram" | "tiktok";
@@ -82,10 +84,34 @@ export function clampDmText(text: string, surface: DmSurface): { text: string; t
   return { text: `${cut.trimEnd()}…`, truncated: true };
 }
 
+/**
+ * Two kinds of message, and they are not interchangeable.
+ *
+ *   private_reply — answers a COMMENT. Meta allows exactly ONE per comment, within 7 days of it,
+ *                   and the conversation continues only if the person replies. Because it cannot
+ *                   be sent twice, the link in it is the only chance to move them.
+ *   reply         — answers a DM the person already sent. The window is 24 hours from their
+ *                   message. Promotional content is allowed inside that window.
+ *
+ * A route that treats them as the same message gets the account restricted, so they are a
+ * discriminated field, not a comment.
+ */
+export type DmKind = "private_reply" | "reply";
+
+export const PRIVATE_REPLY_HOURS = 7 * 24;
+export const REPLY_HOURS = 24;
+
 export type DmInput = {
   surface: string;
   conversation_id: string;
   text: string;
+  kind?: DmKind;
+  /** required for private_reply: the comment being answered. One reply per comment, enforced upstream. */
+  comment_id?: string;
+  /** when the person commented or messaged. Absent means the window cannot be proven, so it is refused. */
+  inbound_at?: string;
+  /** idempotency key passed to Chatfuel as clientId, so a retry cannot deliver twice. */
+  client_id?: string;
 };
 
 export type DmFailure =
@@ -96,7 +122,10 @@ export type DmFailure =
   | "graphql"
   | "message_failed"
   | "transport"
-  | "rate_limited";
+  | "rate_limited"
+  | "window_closed"
+  | "comment_required"
+  | "link_not_allowed";
 
 export type DmResult = {
   ok: boolean;
@@ -118,6 +147,33 @@ function scrub(text: string, token: string): string {
   return out.slice(0, 300);
 }
 
+
+/**
+ * The platform rules a message has to satisfy before it is worth sending — all of them about the
+ * window, because a DM outside it is not "late", it is disallowed, and the account pays for it.
+ */
+export function checkWindow(
+  kind: DmKind,
+  inboundAt: string | undefined,
+  now: Date = new Date(),
+): { ok: boolean; code: "window_closed" | "comment_required" | null; reason: string | null; age_hours: number | null } {
+  if (!inboundAt) {
+    return { ok: false, code: "comment_required", reason: "inbound_at is required: without it the messaging window cannot be proven, and an unproven window is a policy breach", age_hours: null };
+  }
+  const t = new Date(inboundAt).getTime();
+  if (!Number.isFinite(t)) {
+    return { ok: false, code: "comment_required", reason: "inbound_at is not a date", age_hours: null };
+  }
+  const age = (now.getTime() - t) / 3600_000;
+  // A clock in the future is a forged timestamp or a skew; either way it is not a licence to send.
+  if (age < -0.25) return { ok: false, code: "window_closed", reason: `inbound_at is ${(-age).toFixed(1)}h in the future`, age_hours: age };
+  const limit = kind === "private_reply" ? PRIVATE_REPLY_HOURS : REPLY_HOURS;
+  if (age > limit) {
+    return { ok: false, code: "window_closed", reason: `${kind} window closed: the event is ${(age / 24).toFixed(1)} days old, the limit is ${limit / 24} days`, age_hours: age };
+  }
+  return { ok: true, code: null, reason: null, age_hours: age };
+}
+
 export function buildDmRequest(
   input: DmInput,
   botId: string,
@@ -126,9 +182,13 @@ export function buildDmRequest(
   const spec = DM_SPEC[surface];
   const arg = `${spec.mutation}(botID: $botID, conversationID: $conversationID, message: $message)`;
   const query = `mutation DmSend($botID: BotID!, $conversationID: ConversationID!, $message: ${surface === "facebook" ? "FacebookTextMessageSendInput" : surface === "instagram" ? "InstagramTextMessageSendInput" : "TikTokTextMessageSendInput"}!) { ${arg} { id text ${spec.status_field} errors { code originalErrCode originalErrMessage } } }`;
+  const message: Record<string, unknown> = { text: input.text };
+  // Chatfuel's message inputs carry clientId (ClientMID) — its dedupe key. Passing one means a
+  // network retry is answered from the first send instead of posting the DM twice.
+  if (input.client_id) message.clientId = input.client_id;
   return {
     query,
-    variables: { botID: botId, conversationID: input.conversation_id, message: { text: input.text } },
+    variables: { botID: botId, conversationID: input.conversation_id, message },
   };
 }
 
@@ -159,7 +219,20 @@ export async function sendDm(
   if (!conversation) return fail("bad_input", "conversation_id is required — a DM is sent into a conversation, not broadcast at large", false, dm);
   if (!body.text) return fail("bad_input", "text is empty", false, dm);
 
-  const { query, variables } = buildDmRequest({ surface: dm, conversation_id: conversation, text: body.text }, cfg.bot_id!, dm);
+  // The rules come before the transport. One extra call costs a commenter their only reply.
+  const kind: DmKind = input.kind === "reply" ? "reply" : "private_reply";
+  if (kind === "private_reply" && !String(input.comment_id || "").trim()) {
+    return fail("comment_required", "a private reply answers one comment; comment_id is what makes it exactly one", false, dm);
+  }
+  const win = checkWindow(kind, input.inbound_at);
+  if (!win.ok) return fail(win.code as DmFailure, win.reason || "window closed", false, dm);
+
+  const strays = strayLinks(body.text);
+  if (strays.length > 0) {
+    return fail("link_not_allowed", `only whop.com links may leave in a DM; refused ${strays[0].slice(0, 80)}`, false, dm);
+  }
+
+  const { query, variables } = buildDmRequest({ surface: dm, conversation_id: conversation, text: body.text, client_id: input.client_id }, cfg.bot_id!, dm);
   const fetchImpl = opts.fetchImpl ?? fetch;
   const timeoutMs = opts.timeoutMs ?? 12_000;
 

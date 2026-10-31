@@ -30,6 +30,21 @@ CREATE TABLE IF NOT EXISTS pod_members (
   last_post_at TIMESTAMP,
   PRIMARY KEY (pod_id, user_id)
 );
+CREATE TABLE IF NOT EXISTS dm_handoffs (
+  id             BIGSERIAL PRIMARY KEY,
+  comment_id     TEXT NOT NULL UNIQUE,
+  surface        TEXT NOT NULL CHECK (surface IN ('facebook','instagram','tiktok')),
+  conversation_id TEXT NOT NULL,
+  page_ref       TEXT NOT NULL,
+  tier           TEXT NOT NULL DEFAULT 'free' CHECK (tier IN ('free','circle','pro','team')),
+  link           TEXT NOT NULL,
+  status         TEXT NOT NULL DEFAULT 'claimed' CHECK (status IN ('claimed','sent','released')),
+  message_id     TEXT,
+  truncated      BOOLEAN NOT NULL DEFAULT false,
+  sent_at        TIMESTAMPTZ,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS dm_handoffs_page_idx ON dm_handoffs (page_ref, created_at DESC);
 CREATE TABLE IF NOT EXISTS retention_events (
   id TEXT PRIMARY KEY,
   user_id TEXT,

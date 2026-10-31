@@ -214,8 +214,12 @@ comment → Chatfuel automation → WF6 webhook → /api/chatfuel/dm → Chatfue
    URL = `https://<n8n-host>/webhook/chatfuel-dm` for the n8n instance, body:
 
    ```json
-   { "surface": "facebook", "conversation_id": "{{conversation.id}}", "text": "…" }
+   { "surface": "facebook", "conversation_id": "{{conversation.id}}",
+     "comment_id": "{{comment.id}}", "inbound_at": "{{comment.created_time}}",
+     "tier": "circle", "page_ref": "psychology" }
    ```
+
+   **No `text`.** The message and its link are built by the app, not typed into an automation.
 
 6. Import `n8n/wf6_chatfuel.json` (it is also in `n8n_workflows_self_3man.json`). It needs
    `JARVIS_BRAIN_URL`, `CRON_SECRET`, `TELEGRAM_CHAT_ID` as n8n Variables.
@@ -231,6 +235,41 @@ because retrying a queued DM sends it twice (`CF13`).
 
 **There is no broadcast mode.** A DM goes into one conversation. An endpoint that can message an
 arbitrary audience is the fastest way to have a Meta app restricted.
+
+### The join link (comment → DM → whop.com)
+
+The DM exists to move a commenter into the community, so the link is built from environment ids by
+`lib/whop-links.ts` and never typed by a person:
+
+| Tier | Destination | Env |
+|---|---|---|
+| free | the community page | `WHOP_COMMUNITY_URL` |
+| Circle $44 | `https://whop.com/checkout/<plan>` | `WHOP_PLAN_CIRCLE_ID` |
+| Pro $53 | same, its own plan | `WHOP_PLAN_PRO_ID` |
+| Team $62 | same, its own plan | `WHOP_PLAN_TEAM_ID` |
+
+**A plan id is not a product id.** `WHOP_PRODUCT_*_ID` holds `prod_…`; `/checkout/prod_…` is a 404.
+The plan id is in **Checkout Links → ⋯ → Details**, and the app refuses anything that does not start
+with `plan_` (`WH03`) — because a private reply cannot be sent twice, and a dead link spends the
+only message that commenter will ever get.
+
+Every link carries `utm_source=chatfuel`, `utm_medium=dm`, `utm_campaign=<page_ref>`,
+`utm_content=<surface>`, and `?a=<WHOP_AFFILIATE_CODE>` when it is set. Those are the parameters
+Whop records as the sale's campaign, which is how a join is traced back to the DM that caused it.
+Until a sale has been traced end-to-end, treat the attribution as unproven, not as zero.
+
+**The message rules, enforced before anything is sent:**
+
+| Rule | Consequence |
+|---|---|
+| one private reply per **comment**, within **7 days** of it | `dm_handoffs.comment_id` is UNIQUE; a second attempt is `409 already_replied` |
+| replies to a DM within **24 hours** of it | `WH07`: `window_closed` |
+| no URL other than whop.com in a DM | `WH05`: `link_not_allowed` — a compromised workflow cannot DM a phishing link |
+| the window needs the comment's own timestamp | no `inbound_at` means no proof, and no send |
+
+The claim is written **before** the send and released if the send fails, so a timeout can be retried
+inside the window but a success cannot be repeated. `GET /api/chatfuel/dm` lists recent handoffs, so
+"did the leg run" is answerable without opening Chatfuel.
 
 ## Step 6d — The Chatfuel panel (`chatfuel-app/`)
 

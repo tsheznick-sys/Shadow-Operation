@@ -801,7 +801,10 @@ def wf_chatfuel():
                 "1. **Normalise** — trim, lower-case the surface, refuse anything that is not\n"
                 "   facebook, instagram or tiktok (YouTube has no DM channel in Chatfuel at all).\n"
                 "2. **POST /api/chatfuel/dm** — the token stays in the app.\n"
-                "3. **Wrong?** — Telegram. A DM that silently did not send is a member who asked a\n"
+                "3. **The link is built by the app** — `lib/whop-links.ts` turns a tier and a page into a\n"
+                "   whop.com checkout or community link. This workflow never types a URL, and the app\n"
+                "   refuses to send a DM carrying any other.\n"
+                "4. **Wrong?** — Telegram. A DM that silently did not send is a member who asked a\n"
                 "   question and never heard back.\n\n"
                 "Chatfuel answers **200 with `status: Failed` and a per-message `errors` array** for a\n"
                 "DM it did not deliver, so the route refuses those (`CF04`, `CF05`) — this workflow\n"
@@ -820,12 +823,19 @@ def wf_chatfuel():
                         "const b = $json.body ?? $json;\n"
                         "const surface = String(b.surface || '').trim().toLowerCase();\n"
                         "const conversation_id = String(b.conversation_id || b.conversationId || '').trim();\n"
-                        "const text = String(b.text || b.message || '').trim();\n"
+                        "const comment_id = String(b.comment_id || b.commentId || '').trim();\n"
+                        "// The comment's own timestamp, not now: the 7-day window is measured from it.\n"
+                        "const inbound_at = String(b.inbound_at || b.timestamp || b.created_time || '').trim();\n"
+                        "const tier = String(b.tier || 'free').trim().toLowerCase();\n"
+                        "const page_ref = String(b.page_ref || b.page || 'unknown_page').trim();\n"
+                        "const kind = b.kind === 'reply' ? 'reply' : 'private_reply';\n"
                         "const allowed = ['facebook','instagram','tiktok'];\n"
                         "const why = !allowed.includes(surface) ? `surface ${surface || '(none)'} has no Chatfuel DM`\n"
                         "  : !conversation_id ? 'no conversation_id — a DM is a reply, not a broadcast'\n"
-                        "  : !text ? 'empty text' : null;\n"
-                        "return [{ json: { valid: why === null, why, surface, conversation_id, text } }];"
+                        "  : !inbound_at ? 'no inbound_at — the messaging window cannot be proven'\n"
+                        "  : kind === 'private_reply' && !comment_id ? 'no comment_id — one private reply per comment'\n"
+                        "  : null;\n"
+                        "return [{ json: { valid: why === null, why, surface, conversation_id, comment_id, inbound_at, tier, page_ref, kind } }];"
                     )
                 },
                 [230, 0],
@@ -857,7 +867,7 @@ def wf_chatfuel():
                     "headerParameters": {"parameters": [{"name": "Authorization", "value": "=Bearer {{ $vars.CRON_SECRET }}"}]},
                     "sendBody": True,
                     "specifyBody": "json",
-                    "jsonBody": "={{ JSON.stringify({ surface: $json.surface, conversation_id: $json.conversation_id, text: $json.text }) }}",
+                    "jsonBody": "={{ JSON.stringify({ surface: $json.surface, conversation_id: $json.conversation_id, kind: $json.kind, comment_id: $json.comment_id, inbound_at: $json.inbound_at, tier: $json.tier, page_ref: $json.page_ref }) }}",
                     "options": {"timeout": 20000},
                 },
                 [690, -80],
