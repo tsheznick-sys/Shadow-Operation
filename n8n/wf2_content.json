@@ -1,0 +1,319 @@
+{
+  "name": "WF2 Content",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "### WF2 — Content\n02:00 while you sleep. Six scripts (3×8s, 2×32s, 1×60s) for the top domains.\n\nOutput goes to `publisher_queue38` with status `pending_G4`. **Nothing publishes from\nthis workflow.** G4 is a human gate.\n\nA 503 from /api/brain stops the run — a queue filled with 'brain unavailable' is worse\nthan an empty queue.",
+        "height": 260,
+        "width": 420,
+        "color": 4
+      },
+      "id": "896aea84-6dd5-594f-a9b3-4fff40b6a227",
+      "name": "README",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 2 * * *"
+            }
+          ]
+        }
+      },
+      "id": "75ca66a6-628d-5669-88ef-9c3e3908bd92",
+      "name": "02:00 daily",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT handle, why FROM solo_domains WHERE ranked_at > NOW() - INTERVAL '14 days' ORDER BY ranked_at DESC LIMIT 5",
+        "options": {}
+      },
+      "id": "f69ae4df-64d8-5ad8-8456-a09dba16d531",
+      "name": "Top domains",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        220,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "REPLACE_POSTGRES",
+          "name": "Neon (jarvis)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all().map(r => r.json);\nif (rows.length === 0) { throw new Error('no ranked domains — run WF1 first'); }\nconst domains = rows.map(r => r.handle).join(', ');\nconst prompt = [\n  'Write 6 vertical scripts for these domains: ' + domains + '.',\n  'Three 8-second shorts, two 32-second pieces, one 60-second piece.',\n  'Stickman character, one locked character design, no faces, no finance advice, no health claims.',\n  'Return strict JSON: {\"scripts\":[{\"kind\":\"8s|32s|60s\",\"domain\":\"...\",\"hook\":\"...\",\"script\":\"...\",\"caption\":\"...\"}]}.',\n].join('\\n');\nreturn [{ json: { prompt } }];"
+      },
+      "id": "08b173ca-4b48-57d3-b384-a2550393f0a5",
+      "name": "Build prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $vars.JARVIS_BRAIN_URL }}/api/brain",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $vars.N8N_BRAIN_TOKEN }}"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ prompt: prompt, expect: \"script\" }) }}",
+        "options": {
+          "timeout": 45000
+        }
+      },
+      "id": "ca4a228a-2daf-52eb-b5d0-bf87bcaba8c9",
+      "name": "Ask brain (script)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "ok",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "pub",
+              "leftValue": "={{ $json.publishable }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "fd41cb65-e658-5c96-81e2-18e905e80f93",
+      "name": "Brain ok?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        880,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json;\nconst text = body.data || '';\nconst start = text.indexOf('{');\nconst end = text.lastIndexOf('}');\nif (start === -1 || end === -1) throw new Error('brain reply was not JSON');\nconst parsed = JSON.parse(text.slice(start, end + 1));\nconst scripts = Array.isArray(parsed.scripts) ? parsed.scripts : [];\nif (scripts.length === 0) throw new Error('brain returned no scripts');\nconst today = new Date().toISOString().slice(0, 10);\nreturn scripts.map((s, i) => ({ json: {\n  date: today,\n  slot: i + 1,\n  kind: s.kind || '8s',\n  domain: s.domain || '',\n  hook: s.hook || '',\n  caption: s.caption || '',\n  body: s.script || '',\n  status: 'pending_G4',\n} }));"
+      },
+      "id": "2a1224f7-78e3-5522-83e6-9dc45b1787ee",
+      "name": "Queue for G4",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO publisher_queue38 (date, caption, body, status) VALUES ($1, $2, $3, 'pending_G4')",
+        "options": {
+          "queryReplacement": "={{ $json.date }},{{ $json.caption }},{{ $json.body }}"
+        }
+      },
+      "id": "2b16541d-674b-5d4a-a78d-f0203048e7c7",
+      "name": "Insert queue38",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        1320,
+        -60
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "REPLACE_POSTGRES",
+          "name": "Neon (jarvis)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+        "text": "=WF2 done — {{ $('Queue for G4').all().length }} scripts waiting for G4 on /drafts. Nothing published.",
+        "additionalFields": {}
+      },
+      "id": "71fac343-131c-50fa-8e0a-07e0f7c4aa57",
+      "name": "Telegram Sir",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1540,
+        -60
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_TELEGRAM",
+          "name": "Jarvis Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+        "text": "=WF2 STOPPED: no usable scripts were returned. The queue is unchanged. Nothing was published.",
+        "additionalFields": {}
+      },
+      "id": "6413f82a-b2d0-5b9c-8953-1e02a219db9f",
+      "name": "Brain down — stop",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1100,
+        140
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_TELEGRAM",
+          "name": "Jarvis Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "02:00 daily": {
+      "main": [
+        [
+          {
+            "node": "Top domains",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Top domains": {
+      "main": [
+        [
+          {
+            "node": "Build prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build prompt": {
+      "main": [
+        [
+          {
+            "node": "Ask brain (script)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask brain (script)": {
+      "main": [
+        [
+          {
+            "node": "Brain ok?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brain ok?": {
+      "main": [
+        [
+          {
+            "node": "Queue for G4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Brain down — stop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Queue for G4": {
+      "main": [
+        [
+          {
+            "node": "Insert queue38",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert queue38": {
+      "main": [
+        [
+          {
+            "node": "Telegram Sir",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

@@ -1,38 +1,1193 @@
-{
-  "name": "Jarvis Squad Hybrid - n8n Content 6/day for 3 Bros + Vercel Monitor",
-  "workflows": [
-    {
-      "id": "wf1_research_squad",
-      "name": "WF1 Squad - Research Top5 Monetizable Weekly",
-      "trigger": "cron 0 8 * * 1 Mon 08:00 EAT",
-      "crew": "Squad 3 (you+Numinous+Bro3, equal SEND)",
-      "nodes": ["Postgres 1,462 GREEN", "HTTP Social Blade/HypeAuditor Apify", "IF GREEN ER>3% ratio<50", "Claude 3.5 Sonnet primary + Grok-2 secondary rank top5 monetizable $27 vault", "Telegram Squad group + Gmail Shadow Hot Top5 approve?", "Postgres UPDATE solo_domains top5"],
-      "approve": "Any of 3 bros Approve via Telegram button → n8n rotates domains"
+[
+  {
+    "name": "WF1 Research",
+    "nodes": [
+      {
+        "parameters": {
+          "content": "### WF1 — Research\nMon 08:00 EAT. Reads the GREEN pool, asks the brain to rank it, writes the top five.\n\n**Requires:** `JARVIS_BRAIN_URL` and `N8N_BRAIN_TOKEN` in n8n → Settings → Variables.\nIf the brain answers 503 the workflow stops. It never substitutes text.",
+          "height": 260,
+          "width": 420,
+          "color": 4
+        },
+        "id": "3110fdc7-3202-5e95-93c3-280005d4feaf",
+        "name": "README",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          -380,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 8 * * 1"
+              }
+            ]
+          }
+        },
+        "id": "893e84d1-dc2e-5433-97ef-84766820ae5f",
+        "name": "Mon 08:00",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT handle, platform, followers, avg_comments, buyer_pool_x3, ratio, er FROM creators WHERE gate = 'GREEN' ORDER BY buyer_pool_x3 * er DESC LIMIT 50",
+          "options": {}
+        },
+        "id": "836e3c3f-3a71-5e9c-89b2-5ad7688eb43c",
+        "name": "GREEN pool",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.4,
+        "position": [
+          220,
+          0
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "REPLACE_POSTGRES",
+            "name": "Neon (jarvis)"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const rows = $input.all().map(r => r.json);\nif (rows.length === 0) { throw new Error('no GREEN creators — refusing to rank an empty pool'); }\nconst table = rows.map((r, i) => `${i + 1}. ${r.handle} (${r.platform}) followers=${r.followers} comments=${r.avg_comments} pool_x3=${r.buyer_pool_x3} ratio=${r.ratio} er=${r.er}`).join('\\n');\nconst prompt = [\n  'Rank these creators by how monetizable their audience is for a stickman faceless video agent at Circle $44 / Pro $53 / Team $62.',\n  'GREEN = ratio < 50:1 and ER >= 5%. Return strict JSON: {\"top5\":[{\"handle\":\"...\",\"why\":\"one sentence\"}]}. No prose outside the JSON.',\n  table,\n].join('\\n');\nreturn [{ json: { prompt, count: rows.length } }];"
+        },
+        "id": "0dc2eb39-d9e1-58c2-a1ed-c11e22a0311e",
+        "name": "Build prompt",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          440,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $vars.JARVIS_BRAIN_URL }}/api/brain",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $vars.N8N_BRAIN_TOKEN }}"
+              },
+              {
+                "name": "content-type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ prompt: prompt, expect: \"rank\" }) }}",
+          "options": {
+            "timeout": 45000
+          }
+        },
+        "id": "bbc3feea-3fd3-5658-8c9d-9efc2de6c74d",
+        "name": "Ask brain (rank)",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          660,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "id": "ok",
+                "leftValue": "={{ $json.ok }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "623435bb-c76d-5b9c-85e6-625ab30f1a99",
+        "name": "Brain ok?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          880,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const body = $input.first().json;\nconst text = body.data || '';\n// The model was asked for JSON. If it wrapped it in prose or fences, recover it —\n// and if it cannot be recovered, throw rather than writing garbage to Postgres.\nconst start = text.indexOf('{');\nconst end = text.lastIndexOf('}');\nif (start === -1 || end === -1) throw new Error('brain reply was not JSON: ' + text.slice(0, 200));\nconst parsed = JSON.parse(text.slice(start, end + 1));\nconst top5 = Array.isArray(parsed.top5) ? parsed.top5 : [];\nif (top5.length === 0) throw new Error('brain returned an empty top5');\nreturn top5.map(t => ({ json: { handle: t.handle, why: t.why || '', provider: body.provider || null, model: body.model || null } }));"
+        },
+        "id": "2062563f-3861-51f5-be2b-f1e7cce66b2f",
+        "name": "Parse top5",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1100,
+          -60
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "INSERT INTO solo_domains (handle, why, ranked_at, marked_by) VALUES ($1, $2, NOW(), 'wf1') ON CONFLICT (handle) DO UPDATE SET why = EXCLUDED.why, ranked_at = NOW()",
+          "options": {
+            "queryReplacement": "={{ $json.handle }},{{ $json.why }}"
+          }
+        },
+        "id": "70b2579f-0455-5817-a928-f218f646f296",
+        "name": "Rank saved",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.4,
+        "position": [
+          1320,
+          -60
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "REPLACE_POSTGRES",
+            "name": "Neon (jarvis)"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+          "text": "=WF1 done — {{ $('Parse top5').all().length }} domains ranked. Top: {{ $('Parse top5').first().json.handle }}",
+          "additionalFields": {}
+        },
+        "id": "d207bdf3-26e3-5673-bf61-b3b85431c4e0",
+        "name": "Telegram Sir",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1540,
+          -60
+        ],
+        "credentials": {
+          "telegramApi": {
+            "id": "REPLACE_TELEGRAM",
+            "name": "Jarvis Bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+          "text": "=WF1 STOPPED: the brain did not answer. Nothing was ranked and nothing was written. Check ANTHROPIC_API_KEY / GROK_API_KEY on Vercel, then re-run.",
+          "additionalFields": {}
+        },
+        "id": "b4fbb40e-689b-54f0-9660-fd7bd7ed91cd",
+        "name": "Brain down — stop",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1100,
+          140
+        ],
+        "credentials": {
+          "telegramApi": {
+            "id": "REPLACE_TELEGRAM",
+            "name": "Jarvis Bot"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Mon 08:00": {
+        "main": [
+          [
+            {
+              "node": "GREEN pool",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "GREEN pool": {
+        "main": [
+          [
+            {
+              "node": "Build prompt",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build prompt": {
+        "main": [
+          [
+            {
+              "node": "Ask brain (rank)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ask brain (rank)": {
+        "main": [
+          [
+            {
+              "node": "Brain ok?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Brain ok?": {
+        "main": [
+          [
+            {
+              "node": "Parse top5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Brain down — stop",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse top5": {
+        "main": [
+          [
+            {
+              "node": "Rank saved",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Rank saved": {
+        "main": [
+          [
+            {
+              "node": "Telegram Sir",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
     },
-    {
-      "id": "wf2_make_squad",
-      "name": "WF2 Squad - Make 6/Day Short+Long (n8n Cloud $20)",
-      "trigger": "cron 0 2 * * * 02:00 EAT",
-      "nodes": ["Postgres top5", "Claude 6 scripts 3x8s+2x32s+1x60s Butler formal + hashtags", "HTTP Flow 8s + Pillow 0cr HD + Wan T4 32s → ffmpeg Katana p01→Drive", "Postgres publisher_queue38 pending_G4", "Linear SHA + Vercel /n8n embed + Telegram Squad Sir 6 ready"],
-      "queue": "publisher_queue38 (date, caption, video_url, domain, status pending_G4)"
+    "settings": {
+      "executionOrder": "v1"
     },
-    {
-      "id": "wf3_publish_demand_whop_squad",
-      "name": "WF3 Squad - Publish G4 + Demand 1%+25 → Whop Ladder $27+$9+$79+$19",
-      "trigger": "Vercel /n8n approve (any of 3 equal SEND) → Publisher API 6/day + cron 0 9 * * * demand",
-      "nodes": ["IF approved (any bro) → HTTP Publisher 6/day IG+TikTok+YT", "Cron 09:00 HTTP IG/TikTok/YT analytics views+replies", "IF replies>=max(25,ceil(views*0.01)) PASS → Whop Create Product Squad Vault $27+$9+$79+Circle $19/mo", "ManyChat 8ch push", "Gmail Squad PASS — you decide live (Omar R9-11 reused for squad content)", "ELSE Claude reframe (Grok X check) → queue next 6"],
-      "gate": "R9 no Whop before PASS, R10 strict 1%+25, R11 personalize voice (Butler)"
+    "pinData": {}
+  },
+  {
+    "name": "WF2 Content",
+    "nodes": [
+      {
+        "parameters": {
+          "content": "### WF2 — Content\n02:00 while you sleep. Six scripts (3×8s, 2×32s, 1×60s) for the top domains.\n\nOutput goes to `publisher_queue38` with status `pending_G4`. **Nothing publishes from\nthis workflow.** G4 is a human gate.\n\nA 503 from /api/brain stops the run — a queue filled with 'brain unavailable' is worse\nthan an empty queue.",
+          "height": 260,
+          "width": 420,
+          "color": 4
+        },
+        "id": "896aea84-6dd5-594f-a9b3-4fff40b6a227",
+        "name": "README",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          -380,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 2 * * *"
+              }
+            ]
+          }
+        },
+        "id": "75ca66a6-628d-5669-88ef-9c3e3908bd92",
+        "name": "02:00 daily",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT handle, why FROM solo_domains WHERE ranked_at > NOW() - INTERVAL '14 days' ORDER BY ranked_at DESC LIMIT 5",
+          "options": {}
+        },
+        "id": "f69ae4df-64d8-5ad8-8456-a09dba16d531",
+        "name": "Top domains",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.4,
+        "position": [
+          220,
+          0
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "REPLACE_POSTGRES",
+            "name": "Neon (jarvis)"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const rows = $input.all().map(r => r.json);\nif (rows.length === 0) { throw new Error('no ranked domains — run WF1 first'); }\nconst domains = rows.map(r => r.handle).join(', ');\nconst prompt = [\n  'Write 6 vertical scripts for these domains: ' + domains + '.',\n  'Three 8-second shorts, two 32-second pieces, one 60-second piece.',\n  'Stickman character, one locked character design, no faces, no finance advice, no health claims.',\n  'Return strict JSON: {\"scripts\":[{\"kind\":\"8s|32s|60s\",\"domain\":\"...\",\"hook\":\"...\",\"script\":\"...\",\"caption\":\"...\"}]}.',\n].join('\\n');\nreturn [{ json: { prompt } }];"
+        },
+        "id": "08b173ca-4b48-57d3-b384-a2550393f0a5",
+        "name": "Build prompt",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          440,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $vars.JARVIS_BRAIN_URL }}/api/brain",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $vars.N8N_BRAIN_TOKEN }}"
+              },
+              {
+                "name": "content-type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ prompt: prompt, expect: \"script\" }) }}",
+          "options": {
+            "timeout": 45000
+          }
+        },
+        "id": "ca4a228a-2daf-52eb-b5d0-bf87bcaba8c9",
+        "name": "Ask brain (script)",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          660,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "id": "ok",
+                "leftValue": "={{ $json.ok }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              },
+              {
+                "id": "pub",
+                "leftValue": "={{ $json.publishable }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "fd41cb65-e658-5c96-81e2-18e905e80f93",
+        "name": "Brain ok?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          880,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const body = $input.first().json;\nconst text = body.data || '';\nconst start = text.indexOf('{');\nconst end = text.lastIndexOf('}');\nif (start === -1 || end === -1) throw new Error('brain reply was not JSON');\nconst parsed = JSON.parse(text.slice(start, end + 1));\nconst scripts = Array.isArray(parsed.scripts) ? parsed.scripts : [];\nif (scripts.length === 0) throw new Error('brain returned no scripts');\nconst today = new Date().toISOString().slice(0, 10);\nreturn scripts.map((s, i) => ({ json: {\n  date: today,\n  slot: i + 1,\n  kind: s.kind || '8s',\n  domain: s.domain || '',\n  hook: s.hook || '',\n  caption: s.caption || '',\n  body: s.script || '',\n  status: 'pending_G4',\n} }));"
+        },
+        "id": "2a1224f7-78e3-5522-83e6-9dc45b1787ee",
+        "name": "Queue for G4",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1100,
+          -60
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "INSERT INTO publisher_queue38 (date, caption, body, status) VALUES ($1, $2, $3, 'pending_G4')",
+          "options": {
+            "queryReplacement": "={{ $json.date }},{{ $json.caption }},{{ $json.body }}"
+          }
+        },
+        "id": "2b16541d-674b-5d4a-a78d-f0203048e7c7",
+        "name": "Insert queue38",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.4,
+        "position": [
+          1320,
+          -60
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "REPLACE_POSTGRES",
+            "name": "Neon (jarvis)"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+          "text": "=WF2 done — {{ $('Queue for G4').all().length }} scripts waiting for G4 on /drafts. Nothing published.",
+          "additionalFields": {}
+        },
+        "id": "71fac343-131c-50fa-8e0a-07e0f7c4aa57",
+        "name": "Telegram Sir",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1540,
+          -60
+        ],
+        "credentials": {
+          "telegramApi": {
+            "id": "REPLACE_TELEGRAM",
+            "name": "Jarvis Bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+          "text": "=WF2 STOPPED: no usable scripts were returned. The queue is unchanged. Nothing was published.",
+          "additionalFields": {}
+        },
+        "id": "6413f82a-b2d0-5b9c-8953-1e02a219db9f",
+        "name": "Brain down — stop",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1100,
+          140
+        ],
+        "credentials": {
+          "telegramApi": {
+            "id": "REPLACE_TELEGRAM",
+            "name": "Jarvis Bot"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "02:00 daily": {
+        "main": [
+          [
+            {
+              "node": "Top domains",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Top domains": {
+        "main": [
+          [
+            {
+              "node": "Build prompt",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build prompt": {
+        "main": [
+          [
+            {
+              "node": "Ask brain (script)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ask brain (script)": {
+        "main": [
+          [
+            {
+              "node": "Brain ok?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Brain ok?": {
+        "main": [
+          [
+            {
+              "node": "Queue for G4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Brain down — stop",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Queue for G4": {
+        "main": [
+          [
+            {
+              "node": "Insert queue38",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Insert queue38": {
+        "main": [
+          [
+            {
+              "node": "Telegram Sir",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
     },
-    {
-      "id": "wf4_brand_brief_squad",
-      "name": "WF4 Squad - Brand Gmail + Daily Brief All 3",
-      "trigger": "ManyChat webhook + Gmail IMAP brand + cron 45 5 * * * 05:45 EAT",
-      "nodes": ["ManyChat subscriber → Whop entitlement → Telegram Squad New $27", "Gmail brand → Grok classify X real-time + Claude reframe → Telegram Squad Brand deal", "Cron 05:45 Telegram Squad group + Gmail Shadow Hot + Signal Sir 6 live 2.1K views 18 replies 1 Whop sale $1.20 Claude+Grok burn"],
-      "monitor": "Vercel /n8n embeds n8n executions live (your lock)"
-    }
-  ],
-  "hybrid": "Vercel $20+Neon $19 (Squad dashboard: /, /drafts, /omar, /jarvis chat+mic, /bros 3, /n8n embed) + n8n Cloud $20 (WF1-4 full-time) + Claude $20 + Grok $16 (OpenAI removed) + R2 $5 + ManyChat $15 = $109/mo scaled (MVP $55/mo) — stay n8n Cloud forever, no Beelink",
-  "vercel_pages": ["/ (Pipeline 6/day)", "/drafts (Swipe 6/day equal SEND)", "/omar (Omar V2 tracker 1%+25)", "/jarvis (Chat+mic+08:45 Butler briefing)", "/bros (3 bros per-niche owner)", "/n8n (n8n WF1-4 + queue38 monitor)"],
-  "zip_includes": ["jarvis-app (no node_modules/.next)", "n8n/ 2 workflow JSONs", "docs/ 9 JARVIS docs", "tools/ apparatus_1000", "gas/ GMAIL_G4", "marketing/publisher queue38", "data/ 1,462 GREEN", "images/omar 7M ZIP + previews", "archive/ history", ".env.example"],
-  "delivery": "Workspace jarvis_whole_bundle.zip + GDrive HQ https://drive.google.com/drive/folders/17KpzZCmxxz13vJfkKv96EZZ5e7KTft8G — Zip full with assets (your lock)"
-}
+    "settings": {
+      "executionOrder": "v1"
+    },
+    "pinData": {}
+  },
+  {
+    "name": "WF3 Demand → Whop",
+    "nodes": [
+      {
+        "parameters": {
+          "content": "### WF3 — Demand → offer\nPASS = replies ≥ max(25, ceil(views × 1%)).\n\nThe offer on PASS is the **three agent tiers, one Whop product each**:\nCircle **$44** · Pro **$53** · Team **$62**. The one-time ladder ($28 first shot,\n$17 Lite, $35 Good, $89 Better) is a separate door and never gates a tier.\n\n**Nothing is created in Whop by this workflow.** Whop product ids are set once by the\nowner and read by the app from env.",
+          "height": 300,
+          "width": 420,
+          "color": 4
+        },
+        "id": "293a0bbd-d7dd-555c-b49b-b8c6c865aee6",
+        "name": "README",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          -380,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 9 * * *"
+              }
+            ]
+          }
+        },
+        "id": "8443bb69-2e7f-5285-86fe-0e0b2cd279a2",
+        "name": "09:00 daily",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT id, platform, views, replies FROM post_analytics WHERE posted_at::date = CURRENT_DATE - 1 ORDER BY id",
+          "options": {}
+        },
+        "id": "2d14538e-d29f-5e2d-8a4c-90600baaad23",
+        "name": "Yesterday stats",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.4,
+        "position": [
+          220,
+          0
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "REPLACE_POSTGRES",
+            "name": "Neon (jarvis)"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "// The gate is arithmetic, not judgement. Same formula as lib/stickman-agent.ts.\nconst rows = $input.all().map(r => r.json);\nconst results = rows.map(r => {\n  const views = Number(r.views || 0);\n  const replies = Number(r.replies || 0);\n  const bar = Math.max(25, Math.ceil(views * 0.01));\n  return { id: r.id, platform: r.platform, views, replies, bar, pass: replies >= bar };\n});\nconst passed = results.filter(r => r.pass);\nreturn [{ json: {\n  total: results.length,\n  passed: passed.length,\n  any_pass: passed.length > 0,\n  detail: results,\n  offer: passed.length > 0 ? 'Circle $44 / Pro $53 / Team $62 — one Whop product each' : null,\n} }];"
+        },
+        "id": "f909da2a-db6e-58c7-94d4-29f00537894a",
+        "name": "Demand gate",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          440,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "id": "p",
+                "leftValue": "={{ $json.any_pass }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "5fc21540-de61-5ca7-967a-f9f9e2d57eda",
+        "name": "Any PASS?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          660,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+          "text": "=PASS — {{ $json.passed }}/{{ $json.total }} posts cleared the bar. Offer: Circle $44 / Pro $53 / Team $62. Links: the three Whop products, one per tier. No discount.",
+          "additionalFields": {}
+        },
+        "id": "173ee921-12d5-53dd-9941-c1829afd29f7",
+        "name": "PASS — offer the tiers",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          880,
+          -80
+        ],
+        "credentials": {
+          "telegramApi": {
+            "id": "REPLACE_TELEGRAM",
+            "name": "Jarvis Bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+          "text": "=No PASS — {{ $json.passed }}/{{ $json.total }} cleared the bar. No offer goes out. Improve the hook, not the price.",
+          "additionalFields": {}
+        },
+        "id": "77703eba-8f08-5af8-947e-baedb811a164",
+        "name": "No PASS — hold",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          880,
+          120
+        ],
+        "credentials": {
+          "telegramApi": {
+            "id": "REPLACE_TELEGRAM",
+            "name": "Jarvis Bot"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "09:00 daily": {
+        "main": [
+          [
+            {
+              "node": "Yesterday stats",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Yesterday stats": {
+        "main": [
+          [
+            {
+              "node": "Demand gate",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Demand gate": {
+        "main": [
+          [
+            {
+              "node": "Any PASS?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Any PASS?": {
+        "main": [
+          [
+            {
+              "node": "PASS — offer the tiers",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "No PASS — hold",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1"
+    },
+    "pinData": {}
+  },
+  {
+    "name": "WF4 Daily Brief",
+    "nodes": [
+      {
+        "parameters": {
+          "content": "### WF4 — Brief\n05:45 EAT. Pulls `/api/cron/daily-brief` (Bearer `$CRON_SECRET`) and forwards it.\n\nThe route returns `source: \"placeholder\"` until it is wired to Neon. The workflow\n**prints that field** so a placeholder brief can never be mistaken for a real one.",
+          "height": 260,
+          "width": 420,
+          "color": 4
+        },
+        "id": "2f2b0565-fa80-5d2e-80aa-ddc25610cfc4",
+        "name": "README",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          -380,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "45 5 * * *"
+              }
+            ]
+          }
+        },
+        "id": "e2948843-f986-5e1c-8cd0-7c2de42a6eb6",
+        "name": "05:45 daily",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "={{ $vars.JARVIS_BRAIN_URL }}/api/cron/daily-brief",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $vars.CRON_SECRET }}"
+              }
+            ]
+          },
+          "options": {
+            "timeout": 20000
+          }
+        },
+        "id": "c0fee1b7-bd87-5cef-b528-192664f01a31",
+        "name": "GET daily-brief",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          220,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const d = $input.first().json;\nconst src = d.source || 'unknown';\nconst flag = src === 'placeholder' ? '\\n\\n[PLACEHOLDER — not live data]' : '';\nreturn [{ json: { text: (d.briefing || 'no brief') + flag } }];"
+        },
+        "id": "7cda4a03-6521-5de2-aa44-3b3f6c3593fa",
+        "name": "Format",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          440,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+          "text": "={{ $json.text }}",
+          "additionalFields": {}
+        },
+        "id": "a6bc4bb4-6df9-5fff-8899-2b08b2cd4da4",
+        "name": "Telegram Sir",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          660,
+          0
+        ],
+        "credentials": {
+          "telegramApi": {
+            "id": "REPLACE_TELEGRAM",
+            "name": "Jarvis Bot"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "05:45 daily": {
+        "main": [
+          [
+            {
+              "node": "GET daily-brief",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "GET daily-brief": {
+        "main": [
+          [
+            {
+              "node": "Format",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format": {
+        "main": [
+          [
+            {
+              "node": "Telegram Sir",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1"
+    },
+    "pinData": {}
+  },
+  {
+    "name": "WF5 Publish (G4)",
+    "nodes": [
+      {
+        "parameters": {
+          "content": "### WF5 — Publish\n**Manual trigger on purpose.** G4 is a human approving an asset, not a cron job.\n\nOnly rows that a human moved to `approved` are sent to Buffer. A row still in\n`pending_G4` is skipped, and the workflow says so.",
+          "height": 260,
+          "width": 420,
+          "color": 4
+        },
+        "id": "a00050cb-e2a6-5149-8f46-e4b8dd8b2669",
+        "name": "README",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          -380,
+          0
+        ]
+      },
+      {
+        "parameters": {},
+        "id": "50c5ee08-7fd2-5f6f-9068-a26e786d3310",
+        "name": "Manual G4",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT id, caption, video_url FROM publisher_queue38 WHERE status = 'approved' AND scheduled_for <= NOW() ORDER BY id LIMIT 25",
+          "options": {}
+        },
+        "id": "fe2f98b7-5dee-5c42-8c71-32e11d6b5d99",
+        "name": "Approved rows",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.4,
+        "position": [
+          220,
+          0
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "REPLACE_POSTGRES",
+            "name": "Neon (jarvis)"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "id": "has",
+                "leftValue": "={{ $json.id !== undefined && $json.id !== null }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "0b1eb131-e4b2-5f06-a330-e8e5724b68a5",
+        "name": "Anything approved?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          440,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.bufferapp.com/1/updates/create.json",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $vars.BUFFER_TOKEN }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ text: $json.caption, media: { link: $json.video_url }, now: false }) }}",
+          "options": {
+            "timeout": 20000
+          }
+        },
+        "id": "da94a211-8960-5bd9-86f2-e8399a157960",
+        "name": "Send to Buffer",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          660,
+          -80
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "UPDATE publisher_queue38 SET status = 'published', published_at = NOW() WHERE id = $1",
+          "options": {
+            "queryReplacement": "={{ $('Approved rows').item.json.id }}"
+          }
+        },
+        "id": "5c43c53e-837f-5fea-b465-c55b962edf46",
+        "name": "Mark published",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.4,
+        "position": [
+          880,
+          -80
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "REPLACE_POSTGRES",
+            "name": "Neon (jarvis)"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+          "text": "=WF5 ran — nothing is approved for this window. G4 still holds {{ $('Approved rows').all().length }} rows.",
+          "additionalFields": {}
+        },
+        "id": "01a1bf8c-bfe9-5c96-a621-dfb17ab43a1d",
+        "name": "Nothing approved",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          660,
+          120
+        ],
+        "credentials": {
+          "telegramApi": {
+            "id": "REPLACE_TELEGRAM",
+            "name": "Jarvis Bot"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Manual G4": {
+        "main": [
+          [
+            {
+              "node": "Approved rows",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Approved rows": {
+        "main": [
+          [
+            {
+              "node": "Anything approved?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Anything approved?": {
+        "main": [
+          [
+            {
+              "node": "Send to Buffer",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Nothing approved",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send to Buffer": {
+        "main": [
+          [
+            {
+              "node": "Mark published",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1"
+    },
+    "pinData": {}
+  }
+]

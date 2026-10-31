@@ -18,9 +18,12 @@ const PROTECTED = [
  *   /api/auth/*        — the login flow itself
  *   /api/whop/webhook  — verified by Whop's signature inside the handler, not by cookie
  *   /api/cron/*        — verified by CRON_SECRET inside the handler (added 2026-10-31)
+ *   /api/brain         — the n8n door, verified by N8N_BRAIN_TOKEN inside the handler. A machine
+ *                        caller has no cookie, so without this the automation side of the
+ *                        architecture could not reach the model side at all.
  * Everything else under /api requires a session. Before this, NINE handlers had no check at all.
  */
-const PUBLIC_API = ["/api/auth", "/api/whop/webhook", "/api/cron", "/api/health"];
+const PUBLIC_API = ["/api/auth", "/api/whop/webhook", "/api/cron", "/api/brain", "/api/health"];
 
 const ROLE_ROUTES: Record<string, string[]> = {
   owner: ["*"],

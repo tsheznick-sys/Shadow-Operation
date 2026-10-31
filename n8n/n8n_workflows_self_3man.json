@@ -1,306 +1,1193 @@
-{
-  "name": "Jarvis SELF 3-Man Content Jarvis - 14 Workflows (auth+interview+autonomy, monthly sequence, signals, global pause)",
-  "workflows": [
-    {
-      "id": "wf1_research_grok",
-      "name": "WF1 - Research DAILY 08:00 (Grok + whole-internet strategy scan + action plan) - 7 days",
-      "trigger": "cron 0 8 * * * (daily 08:00 EAT — was weekly Mon)",
-      "nodes": [
-        "MARKET WATCH (daily 08:00, before the scan): diff yesterday vs today on YouTube inauthentic-content enforcement, platform policy changes, niche saturation, competitor offers/pricing, Whop+Stripe fee changes, churn and ARPU benchmarks -> dated diff -> any policy change touching our niches raises a Red Button review notice to all 3 seats within the hour",
-        "Postgres SELECT 50 creators: SELECT handle,platform,followers,avg_comments,buyer_pool_x3,ratio,er,gate FROM creators WHERE gate='GREEN' ORDER BY buyer_pool_x3*er DESC LIMIT 50 (1,462 GREEN)",
-        "HTTP Request Social Blade + HypeAuditor + NotJustAnalytics/Picuki + Grok X trending (xAI GROK_API_KEY) - buyer_pool_x3,ratio,ER live",
-        "HTTP Request WHOLE-INTERNET strategy scan daily: X trending + Reddit + YouTube search + Google Trends + competitor channels -> Claude extracts every monetizable strategy that works right now",
-        "IF ER>{{$env.THRESHOLD_ER_GREEN || 5}}% && ratio<{{$env.THRESHOLD_RATIO_GREEN || 50}} && buyer_pool_x3>{{$env.THRESHOLD_BUYER_POOL_MIN || 3000}} => GREEN (8-Gate STRICT per 2026-10-31 answer) — thresholds from env THRESHOLD_*",
-        "Claude Code node (CLAUDE_API_KEY): rank top5 most monetizable for self content vault $35 AND write the daily ACTION PLAN per niche (3 angles + hook + CTA + posting day + proof asset)",
-        "Telegram + Gmail nodes: Sir top5 + today's action plan 1) Stickman Finance 8.2K pool 5.1% ER -> angle/hook/CTA...",
-        "Postgres UPDATE solo_domains SET top5=[...], action_plan=jsonb, ranked_at=now()"
-      ],
-      "sql": "SELECT handle, platform, followers, avg_comments, buyer_pool_x3, ratio, er, gate FROM creators WHERE gate='GREEN' ORDER BY buyer_pool_x3*er DESC LIMIT 50"
+[
+  {
+    "name": "WF1 Research",
+    "nodes": [
+      {
+        "parameters": {
+          "content": "### WF1 — Research\nMon 08:00 EAT. Reads the GREEN pool, asks the brain to rank it, writes the top five.\n\n**Requires:** `JARVIS_BRAIN_URL` and `N8N_BRAIN_TOKEN` in n8n → Settings → Variables.\nIf the brain answers 503 the workflow stops. It never substitutes text.",
+          "height": 260,
+          "width": 420,
+          "color": 4
+        },
+        "id": "3110fdc7-3202-5e95-93c3-280005d4feaf",
+        "name": "README",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          -380,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 8 * * 1"
+              }
+            ]
+          }
+        },
+        "id": "893e84d1-dc2e-5433-97ef-84766820ae5f",
+        "name": "Mon 08:00",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT handle, platform, followers, avg_comments, buyer_pool_x3, ratio, er FROM creators WHERE gate = 'GREEN' ORDER BY buyer_pool_x3 * er DESC LIMIT 50",
+          "options": {}
+        },
+        "id": "836e3c3f-3a71-5e9c-89b2-5ad7688eb43c",
+        "name": "GREEN pool",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.4,
+        "position": [
+          220,
+          0
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "REPLACE_POSTGRES",
+            "name": "Neon (jarvis)"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const rows = $input.all().map(r => r.json);\nif (rows.length === 0) { throw new Error('no GREEN creators — refusing to rank an empty pool'); }\nconst table = rows.map((r, i) => `${i + 1}. ${r.handle} (${r.platform}) followers=${r.followers} comments=${r.avg_comments} pool_x3=${r.buyer_pool_x3} ratio=${r.ratio} er=${r.er}`).join('\\n');\nconst prompt = [\n  'Rank these creators by how monetizable their audience is for a stickman faceless video agent at Circle $44 / Pro $53 / Team $62.',\n  'GREEN = ratio < 50:1 and ER >= 5%. Return strict JSON: {\"top5\":[{\"handle\":\"...\",\"why\":\"one sentence\"}]}. No prose outside the JSON.',\n  table,\n].join('\\n');\nreturn [{ json: { prompt, count: rows.length } }];"
+        },
+        "id": "0dc2eb39-d9e1-58c2-a1ed-c11e22a0311e",
+        "name": "Build prompt",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          440,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $vars.JARVIS_BRAIN_URL }}/api/brain",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $vars.N8N_BRAIN_TOKEN }}"
+              },
+              {
+                "name": "content-type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ prompt: prompt, expect: \"rank\" }) }}",
+          "options": {
+            "timeout": 45000
+          }
+        },
+        "id": "bbc3feea-3fd3-5658-8c9d-9efc2de6c74d",
+        "name": "Ask brain (rank)",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          660,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "id": "ok",
+                "leftValue": "={{ $json.ok }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "623435bb-c76d-5b9c-85e6-625ab30f1a99",
+        "name": "Brain ok?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          880,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const body = $input.first().json;\nconst text = body.data || '';\n// The model was asked for JSON. If it wrapped it in prose or fences, recover it —\n// and if it cannot be recovered, throw rather than writing garbage to Postgres.\nconst start = text.indexOf('{');\nconst end = text.lastIndexOf('}');\nif (start === -1 || end === -1) throw new Error('brain reply was not JSON: ' + text.slice(0, 200));\nconst parsed = JSON.parse(text.slice(start, end + 1));\nconst top5 = Array.isArray(parsed.top5) ? parsed.top5 : [];\nif (top5.length === 0) throw new Error('brain returned an empty top5');\nreturn top5.map(t => ({ json: { handle: t.handle, why: t.why || '', provider: body.provider || null, model: body.model || null } }));"
+        },
+        "id": "2062563f-3861-51f5-be2b-f1e7cce66b2f",
+        "name": "Parse top5",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1100,
+          -60
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "INSERT INTO solo_domains (handle, why, ranked_at, marked_by) VALUES ($1, $2, NOW(), 'wf1') ON CONFLICT (handle) DO UPDATE SET why = EXCLUDED.why, ranked_at = NOW()",
+          "options": {
+            "queryReplacement": "={{ $json.handle }},{{ $json.why }}"
+          }
+        },
+        "id": "70b2579f-0455-5817-a928-f218f646f296",
+        "name": "Rank saved",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.4,
+        "position": [
+          1320,
+          -60
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "REPLACE_POSTGRES",
+            "name": "Neon (jarvis)"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+          "text": "=WF1 done — {{ $('Parse top5').all().length }} domains ranked. Top: {{ $('Parse top5').first().json.handle }}",
+          "additionalFields": {}
+        },
+        "id": "d207bdf3-26e3-5673-bf61-b3b85431c4e0",
+        "name": "Telegram Sir",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1540,
+          -60
+        ],
+        "credentials": {
+          "telegramApi": {
+            "id": "REPLACE_TELEGRAM",
+            "name": "Jarvis Bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+          "text": "=WF1 STOPPED: the brain did not answer. Nothing was ranked and nothing was written. Check ANTHROPIC_API_KEY / GROK_API_KEY on Vercel, then re-run.",
+          "additionalFields": {}
+        },
+        "id": "b4fbb40e-689b-54f0-9660-fd7bd7ed91cd",
+        "name": "Brain down — stop",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1100,
+          140
+        ],
+        "credentials": {
+          "telegramApi": {
+            "id": "REPLACE_TELEGRAM",
+            "name": "Jarvis Bot"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Mon 08:00": {
+        "main": [
+          [
+            {
+              "node": "GREEN pool",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "GREEN pool": {
+        "main": [
+          [
+            {
+              "node": "Build prompt",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build prompt": {
+        "main": [
+          [
+            {
+              "node": "Ask brain (rank)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ask brain (rank)": {
+        "main": [
+          [
+            {
+              "node": "Brain ok?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Brain ok?": {
+        "main": [
+          [
+            {
+              "node": "Parse top5",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Brain down — stop",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse top5": {
+        "main": [
+          [
+            {
+              "node": "Rank saved",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Rank saved": {
+        "main": [
+          [
+            {
+              "node": "Telegram Sir",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
     },
-    {
-      "id": "wf2_longform_tubegen",
-      "name": "WF2 - Longform Make 30min DAILY 02:00 (stickman_all every page, TubeGen fallback only)",
-      "trigger": "cron 0 2 * * * (02:00 EAT while you sleep)",
-      "nodes": [
-        "Postgres SELECT top5 + action_plan FROM solo_domains (scalable {{$env.PAGES_COUNT || 5}} pages — ALL pages stickman per 2026-10-31 answer)",
-        "Claude Code (Claude Max): Generate 6 scripts/domain (3x8s short +2x32s long +1x60s deep -> 4500 words for 30min) Butler tone JSON {title,script,captions,hashtags} + scene beats",
-        "HTTP Request stickman-video-director (STICKMAN_REPO_URL) render 30m scene-per-beat per domain — $0 free engine primary for EVERY page",
-        "IF stickman render fails/timeout -> HTTP Request TubeGen API (TUBEGEN_API_KEY) OR WAN_T4_URL (Colab free) fallback only",
-        "R2 Upload (canonical, off Drive per 2026-10-31) - p01_32s_9x16.mp4 Katana if needed via ffmpeg",
-        "Publish gate: render daily 02:00 but PUBLISH 3x/week Mon/Wed/Fri (LONGFORM_PUBLISH_DAYS=1,3,5) — extras bank as backlog (2026-10-31)",
-        "Postgres INSERT publisher_queue38_longform (date, video_url, engine_used, status='clip_pending')",
-        "Telegram Sir longforms ready 02:15 EAT + which engine rendered each page - Linear SHA"
-      ],
-      "output": "publisher_queue38_longform pending clip"
+    "settings": {
+      "executionOrder": "v1"
     },
-    {
-      "id": "wf3_autoclip_virality",
-      "name": "WF3 - OpusClip virality + Higgsfield polish (LONGFORM + Shorts) -> queue38",
-      "trigger": "Webhook TubeGen finished -> auto",
-      "nodes": [
-        "Webhook engine finished per domain",
-        "ffmpeg Katana p01_32s_9x16.mp4->queue70 if needed -> Drive upload",
-        "HTTP OpusClip virality 9.2 -> 6 shorts 9:16 per longform",
-        "Higgsfield polish (HIGGSFIELD_API_KEY) $0.08/clip — cleans BOTH the 30m longform master AND every short before Buffer (2026-10-31 answer) — no teal/purple LUT/watermark",
-        "Stickman character lock (one master prompt + one reference frame per page) applied at render, verified after polish",
-        "Postgres INSERT publisher_queue38 (date,caption,video_url,status='pending_G4') queue70 schedule38",
-        "Linear Create Issue SHA 'longform + 6 clips ready content guy G4' + Telegram for content guy",
-        "DUAL OUTPUT (lib/split.ts): from the same script produce RAW (destination Whop private community, no edits, includes mistakes) and EDITED (YouTube+TikTok+IG+FB+X). Split happens HERE, before any platform sees the asset.",
-        "POLICY GATE: the public cut must pass no_advice + policy_safe (original commentary present, no slideshow/TTS signature, AI disclosure). If it fails, the asset is BLOCKED — not softened — and only the RAW cut reaches the community. Every cut logged to asset_cuts."
-      ],
-      "flow_tier": "stickman_all: free stickman longform + shorts -> OpusClip 9.2 -> Higgsfield polish longform+shorts -> character lock -> Buffer (G4 only)"
+    "pinData": {}
+  },
+  {
+    "name": "WF2 Content",
+    "nodes": [
+      {
+        "parameters": {
+          "content": "### WF2 — Content\n02:00 while you sleep. Six scripts (3×8s, 2×32s, 1×60s) for the top domains.\n\nOutput goes to `publisher_queue38` with status `pending_G4`. **Nothing publishes from\nthis workflow.** G4 is a human gate.\n\nA 503 from /api/brain stops the run — a queue filled with 'brain unavailable' is worse\nthan an empty queue.",
+          "height": 260,
+          "width": 420,
+          "color": 4
+        },
+        "id": "896aea84-6dd5-594f-a9b3-4fff40b6a227",
+        "name": "README",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          -380,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 2 * * *"
+              }
+            ]
+          }
+        },
+        "id": "75ca66a6-628d-5669-88ef-9c3e3908bd92",
+        "name": "02:00 daily",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT handle, why FROM solo_domains WHERE ranked_at > NOW() - INTERVAL '14 days' ORDER BY ranked_at DESC LIMIT 5",
+          "options": {}
+        },
+        "id": "f69ae4df-64d8-5ad8-8456-a09dba16d531",
+        "name": "Top domains",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.4,
+        "position": [
+          220,
+          0
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "REPLACE_POSTGRES",
+            "name": "Neon (jarvis)"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const rows = $input.all().map(r => r.json);\nif (rows.length === 0) { throw new Error('no ranked domains — run WF1 first'); }\nconst domains = rows.map(r => r.handle).join(', ');\nconst prompt = [\n  'Write 6 vertical scripts for these domains: ' + domains + '.',\n  'Three 8-second shorts, two 32-second pieces, one 60-second piece.',\n  'Stickman character, one locked character design, no faces, no finance advice, no health claims.',\n  'Return strict JSON: {\"scripts\":[{\"kind\":\"8s|32s|60s\",\"domain\":\"...\",\"hook\":\"...\",\"script\":\"...\",\"caption\":\"...\"}]}.',\n].join('\\n');\nreturn [{ json: { prompt } }];"
+        },
+        "id": "08b173ca-4b48-57d3-b384-a2550393f0a5",
+        "name": "Build prompt",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          440,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $vars.JARVIS_BRAIN_URL }}/api/brain",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $vars.N8N_BRAIN_TOKEN }}"
+              },
+              {
+                "name": "content-type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ prompt: prompt, expect: \"script\" }) }}",
+          "options": {
+            "timeout": 45000
+          }
+        },
+        "id": "ca4a228a-2daf-52eb-b5d0-bf87bcaba8c9",
+        "name": "Ask brain (script)",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          660,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "id": "ok",
+                "leftValue": "={{ $json.ok }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              },
+              {
+                "id": "pub",
+                "leftValue": "={{ $json.publishable }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "fd41cb65-e658-5c96-81e2-18e905e80f93",
+        "name": "Brain ok?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          880,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const body = $input.first().json;\nconst text = body.data || '';\nconst start = text.indexOf('{');\nconst end = text.lastIndexOf('}');\nif (start === -1 || end === -1) throw new Error('brain reply was not JSON');\nconst parsed = JSON.parse(text.slice(start, end + 1));\nconst scripts = Array.isArray(parsed.scripts) ? parsed.scripts : [];\nif (scripts.length === 0) throw new Error('brain returned no scripts');\nconst today = new Date().toISOString().slice(0, 10);\nreturn scripts.map((s, i) => ({ json: {\n  date: today,\n  slot: i + 1,\n  kind: s.kind || '8s',\n  domain: s.domain || '',\n  hook: s.hook || '',\n  caption: s.caption || '',\n  body: s.script || '',\n  status: 'pending_G4',\n} }));"
+        },
+        "id": "2a1224f7-78e3-5522-83e6-9dc45b1787ee",
+        "name": "Queue for G4",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1100,
+          -60
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "INSERT INTO publisher_queue38 (date, caption, body, status) VALUES ($1, $2, $3, 'pending_G4')",
+          "options": {
+            "queryReplacement": "={{ $json.date }},{{ $json.caption }},{{ $json.body }}"
+          }
+        },
+        "id": "2b16541d-674b-5d4a-a78d-f0203048e7c7",
+        "name": "Insert queue38",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.4,
+        "position": [
+          1320,
+          -60
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "REPLACE_POSTGRES",
+            "name": "Neon (jarvis)"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+          "text": "=WF2 done — {{ $('Queue for G4').all().length }} scripts waiting for G4 on /drafts. Nothing published.",
+          "additionalFields": {}
+        },
+        "id": "71fac343-131c-50fa-8e0a-07e0f7c4aa57",
+        "name": "Telegram Sir",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1540,
+          -60
+        ],
+        "credentials": {
+          "telegramApi": {
+            "id": "REPLACE_TELEGRAM",
+            "name": "Jarvis Bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+          "text": "=WF2 STOPPED: no usable scripts were returned. The queue is unchanged. Nothing was published.",
+          "additionalFields": {}
+        },
+        "id": "6413f82a-b2d0-5b9c-8953-1e02a219db9f",
+        "name": "Brain down — stop",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1100,
+          140
+        ],
+        "credentials": {
+          "telegramApi": {
+            "id": "REPLACE_TELEGRAM",
+            "name": "Jarvis Bot"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "02:00 daily": {
+        "main": [
+          [
+            {
+              "node": "Top domains",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Top domains": {
+        "main": [
+          [
+            {
+              "node": "Build prompt",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build prompt": {
+        "main": [
+          [
+            {
+              "node": "Ask brain (script)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ask brain (script)": {
+        "main": [
+          [
+            {
+              "node": "Brain ok?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Brain ok?": {
+        "main": [
+          [
+            {
+              "node": "Queue for G4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Brain down — stop",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Queue for G4": {
+        "main": [
+          [
+            {
+              "node": "Insert queue38",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Insert queue38": {
+        "main": [
+          [
+            {
+              "node": "Telegram Sir",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
     },
-    {
-      "id": "wf4_seo_publisher_buffer",
-      "name": "WF4 - SEO (Claude Max) + Publisher + Buffer Team unlimited (Content G4 -> Social autopublish)",
-      "trigger": "queue38 pending_G4 -> Content guy G4 approve + Social manager approve",
-      "nodes": [
-        "Vercel /content pending_G4 view -> Content guy G4 approve once (edit caption/hashtag/thumbnail) -> Postgres status='content_approved'",
-        "Claude Code SEO pack per platform: IG hashtags vs TikTok hooks vs YT titles + buyer_pool_x3 targeting",
-        "Postgres UPDATE status='content_approved' -> trigger Buffer schedule immediately (G5 social review REMOVED 2026-10-31)",
-        "Route by surface: Shorts -> each brand's YT-Shorts channel + IG + TikTok; longform -> the brand's YT-Long channel 3x/week (2 channels per brand, YT_CHANNELS_PER_BRAND=2)",
-        "HTTP Buffer API (BUFFER_TOKEN Team $12/ch) schedule {{$env.BUFFER_SERIOUS_DAILY || 6}}/day serious (IG/TikTok/YT) + longform 3x/week Mon/Wed/Fri per page + {{$env.BUFFER_X_DAILY || 2}}/day X discovery per domain unlimited (env PLATFORMS+X_MODE)",
-        "Telegram Sir 6/day live via Buffer + longform uploaded to YT - Linear Done SHA"
-      ],
-      "rule": "G4 is the ONLY human approve (G5 removed 2026-10-31) — Buffer auto-schedules on G4. X discovery filler 1-2/day not counted in 6/day serious. /social = read-only analytics."
+    "settings": {
+      "executionOrder": "v1"
     },
-    {
-      "id": "wf5_demand_whop_chatfuel",
-      "name": "WF5-GREEN - Demand FAST-CLOSE (GREEN <50+5%+ -> Comments->DM->Whop same day, 3-email cap->FINAL TERMS)",
-      "trigger": "cron 0 9 * * * + comment webhook IG/TikTok/YT (X ignored via PLATFORMS env) — GREEN fast path adaptable",
-      "nodes": [
-        "HTTP IG/TikTok/YT analytics ONLY (X views ignored) views+replies last 3 posts + Social Blade alternatives HypeAuditor/NotJustAnalytics/Picuki daily ER check",
-        "IF ratio<{{$env.THRESHOLD_RATIO_GREEN || 50}} && er>={{$env.THRESHOLD_ER_GREEN || 5}} (STRICT GREEN via THRESHOLD_RATIO_GREEN+ER_GREEN) && buyer_pool_x3 gate GREEN -> GREEN else check AMBER — adaptable via Vercel env",
-        "IF GREEN: ChatFuel IG&TikTok + ManyChat YT auto-DM VAULT keyword within 2min (ManyChat YT because ChatFuel cannot YT) -> Comments->DM->Whop superfast",
-        "Shadow hard-close: 3-email cap -> FINAL TERMS one-pager 10pts sign only after PASS (no free audit, Hard Rule2 R9) -> Whop Create Product Vault $35+$17+$89+$26/mo ladder + First Shot $28 one-time 14-day (the only 1 in the ladder) grant scott.abuya@gmail.com + info.wolf@gmail.com Buffer Team",
-        "ChatFuel Push 8ch IG&TikTok + ManyChat YT Push Whop funnel -> n8n Jarvis DM auto social manager reviews Vercel one-app ChatFuel IG&TikTok + ManyChat YT",
-        "Gmail Sir PASS GREEN fast-close vault live - Telegram all 3 pods"
-      ],
-      "rule": "GREEN Comments->DM->Whop Purchase prioritized — FINAL TERMS same day — no 14-day — R9 no Whop before PASS + R10 strict 1%+25 IG/TikTok/YT only"
+    "pinData": {}
+  },
+  {
+    "name": "WF3 Demand → Whop",
+    "nodes": [
+      {
+        "parameters": {
+          "content": "### WF3 — Demand → offer\nPASS = replies ≥ max(25, ceil(views × 1%)).\n\nThe offer on PASS is the **three agent tiers, one Whop product each**:\nCircle **$44** · Pro **$53** · Team **$62**. The one-time ladder ($28 first shot,\n$17 Lite, $35 Good, $89 Better) is a separate door and never gates a tier.\n\n**Nothing is created in Whop by this workflow.** Whop product ids are set once by the\nowner and read by the app from env.",
+          "height": 300,
+          "width": 420,
+          "color": 4
+        },
+        "id": "293a0bbd-d7dd-555c-b49b-b8c6c865aee6",
+        "name": "README",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          -380,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 9 * * *"
+              }
+            ]
+          }
+        },
+        "id": "8443bb69-2e7f-5285-86fe-0e0b2cd279a2",
+        "name": "09:00 daily",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT id, platform, views, replies FROM post_analytics WHERE posted_at::date = CURRENT_DATE - 1 ORDER BY id",
+          "options": {}
+        },
+        "id": "2d14538e-d29f-5e2d-8a4c-90600baaad23",
+        "name": "Yesterday stats",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.4,
+        "position": [
+          220,
+          0
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "REPLACE_POSTGRES",
+            "name": "Neon (jarvis)"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "// The gate is arithmetic, not judgement. Same formula as lib/stickman-agent.ts.\nconst rows = $input.all().map(r => r.json);\nconst results = rows.map(r => {\n  const views = Number(r.views || 0);\n  const replies = Number(r.replies || 0);\n  const bar = Math.max(25, Math.ceil(views * 0.01));\n  return { id: r.id, platform: r.platform, views, replies, bar, pass: replies >= bar };\n});\nconst passed = results.filter(r => r.pass);\nreturn [{ json: {\n  total: results.length,\n  passed: passed.length,\n  any_pass: passed.length > 0,\n  detail: results,\n  offer: passed.length > 0 ? 'Circle $44 / Pro $53 / Team $62 — one Whop product each' : null,\n} }];"
+        },
+        "id": "f909da2a-db6e-58c7-94d4-29f00537894a",
+        "name": "Demand gate",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          440,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "id": "p",
+                "leftValue": "={{ $json.any_pass }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "5fc21540-de61-5ca7-967a-f9f9e2d57eda",
+        "name": "Any PASS?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          660,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+          "text": "=PASS — {{ $json.passed }}/{{ $json.total }} posts cleared the bar. Offer: Circle $44 / Pro $53 / Team $62. Links: the three Whop products, one per tier. No discount.",
+          "additionalFields": {}
+        },
+        "id": "173ee921-12d5-53dd-9941-c1829afd29f7",
+        "name": "PASS — offer the tiers",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          880,
+          -80
+        ],
+        "credentials": {
+          "telegramApi": {
+            "id": "REPLACE_TELEGRAM",
+            "name": "Jarvis Bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+          "text": "=No PASS — {{ $json.passed }}/{{ $json.total }} cleared the bar. No offer goes out. Improve the hook, not the price.",
+          "additionalFields": {}
+        },
+        "id": "77703eba-8f08-5af8-947e-baedb811a164",
+        "name": "No PASS — hold",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          880,
+          120
+        ],
+        "credentials": {
+          "telegramApi": {
+            "id": "REPLACE_TELEGRAM",
+            "name": "Jarvis Bot"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "09:00 daily": {
+        "main": [
+          [
+            {
+              "node": "Yesterday stats",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Yesterday stats": {
+        "main": [
+          [
+            {
+              "node": "Demand gate",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Demand gate": {
+        "main": [
+          [
+            {
+              "node": "Any PASS?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Any PASS?": {
+        "main": [
+          [
+            {
+              "node": "PASS — offer the tiers",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "No PASS — hold",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
     },
-    {
-      "id": "wf5a_amber_14day",
-      "name": "WF5A - AMBER = MONTHLY 14-Day Growth Operator Sequence (Higgsfield slides -> Buffer, IG/TikTok gated 1K)",
-      "trigger": "AMBER branch from WF5 09:00 daily -> enroll contacts who commented but ratio 50-70 + ER 3-5%",
-      "nodes": [
-        "IF AMBER: ratio {{$env.THRESHOLD_RATIO_GREEN || 50}}-{{$env.THRESHOLD_RATIO_AMBER_MAX || 70}} && er {{$env.THRESHOLD_ER_AMBER_MIN || 3}}-{{$env.THRESHOLD_ER_AMBER_MAX || 5}}% -> enroll in the monthly sequence",
-        "Guide: Shadow_Operation_Playbook.pdf (Consulting.com Growth Operator training) — Warm-Up day1-3 / Value Delivery day4-9 / Money Days day10-14 + 11 buy buttons (docs/GROWTH_OPERATOR_14DAY_SEQUENCE.md)",
-        "Inputs: Claude reads last month top3 posts + Whop ladder + objections -> builds day/phase/slides/hook/body/CTA/link_sticker JSON",
-        "Higgsfield renders slides in page operation style (stickman character lock, 1080x1350 feed / 1080x1920 story) -> R2 upload -> Neon INSERT sequence_assets",
-        "G4 once per cycle in /content -> Buffer schedule IG carousel + TikTok ONLY if follower gate open (WF11)",
-        "Demand test: 3-slide carousel Stories only, read after 72h -> {{$env.THRESHOLD_DEMAND_GREEN || 50}}+ GREEN / {{$env.THRESHOLD_DEMAND_AMBER || 25}}-49 AMBER / <25 RED hold (pre-send checklist before every day)",
-        "IF reply YES any day 1-14 -> EXIT to WF5-GREEN fast-close FINAL TERMS 10pts (both to advantage)",
-        "Post-cycle no YES -> HOLD -> WF6 leak finder + WF1 daily re-rank — improve loop A/B Higgsfield slides + OpusClip virality + Whitepaper ladder A/B (no G4 in loop)"
-      ],
-      "rule": "Monthly 14-day Growth Operator sequence per book — Stories-first, warm-up never skipped, 3-slide demand test read at 72h, IG+TikTok only after 1K followers on both. IG/TikTok gate alerts all 3 when reached."
+    "settings": {
+      "executionOrder": "v1"
     },
-    {
-      "id": "wf6_brand_daily_leak",
-      "name": "WF6 - Brand Gmail + Daily Leak Finder -> Weekly Expand + Daily Brief 05:45 (leak->expand superfast)",
-      "trigger": "Gmail Trigger brand@* + cron 45 5 * * * + daily leak check",
-      "nodes": [
-        "Gmail Trigger brand@* adaptable NICHES_POOL {{$env.NICHES_POOL}} -> Claude Max classify brand deal -> Telegram Sir brand deal inbound",
-        "ManyChat YT + ChatFuel IG&TikTok webhook new subscriber -> Postgres replies -> Whop entitlement -> Telegram New vault buyer $35",
-        "Daily feedback email to ALL 3 seats from Jarvis Agent (Vessy) + in-app PWA update + SMS if a seat is offline; no reply in 10 min -> voice callback to that seat",
-        "Cron 45 5 * * * Telegram+Gmail Shadow Hot+Signal all 3: Sir 6 videos live 2.1K views 18 replies 1 Whop $35 - n8n spent $1.20 Claude today + leak_finder biggest leak in operator_context via /api/cron/daily-brief — env NICHES_POOL + THRESHOLD_* adaptable",
-        "Weekly Expand Mon 08:00: WF1 Grok re-rank top5 monetizable -> if GREEN pool expands -> auto-expand to 5 pages template big_run_1000.py + WF9 pods"
-      ],
-      "rule": "leak_expand you chose: daily leak via operator_context + weekly re-rank expand — superfast to Whop"
+    "pinData": {}
+  },
+  {
+    "name": "WF4 Daily Brief",
+    "nodes": [
+      {
+        "parameters": {
+          "content": "### WF4 — Brief\n05:45 EAT. Pulls `/api/cron/daily-brief` (Bearer `$CRON_SECRET`) and forwards it.\n\nThe route returns `source: \"placeholder\"` until it is wired to Neon. The workflow\n**prints that field** so a placeholder brief can never be mistaken for a real one.",
+          "height": 260,
+          "width": 420,
+          "color": 4
+        },
+        "id": "2f2b0565-fa80-5d2e-80aa-ddc25610cfc4",
+        "name": "README",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          -380,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "45 5 * * *"
+              }
+            ]
+          }
+        },
+        "id": "e2948843-f986-5e1c-8cd0-7c2de42a6eb6",
+        "name": "05:45 daily",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "={{ $vars.JARVIS_BRAIN_URL }}/api/cron/daily-brief",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $vars.CRON_SECRET }}"
+              }
+            ]
+          },
+          "options": {
+            "timeout": 20000
+          }
+        },
+        "id": "c0fee1b7-bd87-5cef-b528-192664f01a31",
+        "name": "GET daily-brief",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          220,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const d = $input.first().json;\nconst src = d.source || 'unknown';\nconst flag = src === 'placeholder' ? '\\n\\n[PLACEHOLDER — not live data]' : '';\nreturn [{ json: { text: (d.briefing || 'no brief') + flag } }];"
+        },
+        "id": "7cda4a03-6521-5de2-aa44-3b3f6c3593fa",
+        "name": "Format",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          440,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+          "text": "={{ $json.text }}",
+          "additionalFields": {}
+        },
+        "id": "a6bc4bb4-6df9-5fff-8899-2b08b2cd4da4",
+        "name": "Telegram Sir",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          660,
+          0
+        ],
+        "credentials": {
+          "telegramApi": {
+            "id": "REPLACE_TELEGRAM",
+            "name": "Jarvis Bot"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "05:45 daily": {
+        "main": [
+          [
+            {
+              "node": "GET daily-brief",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "GET daily-brief": {
+        "main": [
+          [
+            {
+              "node": "Format",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format": {
+        "main": [
+          [
+            {
+              "node": "Telegram Sir",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
     },
-    {
-      "id": "wf7_jive_vesper_broadcast",
-      "name": "WF7 - Jive One Permanent Broadcast + Vesper Feedback (Vapi + Voiceflow) - 5min online WebRTC -> PSTN offline",
-      "trigger": "Webhook from WF6 emergency + manual Hey Jarvis / /parallel / Big Red Button in /admin",
-      "nodes": [
-        "Webhook WF6 timer emergency detection -> JIVE_JARVIS_NUMBER=+25418XXXX710 secure env only",
-        "Vapi SIP Jive permanent One number -> Parallel broadcast 3 legs simultaneously - Leg1 Owner All, Leg2 Content content only, Leg3 Social account only - Voiceflow Creator 3 KBs live via n8n webhook to Neon",
-        "Vapi voice = Vesper 20yo playful witty joke - custom per role intro: Owner Hey Sir it's Vesper! Social Hey love! Content Hey star! - ElevenLabs voice-00 via Vapi",
-        "Whisper transcribe each leg -> Neon save transcript + Drive HQ 17KpzZCm/calls/ recording + Linear SHA + /admin log",
-        "Claude Pro generates 3 fixes -> Voiceflow presents via Vesper 20yo",
-        "Vapi feedback call to Owner ONLY via same Jive permanent number - Vesper reads fixes: Say Apply or press 1 -> Admin Big Red Button optional double-confirm -> Execute via n8n",
-        "Legs = 3 (owner all / content only / social only) — kept 2026-10-31; advice from the interview decides fixes, not guesses",
-        "10-minute no-reply timer: if a seat has not acknowledged the SMS, WF7 calls that seat directly"
-      ],
-      "cost": "Vapi $0 free WebRTC + PSTN $0.06-0.22/min emergency only",
-      "security": "JIVE_JARVIS_NUMBER env only not in docs/commit"
+    "settings": {
+      "executionOrder": "v1"
     },
-    {
-      "id": "wf8_retention_1_2",
-      "name": "WF8 - Retention 1-2% Save Engine (Pause/Downgrade/50% off + Alias Wise Pay) + Entitlement sync",
-      "trigger": "Whop webhook membership_cancelled + membership_payment_failed + cron 0 6 * * * churn check + manual /retention save click + ManyChat inactive 3d",
-      "nodes": [
-        "Webhook Whop membership_cancelled (WHOP_API_KEY) -> payload user_id, plan $26, reason, cancel_click_at — BEFORE final cancel",
-        "IF user in retention_events where last_save_offer <30d -> skip (1 save/30d max)",
-        "Postgres SELECT user_vault scripts_count, streak, pod_id, last_agent_use, entitlement tier from checkEntitlement",
-        "HTTP Whop API GET /api/v1/memberships/{id} -> verify active, get card_last4",
-        "Claude Code: personalized save copy via Vesper 20yo tone: Sir you have 47 scripts + Day 4 streak + pod Red needs you — Pause $8 keeps all vs Cancel deletes in 7d",
-        "Telegram + Chatfuel DM + ManyChat 8ch push save offer card: [Pause $8 keep vault] [35% off ${{$env.TIER_SAVE_PRICE || 17}} for 3 mo] [Downgrade ${{$env.TIER_LITE_PRICE||17}} Lite] — one-click via Whop API — TIER_* env adaptable",
-        "Webhook user choice -> HTTP Whop API POST — IF pause/discount/downgrade -> Postgres INSERT retention_events saved, Neon saved_rate++, Telegram Sir saved + Linear SHA + Jive Vesper voice note optional",
-        "ELSE cancel confirmed -> Postgres churn increment, IF churn7d>2.0% (tightened 2026-10-31) -> WF7 Jive broadcast emergency Sir churn 3.1% trigger win clip + office hour",
-        "Entitlement sync: Whop active -> update Neon entitlements tier=pro/lite for jarvis-app/lib/entitlement.ts has_access",
-        "ALIAS PAY: Cron 0 8 1 * * * (1st 08:00) -> HTTP YouTube Analytics + TikTok + Whop revenue_last_month -> Neon revenue_log -> Wise API POST /v1/batch-transfers alias with Social Manager: propose pay Jarvis $108 + community $500 from Wise USD, Social approves in /retention -> Wise executes",
-        "Funding ledger: monthly Circle revenue -> tools first -> prizes (cap $710, pro-rata) -> annual fund $133 -> reserve; write funding_ledger",
-        "Autopay HELD: read app_config autopay_authority — if not_granted, send proposal only, never transfer (owner 2026-10-31)"
-      ],
-      "cost": "Whop API $0 + Wise batch $0.43% + Neon $0 — saves 40% cancels, recovers 30% failed payments",
-      "rule": "Whop pause_membership first option, churn only counts if all 3 offers declined — paused = active 0% churn. Entitlement wired: lib/entitlement.ts mirrors Whop state"
+    "pinData": {}
+  },
+  {
+    "name": "WF5 Publish (G4)",
+    "nodes": [
+      {
+        "parameters": {
+          "content": "### WF5 — Publish\n**Manual trigger on purpose.** G4 is a human approving an asset, not a cron job.\n\nOnly rows that a human moved to `approved` are sent to Buffer. A row still in\n`pending_G4` is skipped, and the workflow says so.",
+          "height": 260,
+          "width": 420,
+          "color": 4
+        },
+        "id": "a00050cb-e2a6-5149-8f46-e4b8dd8b2669",
+        "name": "README",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          -380,
+          0
+        ]
+      },
+      {
+        "parameters": {},
+        "id": "50c5ee08-7fd2-5f6f-9068-a26e786d3310",
+        "name": "Manual G4",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT id, caption, video_url FROM publisher_queue38 WHERE status = 'approved' AND scheduled_for <= NOW() ORDER BY id LIMIT 25",
+          "options": {}
+        },
+        "id": "fe2f98b7-5dee-5c42-8c71-32e11d6b5d99",
+        "name": "Approved rows",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.4,
+        "position": [
+          220,
+          0
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "REPLACE_POSTGRES",
+            "name": "Neon (jarvis)"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "id": "has",
+                "leftValue": "={{ $json.id !== undefined && $json.id !== null }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "0b1eb131-e4b2-5f06-a330-e8e5724b68a5",
+        "name": "Anything approved?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          440,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.bufferapp.com/1/updates/create.json",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $vars.BUFFER_TOKEN }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ text: $json.caption, media: { link: $json.video_url }, now: false }) }}",
+          "options": {
+            "timeout": 20000
+          }
+        },
+        "id": "da94a211-8960-5bd9-86f2-e8399a157960",
+        "name": "Send to Buffer",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          660,
+          -80
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "UPDATE publisher_queue38 SET status = 'published', published_at = NOW() WHERE id = $1",
+          "options": {
+            "queryReplacement": "={{ $('Approved rows').item.json.id }}"
+          }
+        },
+        "id": "5c43c53e-837f-5fea-b465-c55b962edf46",
+        "name": "Mark published",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.4,
+        "position": [
+          880,
+          -80
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "REPLACE_POSTGRES",
+            "name": "Neon (jarvis)"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+          "text": "=WF5 ran — nothing is approved for this window. G4 still holds {{ $('Approved rows').all().length }} rows.",
+          "additionalFields": {}
+        },
+        "id": "01a1bf8c-bfe9-5c96-a621-dfb17ab43a1d",
+        "name": "Nothing approved",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          660,
+          120
+        ],
+        "credentials": {
+          "telegramApi": {
+            "id": "REPLACE_TELEGRAM",
+            "name": "Jarvis Bot"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Manual G4": {
+        "main": [
+          [
+            {
+              "node": "Approved rows",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Approved rows": {
+        "main": [
+          [
+            {
+              "node": "Anything approved?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Anything approved?": {
+        "main": [
+          [
+            {
+              "node": "Send to Buffer",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Nothing approved",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send to Buffer": {
+        "main": [
+          [
+            {
+              "node": "Mark published",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
     },
-    {
-      "id": "wf9_proof_loop",
-      "name": "WF9 - Proof Loop WWS Sun 09:00 + Leaderboard 05:45 + Pod Accountability",
-      "trigger": "cron 0 9 * * 0 WWS (Sun 09:00 EAT) + cron 45 5 * * * leaderboard + webhook new win + cron 0 19 * * 4 teardown Thu 19:00",
-      "nodes": [
-        "Cron Sun 09:00 -> Postgres SELECT Whop memberships new, Buffer analytics top views, Neon streaks, user_vault wins -> Claude summary WWS deck: 12 wins $340 new, @wolf_ke $90 with Agent",
-        "Cron 06:00 daily -> GLOBAL LIVE LEDGER: pull real Buffer/IG/TikTok/YT analytics for all 5 brands + 10 YT channels -> Postgres public_ledger (brand, platform, day, views, er_pct, comments, replies, posted, note) -> /ledger + /proof publish with a 24h lag + GET /api/ledger JSON for embedding. Failures stay in. Nothing hand-typed.",
-        "HTTP OpusClip per-clip auto fine-tune proof screenshot -> Drive HQ proofs/ + Postgres proof_queue — uses finish only, needs OpusClip virality source",
-        "Vercel /social read-only -> Buffer auto queue proof clip Tue/Fri 18:00 -> Chatfuel DM proof to inactive 3d -> ManyChat 8ch WWS announcement Whop Announcements",
-        "Cron 05:45 daily -> Buffer analytics top 3 views -> Postgres leaderboard -> Telegram + Whop Chat all pods: Top today @psych_mind 12k #2 you 4k Pod Red 28 vs Blue 22 keep streak?",
-        "Webhook member win submit -> Verify via Whop API + screen -> Neon wins table -> Queue Fri proof clip -> Leaderboard +1",
-        "Pod auto-assign on join: ManyChat assigns 5-pod via Whop Chat app -> Postgres pods(pod_id,user_id,streak)",
-        "Thu 19:00 teardown Zoom Whop Event -> Vapi Vesper transcribes -> Neon vault -> Clip 32s teaser -> Buffer next day",
-        "LEDGER v2 exposure: publish views/ER/comments/replies/posts/days/churn publicly. Revenue stays ADMIN ONLY unless that brand sets ledger_brand_settings.share_revenue = true itself. Never publish someone else's revenue.",
-        "LEDGER v2 cadence: cumulative totals refresh every LEDGER_TOTALS_REFRESH_SECONDS (900) — a total cannot be cherry-picked; audited daily rows keep the 24h lag."
-      ],
-      "metrics": "WWS replay target 40% base, activation 85% in 7d, DAU 60%, save 45% — alerts if churn >2.0% 7d rolling"
+    "settings": {
+      "executionOrder": "v1"
     },
-    {
-      "id": "wf10_monthly_sequence",
-      "name": "WF10 - Monthly 14-Day Growth Operator Sequence (Higgsfield slides -> Buffer)",
-      "trigger": "cron 0 7 1 * * (1st of month 07:00 EAT — Day 1 = 2nd)",
-      "nodes": [
-        "Cron 1st 07:00 -> Postgres SELECT last month top3 posts + Whop ladder + objection list per page",
-        "Claude Code: build 14 days x slides from Shadow_Operation_Playbook.pdf phases — Warm-Up 1-3 (no selling) / Value Delivery 4-9 / Money Days 10-14 + distribute 11 buy buttons",
-        "Higgsfield: render every slide in page operation style — stickman character lock, 1080x1350 feed + 1080x1920 story, no watermark, no LUT",
-        "R2 upload (canonical, off Drive) -> Postgres INSERT sequence_assets (cycle, day, phase, url, prompt_hash)",
-        "Vercel /content: Content G4 approves ONCE per cycle (not per slide) -> status cycle_approved",
-        "IF WF11 demand gate PASS (50+ comments at 72h) -> Buffer schedules the full 14-day sequence; AMBER warms up, RED holds",
-        "Telegram/Signal/Gmail all 3: cycle built, slide count, G4 pending, follower headroom on each platform"
-      ],
-      "rule": "Book-faithful: warm-up never skipped, Stories only, 3-slide demand test read at 72h (50/25 bar), no invented testimonials"
-    },
-    {
-      "id": "wf11_demand_gate",
-      "name": "WF11 - Demand-Test Gate (3-slide Stories, 72h) -> qualify the sequence, not follower count",
-      "trigger": "after each cycle's 3-slide test + cron 30 6 * * * refresh",
-      "nodes": [
-        "Read the 3-slide Stories carousel result at 72h (Stories only — never a feed post)",
-        "IF comments >= {{$env.THRESHOLD_DEMAND_GREEN || 50}} -> PASS -> unlock the full 14-day sequence to Buffer immediately",
-        "IF {{$env.THRESHOLD_DEMAND_AMBER || 25}}-49 -> AMBER -> warm-up content for 7 days then retest",
-        "IF < {{$env.THRESHOLD_DEMAND_AMBER || 25}} -> RED -> hold, keep publishing organic, no sequence",
-        "Write demand_gate (cycle, comments, verdict, checked_at) + Telegram/Signal/Gmail all 3",
-        "Scans update the DB: IG/TikTok/YT metrics refreshed so the next verdict uses live numbers"
-      ],
-      "rule": "Metrics qualify the sequence, not follower count (owner 2026-10-31) — 50 / 25 / <25 bar from the Growth Operator book"
-    },
-    {
-      "id": "wf12_team_interview",
-      "name": "WF12 - Team interview digest (3 seats, completeness, gaps) - Mon 07:30",
-      "trigger": "cron 30 7 * * 1 (Mon 07:30 EAT)",
-      "nodes": [
-        "Postgres SELECT email, role, answers, completeness, updated_at FROM team_profiles",
-        "Claude Code: per seat summarise what changed, what is missing, 3 questions to close the gap — inject Content answers into WF3/WF4 prompts, Social into WF5/WF5A, Owner into WF8/WF10",
-        "IF any seat completeness < 60% -> Telegram Owner 'seat X cannot run unsupervised yet'",
-        "Vercel /team card + audit_log row (interview_digest)"
-      ],
-      "rule": "A seat under 60% does not get unsupervised authority over its lane — docs/TEAM_ONBOARDING_AUTH.md"
-    },
-    {
-      "id": "wf13_global_pause",
-      "name": "WF13 - Global Pause (Big Red Button) — stops publish, DM, voice and money",
-      "trigger": "webhook /api/control + /admin Big Red Button + Vapi 'press 1'",
-      "nodes": [
-        "Webhook control {action: pause|resume} -> owner-only check (session role = owner or signed Vapi token)",
-        "Postgres UPDATE app_config control_state = paused|running + audit_log row (who, when, why)",
-        "Every outbound WF (WF4 Buffer, WF5/WF5A DM, WF7 voice, WF8/WF10 money) checks control_state BEFORE acting — paused = stop, log, Telegram",
-        "Resume requires owner; paused workflows do not auto-resume",
-        "Telegram + email all 3: Jarvis paused by <seat> at <time> — nothing ships until resume"
-      ],
-      "rule": "Global pause is absolute and owner-only to undo (2026-10-31) — no partial resume paths"
-    },
-    {
-      "id": "wf14_challenge_engine",
-      "name": "WF14 - 14-Day Operator Challenge (gate 14d tenure, API-verified, 06:00 daily)",
-      "trigger": "cron 0 6 * * * daily + webhook challenge_join + webhook challenge_checkin + cron 0 20 * * 0 weekly cohort report",
-      "nodes": [
-        "Gate check: cohort members must have tier <> none AND paid_tenure_days >= CHALLENGE_MIN_TENURE_DAYS (14). Entry fee $0 — the membership is the ticket. No public sign-ups, no exceptions.",
-        "Cron 06:00 -> Postgres SELECT eligible challenge_members (cohort = current 'YYYY-MM') -> send TODAY'S action from config trust.engines.do.challenge.days (one action, one deliverable, no essay) via Chatfuel IG/TK + ManyChat YT + email -> log send",
-        "Cron 06:10 -> recompute challenge_scores server-side ONLY: checked_in = COUNT(counted = true), streak, score, status. A client-submitted number is never trusted.",
-        "VERIFY (api_numbers): for each check-in open the link AND pull the real view/comment count from the platform API -> reconcile claimed vs actual -> mismatch > CHALLENGE_MISMATCH_LIMIT (20%) => counted = false, day does not count until corrected. Missing API key => verify_status api_missing, counted, but excluded from the leaderboard top 3.",
-        "Quiet detector: 2 days with no counted check-in -> ONE nudge, then leave them alone. No third message, no guilt copy, no public shaming.",
-        "Day 5 read -> Telegram owner: joined / active / at-risk + which day is shedding the most operators",
-        "Day 13 -> DM the verdict template. The member logs their OWN number: 50+ PASS / 25-49 AMBER / <25 RED. Jarvis reconciles it, never decides it.",
-        "Day 15 two doors: finisher + PASS -> First Shot $28 -> Circle $26 -> operator seat running their own page. AMBER -> another cycle free. Everyone else -> Lite $17 ('you did not finish, so I will not pretend you did').",
-        "Weekly Sun 20:00 -> completion rate (counted check-ins / (active x 14)) -> Neon + /challenge -> Telegram. Target 60%+. Below 40% by day 7 = the challenge is failing, not the operators.",
-        "Monthly rollover -> archive cohort -> open a fresh room capped at CHALLENGE_COHORT_SIZE (53) -> announce to the pages",
-        "Every send gated by WF13 global pause + mayActOutbound() before any DM or email"
-      ],
-      "metrics": "completion 60%+ of active · verified-day rate · finisher->First Shot 100% invited · finisher->paid 8-15% · unverified days excluded from top 3 · alert <40% completion by day 7",
-      "notes": "Operators only. The gate is 14 days of paid tenure — the one filter money cannot shortcut, because tourists do not pay for two weeks."
-    },
-    {
-      "id": "wf15_self_improvement",
-      "name": "WF15 - Self-Improvement Loop (grade self -> operation -> money, one variable per test)",
-      "trigger": "cron 0 7 * * 1 weekly (Mon 07:00) + webhook experiment_close",
-      "nodes": [
-        "Stage gate FIRST: self is always on. operation unlocks after 3 consecutive self-wins. money unlocks only after cost/clip falls 2 cycles AND G4 rejection <10% AND a month above the member floor (53) with churn <=2.0%. A stage that is not unlocked is skipped, not faked.",
-        "Stage 1 SELF: score Jarvis's own output against what the market did — hook retention, ER, comment quality, objection rate. Jarvis proposes the change; WF15 recomputes the score independently, so it cannot grade its own homework.",
-        "Stage 2 OPERATION: render pass rate, G4 rejection rate, publish cadence, cost per shipped clip, duplicate-question rate. Cheaper and cleaner before it goes anywhere near money.",
-        "Stage 3 MONEY: pricing, offers, the 14-day sequence, the save menu. Recommendations only — a PRICE change is never automatic, it goes to the owner with the data attached.",
-        "Every test: change exactly ONE variable, keep a 20% holdout on the incumbent, require LEARN_MIN_SAMPLE (30) and LEARN_MIN_DAYS (7) before reading. Two changes and the result is unreadable.",
-        "Decision (lib/learn.decide): promote only if it beats the incumbent by > LEARN_WIN_MARGIN (10%) AND the primary metric is not lost; behind -> killed; inside the margin -> inconclusive, which is NOT a win and is never shipped as one.",
-        "Playbook write: a tactic enters only after 2 independent wins on 2 DIFFERENT pages. It leaves after 2 consecutive losses and is archived (retired_at), never deleted, so a dead idea is not retried later under a new name.",
-        "Decay: every tactic is re-tested after LEARN_DECAY_DAYS (60). What worked in October is not guaranteed in January.",
-        "Weekly Telegram + /improve: running / promoted / killed / inconclusive counts, the current stage, and what is blocking the next unlock.",
-        "Gated by WF13 global pause. Experiments that spend money stop; scoring and reading continue."
-      ],
-      "metrics": "one variable per test 100% · promoted only above +10% margin · inconclusive never shipped · 60-day re-test compliance · stage unlock never bypassed",
-      "notes": "Self -> operation -> money, in that order. A system that cannot correct its own output will scale its mistakes."
-    },
-    {
-      "id": "wf16_scaleout",
-      "name": "WF16 - Scale-Out Duplicator (graduate a page, freeze a template, run clones in parallel)",
-      "trigger": "cron 0 8 * * 1 weekly + webhook page_graduate + webhook clone_demand_test_failed",
-      "nodes": [
-        "GRADUATION CHECK (lib/scaleout.graduate): all eight gates must pass — demand test 50+, 30 days live, ER >=5% rolling 7d, buyer pool x3 >=3,000, 3 paying buyers, churn <=2.0%, cost per clip <= $0.25, 5 proven hooks. Miss one and it stays a page, not a template.",
-        "On graduation: freeze a TEMPLATE version — master prompt, character lock, hook bank, cadence, playbook slice. Written immutably so a later tweak cannot silently change what was copied.",
-        "PARALLEL ALLOWANCE (parallelAllowance): 1 graduated page -> cap 3 live. 2 -> cap 6. 3+ -> cap 10 (the supervision ceiling at 80% autonomy). The cap lifts on proof, never on ambition.",
-        "NICHE DISTANCE: a new page must sit at least 2 niches from every existing page until the playbook holds 5 proven hooks per niche — otherwise clones compete for the same audience and the same comments.",
-        "CLONE: copy template only. Never copy the audience, the comments or the credibility. The clone publishes an honesty line: it starts at zero and we will publish that too.",
-        "ISOLATION: one credential set, one R2 prefix, one Buffer channel group, one budget per page. A bad page cannot poison the others — this is the only reason parallel is safe.",
-        "KILL RULE: a clone failing its 72h demand test SCALE_KILL_AFTER_FAILS (2x) is archived, not nursed. Sunk cost is bounded by design, not by sentiment.",
-        "PORTFOLIO: revenue logged PER PAGE into page_portfolio (never an aggregate — an average hides a dead page). A page that pays for itself is worth more than a bigger average.",
-        "REINVEST: a new page is funded from graduated pages, never from the owner's pocket. Telegram weekly: live / graduated / self-funding / margin / to-archive.",
-        "Creating a NEW template needs the owner. Cloning an APPROVED template runs unsupervised at 85%. Gated by WF13 global pause."
-      ],
-      "metrics": "0 clones before graduation · 8/8 gates enforced · cap never exceeded · kill after 2 fails · per-page margin positive · no aggregate reporting",
-      "notes": "Duplicating an unproven page multiplies losses at the same speed it multiplies wins."
-    }
-  ],
-  "creds_needed": [
-    "n8n Cloud $20/mo embedded Vercel /n8n",
-    "DATABASE_URL Neon free",
-    "CLAUDE_API_KEY Claude Pro/Max main brain",
-    "GROK_API_KEY xAI Grok speciality",
-    "STICKMAN_REPO kaomei/stickman-video-director free GitHub — PRIMARY engine for ALL pages (longform + shorts), no API key, git clone $0",
-    "HIGGSFIELD_API_KEY $0.08/clip polish — cleans BOTH longform 30m AND every short before Buffer (not LUT/watermark)",
-    "TUBEGEN_API_KEY $29/mo OPTIONAL — fallback only if stickman render fails (2026-10-31 answer)",
-    "OPUSCLIP_API_KEY $15/mo free tier fallback —  cannot clip",
-    "BUFFER_TOKEN Team $12/channel approval unlimited — Publisher fallback if missing",
-    "WHOP_API_KEY 27+9+79+19 ladder + WHOP_PRODUCT_LITE_ID / PRO_ID for entitlement lib/entitlement.ts",
-    "WHOP_WEBHOOK membership_cancelled + membership_payment_failed → /webhook/retention",
-    "WISE_API_KEY batch-transfers alias pay",
-    "CHATFUEL_TOKEN + MANYCHAT_API_KEY 8ch",
-    "TELEGRAM_BOT_TOKEN + SIGNAL_API all 3",
-    "Gmail OAuth2 gmail.modify 500/day",
-    "Drive OAuth2 HQ 17KpzZCm",
-    "R2 $5/mo — CANONICAL content storage (longform masters, shorts, sequence slides) — Drive keeps deliverables only (2026-10-31)",
-    "LINEAR_API_KEY SHA",
-    "HIGGSFIELD_API_KEY also renders the monthly 14-day sequence slides (stickman lock) — $0.08/slide",
-    "AUTH_SECRET 32+ chars — signs the 3 team sessions (shadow_session cookie)",
-    "TEAM_OWNER_PASSWORD + TEAM_CONTENT_PASSWORD + TEAM_SOCIAL_PASSWORD — rotate from dev defaults before live",
-    "AUTOPAY_AUTHORITY not_granted | granted — Jarvis only transfers after the owner flips this in /money"
-  ],
-  "total_cost": "MVP: $61/mo (1 brand, 2 YT channels) -> SCALE 5 brands / 10 YT channels: $165/mo + SMS/call usage ~$10 (Africa's Talking) = ~$175/mo — 3 sales $81 covers MVP, 7 sales $189 covers scale",
-  "next_step": "n8n Cloud Import this JSON -> add WHOP_API_KEY + WHOP_PRODUCT_LITE_ID/PRO_ID + WISE_API_KEY -> Vercel env same + set Whop webhooks membership_cancelled/payment_failed -> test /api/entitlement?whop_user_id=xxx -> WF8 retention save",
-  "self_only": "3-man core self-only scalable 5 domains — ALL pages stickman free engine 30m longform (render daily, publish Mon/Wed/Fri) + Shorts -> OpusClip 9.2 -> Higgsfield polish longform+shorts -> R2 canonical storage -> monthly 14-day Growth Operator sequence with Higgsfield slides -> Buffer (IG/TikTok gated at 1K) -> G4 only — cloud free GitHub+Vercel Hobby+Neon free"
-}
+    "pinData": {}
+  }
+]

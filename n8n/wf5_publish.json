@@ -1,0 +1,216 @@
+{
+  "name": "WF5 Publish (G4)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "### WF5 — Publish\n**Manual trigger on purpose.** G4 is a human approving an asset, not a cron job.\n\nOnly rows that a human moved to `approved` are sent to Buffer. A row still in\n`pending_G4` is skipped, and the workflow says so.",
+        "height": 260,
+        "width": 420,
+        "color": 4
+      },
+      "id": "a00050cb-e2a6-5149-8f46-e4b8dd8b2669",
+      "name": "README",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "50c5ee08-7fd2-5f6f-9068-a26e786d3310",
+      "name": "Manual G4",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, caption, video_url FROM publisher_queue38 WHERE status = 'approved' AND scheduled_for <= NOW() ORDER BY id LIMIT 25",
+        "options": {}
+      },
+      "id": "fe2f98b7-5dee-5c42-8c71-32e11d6b5d99",
+      "name": "Approved rows",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        220,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "REPLACE_POSTGRES",
+          "name": "Neon (jarvis)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "has",
+              "leftValue": "={{ $json.id !== undefined && $json.id !== null }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "0b1eb131-e4b2-5f06-a330-e8e5724b68a5",
+      "name": "Anything approved?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.bufferapp.com/1/updates/create.json",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $vars.BUFFER_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ text: $json.caption, media: { link: $json.video_url }, now: false }) }}",
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "id": "da94a211-8960-5bd9-86f2-e8399a157960",
+      "name": "Send to Buffer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE publisher_queue38 SET status = 'published', published_at = NOW() WHERE id = $1",
+        "options": {
+          "queryReplacement": "={{ $('Approved rows').item.json.id }}"
+        }
+      },
+      "id": "5c43c53e-837f-5fea-b465-c55b962edf46",
+      "name": "Mark published",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        880,
+        -80
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "REPLACE_POSTGRES",
+          "name": "Neon (jarvis)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+        "text": "=WF5 ran — nothing is approved for this window. G4 still holds {{ $('Approved rows').all().length }} rows.",
+        "additionalFields": {}
+      },
+      "id": "01a1bf8c-bfe9-5c96-a621-dfb17ab43a1d",
+      "name": "Nothing approved",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        660,
+        120
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_TELEGRAM",
+          "name": "Jarvis Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Manual G4": {
+      "main": [
+        [
+          {
+            "node": "Approved rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approved rows": {
+      "main": [
+        [
+          {
+            "node": "Anything approved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anything approved?": {
+      "main": [
+        [
+          {
+            "node": "Send to Buffer",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Nothing approved",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send to Buffer": {
+      "main": [
+        [
+          {
+            "node": "Mark published",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

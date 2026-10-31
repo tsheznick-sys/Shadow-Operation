@@ -1,4 +1,5 @@
 import { CONFIG } from "./config";
+import { ask, explain, mockAllowed, type BrainResult } from "./brain";
 
 // JARVIS brain — Grok + Claude Primary — FULLY ADAPTABLE (no hardcoded niche/price/threshold)
 // Thresholds, niches, platforms, pricing, pages all via CONFIG (env-overridable) — see config/adaptable.json
@@ -32,42 +33,55 @@ RETENTION 1-2% (System+Agent+Proof): System M1-5 teach 90% keep 10% edge, Agent 
 export const JARVIS_SYSTEM = buildJarvisSystem();
 export const getJarvisSystem = buildJarvisSystem;
 
-export async function askJarvis(prompt: string, history: any[] = []) {
-  if (process.env.CLAUDE_API_KEY) {
-    try {
-      const Anthropic = (await import("@anthropic-ai/sdk")).default;
-      const anthropic = new Anthropic({ apiKey: process.env.CLAUDE_API_KEY });
-      const res = await anthropic.messages.create({
-        model: "claude-3-5-sonnet-20241022",
-        max_tokens: 4096,
-        system: JARVIS_SYSTEM,
-        messages: [...history.map((h:any)=>({role:h.role, content:h.content})), {role:"user", content: prompt}],
-        temperature: 0.4,
-      });
-      const text = (res.content?.[0] as any)?.text || "";
-      return { text, mock: false, provider: "claude" };
-    } catch (e:any) {
-      console.error("[JARVIS] Claude failed, trying Grok:", e?.message?.slice(0,200));
-    }
+export type JarvisReply = {
+  ok: boolean;
+  text: string;
+  mock: boolean;
+  provider: "claude" | "grok" | "mock" | "none";
+  model?: string;
+  ms?: number;
+  error?: string;
+};
+
+/**
+ * The one entry point for the brain.
+ *
+ * Before 2026-10-31 this returned `{ text: "<canned paragraph>", mock: true }` with HTTP 200
+ * whenever a key was missing OR the model 404'd. The route passed the 200 through and the chat
+ * page rendered the paragraph as Jarvis. A dead brain and a live one looked identical.
+ *
+ * Now: a real answer, or `ok: false`. A mock is returned only when the operator has said so out
+ * loud (non-production, or ALLOW_MOCK_BRAIN=true), and it is labelled so nobody quotes it.
+ */
+export async function askJarvis(
+  prompt: string,
+  history: unknown[] = [],
+  opts: { env?: Record<string, string | undefined>; timeoutMs?: number; fetchImpl?: typeof fetch } = {},
+): Promise<JarvisReply> {
+  const res: BrainResult = await ask({ prompt, system: JARVIS_SYSTEM, history, ...opts });
+  if (res.status === "ok") {
+    return { ok: true, text: res.text, mock: false, provider: res.provider, model: res.model, ms: res.ms };
   }
-  const grokKey = process.env.GROK_API_KEY || process.env.XAI_API_KEY;
-  if (grokKey) {
-    try {
-      const { default: OpenAI } = await import("openai");
-      const grok = new OpenAI({ apiKey: grokKey, baseURL: process.env.XAI_BASE_URL || "https://api.x.ai/v1" });
-      const res = await grok.chat.completions.create({
-        model: process.env.GROK_MODEL || "grok-2-latest",
-        messages: [{ role: "system", content: JARVIS_SYSTEM }, ...history, { role: "user", content: prompt }],
-        temperature: 0.4
-      });
-      return { text: res.choices[0].message.content, mock: false, provider: "grok" as const };
-    } catch (e:any) {
-      console.error("[JARVIS] Grok failed:", e?.message?.slice(0,200));
-    }
+  if (mockAllowed(opts.env)) {
+    return {
+      ok: true,
+      text:
+        `[DEMO — no model answered. ${explain(res)}] Sir, this is a fixed sample, not the brain. ` +
+        `Set ANTHROPIC_API_KEY (Claude) or GROK_API_KEY (xAI) in Vercel to enable the real reply.`,
+      mock: true,
+      provider: "mock",
+      error: res.detail,
+    };
   }
-  return { text: "Sir, CLAUDE_API_KEY / GROK_API_KEY missing in Vercel env — set CLAUDE_API_KEY (Anthropic) or GROK_API_KEY (xAI api.x.ai/v1) to enable Grok+Claude brain. Mock: GREEN <50+5%+ fast-close, AMBER 50-70+3-5% 14-day via ChatFuel IG&TikTok+ManyChat YT, Comments→DM→Whop priority, leak→expand daily 05:45. Vesper standby.", mock: true, provider: "mock" as const };
+  return { ok: false, text: explain(res), mock: false, provider: "none", error: res.detail };
 }
 
-export async function askJarvisStream(prompt: string, history: any[] = []) {
-  return askJarvis(prompt, history);
+/**
+ * NOT streaming. Kept only so an older caller does not break; every response is fully buffered.
+ * The previous body was identical to askJarvis, so nothing was ever streamed through it either —
+ * the name was the only claim being made, and it was false.
+ */
+export async function askJarvisStream(prompt: string, history: unknown[] = []) {
+  const r = await askJarvis(prompt, history);
+  return { ...r, streamed: false as const };
 }

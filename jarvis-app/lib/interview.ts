@@ -91,10 +91,10 @@ export const BY_ROLE: Record<Role, Question[]> = {
     },
     {
       id: "revenue_mix",
-      prompt: "Rank what you want to earn from first: vault one-times ($27), Pro ($79), Circle ($19/mo), brand deals, DFY builds.",
+      prompt: "Rank what you want to earn from first: the agent tiers (Circle $44 / Pro $53 / Team $62/mo), the one-time ladder ($28 first shot, $17 Lite, $35 Good, $89 Better), brand deals, DFY builds.",
       why: "Drives which funnel the 14-day sequence pushes and where DMs steer buyers.",
       type: "multi",
-      options: ["$27 vault", "$79 Pro", "$19/mo Circle", "Brand deals", "DFY builds"],
+      options: ["Circle $44/mo", "Pro $53/mo", "Team $62/mo", "$28 first shot", "$89 Better build", "Brand deals", "DFY builds"],
     },
     {
       id: "risk_line",

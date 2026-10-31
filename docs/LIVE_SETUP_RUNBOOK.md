@@ -41,19 +41,44 @@ Why first: in production the app refuses to boot without it, by design.
 
 > This is the step that matters most. Before the webhook existed a member could pay $44 and nothing happened — no tier, no vault, no access.
 
-## Step 4 — Model keys
+## Step 4 — Model keys (the brain)
 
-- https://console.anthropic.com → API Keys → `CLAUDE_API_KEY`
-- https://console.x.ai → API Keys → `GROK_API_KEY`
+- https://console.anthropic.com → API Keys → `ANTHROPIC_API_KEY` (the code also accepts `CLAUDE_API_KEY`)
+- https://console.x.ai → API Keys → `GROK_API_KEY` (second brain, used only if Claude fails)
 
-Without these the agent opens but cannot write a script.
+**Do not set `ANTHROPIC_MODEL` to a retired id.** `claude-3-5-sonnet-20241022` was retired on
+2025-10-28 and sat in this codebase for a year: every request 404'd, the catch swallowed it, and a
+canned paragraph was returned with HTTP 200. `lib/brain.ts` now refuses a retired id in favour of
+`claude-sonnet-5-5`, and `B01` tests it. Leave the variable unset unless you are deliberately
+pinning a newer model.
+
+**No `ALLOW_MOCK_BRAIN=true`.** In production, no key means `/api/jarvis` returns **503** and the
+chat shows "brain offline". A member must never be handed a sample paragraph as an answer.
+
+Without these keys the agent opens but says so instead of writing a script.
+
+## Step 4b — n8n (the automation) → the brain
+
+n8n has no session cookie, so it cannot call `/api/jarvis`. `POST /api/brain` is the machine door.
+
+1. `openssl rand -hex 32` → set as `N8N_BRAIN_TOKEN` in **both** Vercel and n8n → Settings → Variables.
+2. n8n Variables: `JARVIS_BRAIN_URL` (your Vercel URL, no trailing slash), `CRON_SECRET` (same value
+   as Vercel), `TELEGRAM_CHAT_ID`. Full list in `config/n8n_workflow_variables.json`.
+3. Import `n8n/wf1_research.json` … `n8n/wf5_publish.json`, or the bundle
+   `n8n/n8n_workflows_self_3man.json`. Fill the two credential placeholders (Neon Postgres, Telegram bot).
+4. **Run WF4 first** — it writes nothing. Then WF1.
+
+A **503** from `/api/brain` means no model answered. Every brain node is followed by an `ok?` gate
+whose false branch announces *STOPPED — nothing was written*. Do not remove that gate.
+
+`WF6–WF14` are referenced by older documents and do not exist. Five workflows cover the money loop.
 
 ## Step 5 — Render (paid route, documented contract)
 
 - https://console.higgsfield.ai → API credentials → key ID + key secret.
 - `HIGGSFIELD_KEY_ID`, `HIGGSFIELD_KEY_SECRET`, `HIGGSFIELD_COST_PER_RENDER`.
 - Auth is `Authorization: Key ID:SECRET` — **not** Bearer. Endpoint `POST https://api.higgsfield.ai/wan/v2.7/image-to-video`, response `{ video: { url } }`.
-- Engine order is unchanged: free stickman first, Wan second — money is only spent when the cheap path cannot run.
+- Engine order: **paid Higgsfield is the render path** (`lib/render-paid.ts`). The stickman repo is the animation style, not a free renderer; Wan is the fallback when Higgsfield is unavailable. The earlier "free first, pay only when the cheap path fails" line was reversed on 2026-10-31.
 
 ## Step 6 — Publish
 
