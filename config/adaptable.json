@@ -5,7 +5,7 @@
     "created": "2026-10-30",
     "branch": "arena/6c47af3d-shadow-operation",
     "status": "pr_open",
-    "updated": "2026-10-31 Higgsfield added back for short-form final polish (per user), Stickman Finance main retained"
+    "updated": "2026-10-31 Round1: WF1 daily 08:00 whole-internet strategy scan + action plan \u00b7 stickman_all every page \u00b7 Higgsfield polishes longform+shorts \u00b7 G5 approval removed"
   },
   "niches": {
     "strategy": "Grok weekly re-rank via WF1, not hardcoded",
@@ -23,7 +23,10 @@
     "custom_own": "Add any niche via ADMIN_EMAIL in /admin \u2192 Create Niche (writes to Neon solo_domains top5)",
     "faceless_db": "data/creator_db_faceless_1000_FINAL.csv (1,000 verified via Social Blade alternatives \u2014 use this as seed, not hardcode)",
     "source": "GROK_API_KEY + HypeAuditor + NotJustAnalytics + Picuki (not Social Blade alone)",
-    "stickman_finance_note": "Main niche per Content Guy: Stickman Finance matches churn retention objective (finance RPM $8-15 keeps members paying). Other niches preserved as Page 2+"
+    "stickman_finance_note": "Main niche per Content Guy: Stickman Finance matches churn retention objective (finance RPM $8-15 keeps members paying). Other niches preserved as Page 2+",
+    "research_cadence": "daily 08:00 EAT (cron 0 8 * * *) \u2014 was weekly Mon",
+    "internet_scan": "whole-internet strategy scan daily: X trending + Reddit + YouTube + Google Trends + competitor channels -> Claude extracts every strategy that works now",
+    "action_plan": "Claude emits a per-niche action plan each morning: 3 angles, hook, CTA, posting day, proof asset"
   },
   "thresholds": {
     "comment_note": "All thresholds env-overridable via JARVIS_* in .env.example \u2014 no code change needed",
@@ -40,7 +43,7 @@
     "stuck_detector_hours": 48
   },
   "content": {
-    "engine": "Hybrid both_engines: TubeGen $29 auto longform 30m (Wan T4 free fallback) + kaomei/stickman-video-director free Shorts \u2014 OpusClip virality 9.2 + Higgsfield improve short-form final pieces (no teal/purple LUT)",
+    "engine": "Stickman EVERY page (stickman_all): kaomei/stickman-video-director free renders 30m longform + Shorts on all PAGES_COUNT pages \u2192 OpusClip virality 9.2 \u2192 Higgsfield polish BOTH longform + shorts $0.08/clip (no teal/purple LUT). TubeGen $29 kept only as fallback if stickman render fails",
     "scripts_per_domain": 6,
     "words_per_longform": 4500,
     "clip_targets": "3x8s short + 2x32s long + 1x60s deep from 30m p01_32s_9x16.mp4 Katana queue70",
@@ -65,10 +68,17 @@
       "switch_env": "ENGINE_PROVIDER=wan|tubegen|pictory|fliki|invideo|heygen|frameloop + paired API key, fallback WAN_T4_URL auto"
     },
     "engine_hybrid": {
-      "longform": "TubeGen $29 auto (fallback WAN_T4_URL) -> 30m p01_32s_9x16.mp4 -> queue38",
-      "shorts": "stickman-video-director free GitHub kaomei -> stickman Finance scenes (one master prompt + one reference frame locks character) -> captions/SFX -> OpusClip 9:16",
-      "brand_lock": "Stickman Finance character lock (one prompt/one frame) + Higgsfield short-form final polish replaces teal/purple LUT",
-      "shorts_final": "Higgsfield $0.08/clip short-form polish (upscale/smooth/clean) \u2014 improves final Shorts pieces before Buffer, not LUT/watermark"
+      "mode": "stickman_all",
+      "longform": "stickman-video-director free \u2014 30m scene-per-beat render ($0) -> p01_32s_9x16.mp4 -> queue38",
+      "shorts": "stickman-video-director free \u2014 same character lock -> OpusClip 9.2 -> 6 clips per longform",
+      "polish": "Higgsfield $0.08/clip cleans BOTH the 30m longform master AND every short before Buffer (per 2026-10-31 answer)",
+      "fallback": "TubeGen $29 / Wan T4 free \u2014 only if stickman render fails or times out",
+      "brand_lock": "Stickman Finance: one master prompt + one reference frame per page \u2014 replaces teal/purple LUT + watermark"
+    },
+    "gates": {
+      "g4_content": true,
+      "g5_social": false,
+      "note": "G5 social review removed 2026-10-31 \u2014 G4 approve auto-schedules to Buffer; /social stays read-only analytics"
     }
   },
   "conversion": {
@@ -96,7 +106,7 @@
     "good_better_best": {
       "GOOD": "$27 Starter Pillow+Wan manual \u2014 no auto",
       "BETTER": "$79 Pro TubeGen+OpusClip presets \u2014 Lite $9 unlocks 1 domain 3 clips/day",
-      "BEST": "$79+$29/mo Vault+Agent Pro full stack $189 auto LUT 5 domains 6/day \u2014 Pro unlocks",
+      "BEST": "$79+$29/mo Vault+Agent Pro full stack $160 auto stickman 5 pages 6/day \u2014 Pro unlocks",
       "Circle": "$19/mo Continuity pod streak WWS"
     },
     "entitlement": "lib/entitlement.ts Lite $9 (30 runs, 1d, 3c/d) / Pro $29 (9999, 5d, 6c/d) via WHOP_PRODUCT_LITE_ID/PRO_ID/TEAM_ID + Whop API v2/memberships",
@@ -111,8 +121,8 @@
   },
   "shadow_pattern": "leak_expand: Daily 05:45 leak finder biggest leak in operator_context via /api/cron/daily-brief + weekly Grok re-rank top5 expand \u2192 auto-expand to 5 pages template big_run_1000.py + WF9 pods \u2014 superfast to Whop",
   "scale": {
-    "mvp": "$61/mo \u2192 $732/yr 1 YT brand 6/day (Wan free + OpusClip free + Higgsfield manual + Buffer Free 3ch)",
-    "scale_5": "$189/mo \u2192 $2,268/yr + ~$60 PSTN = $2,328 Year1 pocket (you locked) + TubeGen $29 + OpusClip $15 + Higgsfield $29 + Buffer Team $60) + brain $36 \u2014 7 sales $189 covers scale, 3 sales $81 covers MVP",
+    "mvp": "$61/mo \u2192 $732/yr 1 page 6/day (stickman free + OpusClip free + Higgsfield manual + Buffer Free 3ch)",
+    "scale_5": "$160/mo \u2192 $1,920/yr + ~$60 PSTN = $1,980 Year1 (5 pages stickman free $0 engine + OpusClip $15 + Higgsfield $29 longform+shorts polish + Buffer Team $60 + brain $36) \u2014 TubeGen $29 dropped to fallback only \u2014 3 sales $81 covers MVP, 6 sales $162 covers scale",
     "year1": "Pocket $189/mo\u00d712=$2,268 \u2192 Net $1K/mo for 3 bros 30/20/50 \u2192 100K gross before re-tool \u2014 docs/YEAR1_POCKET_TO_100K_SCALE.md",
     "adaptable_pages": "Env PAGES_COUNT 5 (scalable any N) \u2014 no code change, WF1-9 loop domains",
     "languages": "English default, extendable via CLAUDE_LOCALE env + Grok X trending locale"

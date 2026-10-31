@@ -8,11 +8,11 @@
 
 ---
 
-## A — What we built (Full Stack SCALE $189/mo)
+## A — What we built (Full Stack SCALE $160/mo)
 
 **Squad 3-man self-only:** Content G4 (queue38 approve) + Social (Buffer one-app) + Admin (whole pipeline) — equal SEND, you super-admin money/sign. Vercel PWA `0.0.0.0:3000` embeds n8n+Buffer+Chatfuel one frontend.
 
-**Engine chain (nobody opens apps) — Hybrid both_engines:** `Page1 Stickman Finance: stickman-video-director free Shorts (one master prompt + one reference frame locks character)` + `Page2+ Other niches: TubeGen 30m 2h faceless 4.5k words/6 scripts` → `OpusClip 5-8 shorts virality 9.2 9:16 (stickman character lock)` → `Higgsfield short-form polish $0.08` → `Claude Max SEO` → `Buffer 6/day serious IG/TikTok/YT + X 1-2 discovery filler` — Higgsfield final Shorts polish replaces LUT
+**Engine chain (nobody opens apps) — Hybrid both_engines:** `ALL pages: stickman-video-director free renders 30m longform + Shorts (one master prompt + one reference frame locks character)` (TubeGen $29 fallback only) → `OpusClip 5-8 shorts virality 9.2 9:16 (stickman character lock)` → `Higgsfield polish $0.08 — cleans longform AND shorts` → `Claude Max SEO` → `Buffer 6/day serious IG/TikTok/YT + X 1-2 discovery filler` — Higgsfield longform+shorts polish replaces LUT
 
 **Fall engine:** Wan 1.3B T4 free Colab `WAN_T4_URL` — TubeGen missing → Wan auto, Higgsfield alone cannot make source.
 
@@ -26,7 +26,7 @@
 
 **Trigger auto:** Demand `1%+25` IG/TikTok/YT only (X ignored) `replies >= max(25, ceil(views*1%))` → Whop product auto-create → Chatfuel push `VAULT`.
 
-**Math:** MVP $61/mo 1 brand → 3 sales $81 covers. SCALE $189 5 brands → 7 sales $189 covers. Year1 pocket $189×12=$2,268 + $60 PSTN = $2,328 you fund → net $1K/mo for 3 bros 30/20/50 → 100K gross same flat.
+**Math:** MVP $61/mo 1 brand → 3 sales $81 covers. SCALE $189 5 brands → 7 sales $189 covers. Year1 pocket $189×12=$1,920 + $60 PSTN = $2,328 you fund → net $1K/mo for 3 bros 30/20/50 → 100K gross same flat.
 
 ---
 
@@ -94,7 +94,7 @@ System M1-M5 teaches 90% → Agent Lite $9/Pro $29 stuck 48h → Proof WWS Sun 0
 | Plan | Monthly | Annual ×12 | Annual Prepaid | Save |
 |---|---|---|---|---|
 | **MVP 1 brand** | $61 | $732 | $576 (n8n annual) | $156 |
-| **SCALE 5 brands** | $189 | $2,268 (+$60 PSTN $2,328) | ~$1,992 | $336 |
+| **SCALE 5 brands** | $189 | $1,920 (+$60 PSTN $2,328) | ~$1,992 | $336 |
 
 Pay monthly until $1K net, then prepaid to save.
 

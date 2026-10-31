@@ -3,57 +3,61 @@
   "workflows": [
     {
       "id": "wf1_research_grok",
-      "name": "WF1 - Research Best Monetizable Weekly (Grok + Social Blade) - Mon 08:00 EAT",
-      "trigger": "cron 0 8 * * 1 (Mon 08:00 EAT)",
+      "name": "WF1 - Research DAILY 08:00 (Grok + whole-internet strategy scan + action plan) - 7 days",
+      "trigger": "cron 0 8 * * * (daily 08:00 EAT \u2014 was weekly Mon)",
       "nodes": [
         "Postgres SELECT 50 creators: SELECT handle,platform,followers,avg_comments,buyer_pool_x3,ratio,er,gate FROM creators WHERE gate='GREEN' ORDER BY buyer_pool_x3*er DESC LIMIT 50 (1,462 GREEN)",
         "HTTP Request Social Blade + HypeAuditor + NotJustAnalytics/Picuki + Grok X trending (xAI GROK_API_KEY) - buyer_pool_x3,ratio,ER live",
-        "IF ER>{{$env.THRESHOLD_ER_GREEN || 5}}% && ratio<{{$env.THRESHOLD_RATIO_GREEN || 50}} && buyer_pool_x3>{{$env.THRESHOLD_BUYER_POOL_MIN || 3000}} => GREEN (8-Gate) \u2014 thresholds from config/adaptable.json env THRESHOLD_*",
-        "Claude Code node (Claude Pro/Max CLAUDE_API_KEY): prompt 'Rank top5 most monetizable for self content vault $27'",
-        "Telegram + Gmail nodes: Sir top5 monetizable domains 1) Psych Hack 8.2K pool 5.1% ER...",
-        "Postgres UPDATE solo_domains SET top5=[...]"
+        "HTTP Request WHOLE-INTERNET strategy scan daily: X trending + Reddit + YouTube search + Google Trends + competitor channels -> Claude extracts every monetizable strategy that works right now",
+        "IF ER>{{$env.THRESHOLD_ER_GREEN || 5}}% && ratio<{{$env.THRESHOLD_RATIO_GREEN || 50}} && buyer_pool_x3>{{$env.THRESHOLD_BUYER_POOL_MIN || 3000}} => GREEN (8-Gate STRICT per 2026-10-31 answer) \u2014 thresholds from env THRESHOLD_*",
+        "Claude Code node (CLAUDE_API_KEY): rank top5 most monetizable for self content vault $27 AND write the daily ACTION PLAN per niche (3 angles + hook + CTA + posting day + proof asset)",
+        "Telegram + Gmail nodes: Sir top5 + today's action plan 1) Stickman Finance 8.2K pool 5.1% ER -> angle/hook/CTA...",
+        "Postgres UPDATE solo_domains SET top5=[...], action_plan=jsonb, ranked_at=now()"
       ],
       "sql": "SELECT handle, platform, followers, avg_comments, buyer_pool_x3, ratio, er, gate FROM creators WHERE gate='GREEN' ORDER BY buyer_pool_x3*er DESC LIMIT 50"
     },
     {
       "id": "wf2_longform_tubegen",
-      "name": "WF2 - Longform Make TubeGen 30min (daily 02:00 while sleep) - Claude auto-scripts",
+      "name": "WF2 - Longform Make 30min DAILY 02:00 (stickman_all every page, TubeGen fallback only)",
       "trigger": "cron 0 2 * * * (02:00 EAT while you sleep)",
       "nodes": [
-        "Postgres SELECT top5 FROM solo_domains (scalable {{$env.PAGES_COUNT || 5}} pages adaptable \u2014 Page1 Stickman Finance (stickman free Shorts), Page2+ other niches (TubeGen longform))",
-        "Claude Code (Claude Max): Generate 6 scripts/domain (3x8s short +2x32s long +1x60s deep -> 4500 words for 30min) Butler tone JSON {title,script,captions,hashtags}",
-        "HTTP Request TubeGen API (TUBEGEN_API_KEY) generate 30min faceless longform per domain \u2014 OR fallback WAN_T4_URL (Colab free) if TubeGen missing \u2014 OpusClip only cannot make source",
+        "Postgres SELECT top5 + action_plan FROM solo_domains (scalable {{$env.PAGES_COUNT || 5}} pages \u2014 ALL pages stickman per 2026-10-31 answer)",
+        "Claude Code (Claude Max): Generate 6 scripts/domain (3x8s short +2x32s long +1x60s deep -> 4500 words for 30min) Butler tone JSON {title,script,captions,hashtags} + scene beats",
+        "HTTP Request stickman-video-director (STICKMAN_REPO_URL) render 30m scene-per-beat per domain \u2014 $0 free engine primary for EVERY page",
+        "IF stickman render fails/timeout -> HTTP Request TubeGen API (TUBEGEN_API_KEY) OR WAN_T4_URL (Colab free) fallback only",
         "Drive Upload to NUMINOUS_WHOP_DEPLOY/17KpzZCm/ - p01_32s_9x16.mp4 Katana if needed via ffmpeg",
-        "Postgres INSERT publisher_queue38_longform (date, video_url, status='clip_pending')",
-        "Telegram Sir 6 TubeGen longforms ready 02:15 EAT - Linear SHA"
+        "Postgres INSERT publisher_queue38_longform (date, video_url, engine_used, status='clip_pending')",
+        "Telegram Sir longforms ready 02:15 EAT + which engine rendered each page - Linear SHA"
       ],
       "output": "publisher_queue38_longform pending clip"
     },
     {
       "id": "wf3_autoclip_virality",
-      "name": "WF3 - Stickman Finance Shorts + OpusClip virality + Higgsfield short-form polish \u2192 queue38",
+      "name": "WF3 - OpusClip virality + Higgsfield polish (LONGFORM + Shorts) -> queue38",
       "trigger": "Webhook TubeGen finished -> auto",
       "nodes": [
-        "Webhook TubeGen finished per domain",
+        "Webhook engine finished per domain",
         "ffmpeg Katana p01_32s_9x16.mp4->queue70 if needed -> Drive upload",
+        "HTTP OpusClip virality 9.2 -> 6 shorts 9:16 per longform",
+        "Higgsfield polish (HIGGSFIELD_API_KEY) $0.08/clip \u2014 cleans BOTH the 30m longform master AND every short before Buffer (2026-10-31 answer) \u2014 no teal/purple LUT/watermark",
+        "Stickman character lock (one master prompt + one reference frame per page) applied at render, verified after polish",
         "Postgres INSERT publisher_queue38 (date,caption,video_url,status='pending_G4') queue70 schedule38",
-        "Linear Create Issue SHA '6 clips ready content guy G4' + Telegram for content guy"
+        "Linear Create Issue SHA 'longform + 6 clips ready content guy G4' + Telegram for content guy"
       ],
-      "flow_tier": "Hybrid both_engines: stickman free Shorts + TubeGen longform -> OpusClip 9.2 virality -> Higgsfield $0.08 short-form polish -> character lock -> Buffer"
+      "flow_tier": "stickman_all: free stickman longform + shorts -> OpusClip 9.2 -> Higgsfield polish longform+shorts -> character lock -> Buffer (G4 only)"
     },
     {
       "id": "wf4_seo_publisher_buffer",
       "name": "WF4 - SEO (Claude Max) + Publisher + Buffer Team unlimited (Content G4 -> Social autopublish)",
       "trigger": "queue38 pending_G4 -> Content guy G4 approve + Social manager approve",
       "nodes": [
-        "Vercel /content pending_G4 view -> Content guy initial G4 approve once (not in improve loop per lock) -> Postgres status=content_approved",
+        "Vercel /content pending_G4 view -> Content guy G4 approve once (edit caption/hashtag/thumbnail) -> Postgres status='content_approved'",
         "Claude Code SEO pack per platform: IG hashtags vs TikTok hooks vs YT titles + buyer_pool_x3 targeting",
-        "Vercel /content pending_G4 view -> Content guy G4 approve swipe (edit caption/hashtag/LUT) -> Postgres status='content_approved'",
-        "Vercel /social Buffer Team queue view -> Social manager single frontend analytics + Buffer queue preview -> gives Jarvis approval -> Postgres status='social_approved'",
-        "HTTP Buffer API (BUFFER_TOKEN Team $12/ch) schedule {{$env.BUFFER_SERIOUS_DAILY || 6}}/day serious (IG/TikTok/YT) + {{$env.BUFFER_X_DAILY || 2}}/day X discovery per domain unlimited (env PLATFORMS+X_MODE) -> Publisher fallback",
-        "Telegram Sir 6/day live via Buffer - Linear Done SHA"
+        "Postgres UPDATE status='content_approved' -> trigger Buffer schedule immediately (G5 social review REMOVED 2026-10-31)",
+        "HTTP Buffer API (BUFFER_TOKEN Team $12/ch) schedule {{$env.BUFFER_SERIOUS_DAILY || 6}}/day serious (IG/TikTok/YT) + {{$env.BUFFER_X_DAILY || 2}}/day X discovery per domain unlimited (env PLATFORMS+X_MODE)",
+        "Telegram Sir 6/day live via Buffer + longform uploaded to YT - Linear Done SHA"
       ],
-      "rule": "Content G4 + Social autopublish \u2014 X discovery filler 1-2/day not counted in 6/day serious"
+      "rule": "G4 is the ONLY human approve (G5 removed 2026-10-31) \u2014 Buffer auto-schedules on G4. X discovery filler 1-2/day not counted in 6/day serious. /social = read-only analytics."
     },
     {
       "id": "wf5_demand_whop_chatfuel",
@@ -135,7 +139,7 @@
       "nodes": [
         "Cron Sun 09:00 -> Postgres SELECT Whop memberships new, Buffer analytics top views, Neon streaks, user_vault wins -> Claude summary WWS deck: 12 wins $340 new, @wolf_ke $90 with Agent",
         "HTTP OpusClip per-clip auto fine-tune proof screenshot -> Drive HQ proofs/ + Postgres proof_queue \u2014 uses finish only, needs OpusClip virality source",
-        "Vercel /social Buffer Team auto queue proof clip Tue/Fri 18:00 -> Chatfuel DM proof to inactive 3d -> ManyChat 8ch WWS announcement Whop Announcements",
+        "Vercel /social read-only -> Buffer auto queue proof clip Tue/Fri 18:00 -> Chatfuel DM proof to inactive 3d -> ManyChat 8ch WWS announcement Whop Announcements",
         "Cron 05:45 daily -> Buffer analytics top 3 views -> Postgres leaderboard -> Telegram + Whop Chat all pods: Top today @psych_mind 12k #2 you 4k Pod Red 28 vs Blue 22 keep streak?",
         "Webhook member win submit -> Verify via Whop API + screen -> Neon wins table -> Queue Fri proof clip -> Leaderboard +1",
         "Pod auto-assign on join: ManyChat assigns 5-pod via Whop Chat app -> Postgres pods(pod_id,user_id,streak)",
@@ -149,9 +153,9 @@
     "DATABASE_URL Neon free",
     "CLAUDE_API_KEY Claude Pro/Max main brain",
     "GROK_API_KEY xAI Grok speciality",
-    "STICKMAN_REPO kaomei/stickman-video-director free GitHub open-source for Shorts (no API key, git clone free, $0)",
-    "HIGGSFIELD_API_KEY $0.08/clip short-form polish only (improve final Shorts, not LUT/watermark) \u2014 WF3 short-form final",
-    "TUBEGEN_API_KEY 2h $29/mo OR WAN_T4_URL free Colab fallback \u2014  cannot replace engine",
+    "STICKMAN_REPO kaomei/stickman-video-director free GitHub \u2014 PRIMARY engine for ALL pages (longform + shorts), no API key, git clone $0",
+    "HIGGSFIELD_API_KEY $0.08/clip polish \u2014 cleans BOTH longform 30m AND every short before Buffer (not LUT/watermark)",
+    "TUBEGEN_API_KEY $29/mo OPTIONAL \u2014 fallback only if stickman render fails (2026-10-31 answer)",
     "OPUSCLIP_API_KEY $15/mo free tier fallback \u2014  cannot clip",
     "BUFFER_TOKEN Team $12/channel approval unlimited \u2014 Publisher fallback if missing",
     "WHOP_API_KEY 27+9+79+19 ladder + WHOP_PRODUCT_LITE_ID / PRO_ID for entitlement lib/entitlement.ts",
@@ -164,7 +168,7 @@
     "R2 $5/mo backup",
     "LINEAR_API_KEY SHA"
   ],
-  "total_cost": "MVP 1 domain WWS+Retention+Entitlement: Vercel $0 + Neon $0 + n8n $20 + Claude $20 + Grok $16 + Wan T4 free + OpusClip free + Buffer Free 3ch = $56/mo \u2014 direct publish + Higgsfield short-form polish \u2192 scale 5 domains: +TubeGen $29 + OpusClip $15 + Buffer Team $60 = $189/mo incl Higgsfield $29 short-form polish \u2014 3 Whop sales $81 covers MVP, 7 sales $189 covers scale",
+  "total_cost": "MVP 1 page: Vercel $0 + Neon $0 + n8n $20 + Claude $20 + Grok $16 + stickman free $0 + OpusClip free + Buffer Free 3ch = $56-61/mo \u2192 SCALE 5 pages: +OpusClip $15 + Higgsfield $29 (longform+shorts polish) + Buffer Team $60 = $160/mo incl stickman $0 engine (TubeGen $29 fallback only) \u2014 3 Whop sales $81 covers MVP, 6 sales $162 covers scale",
   "next_step": "n8n Cloud Import this JSON -> add WHOP_API_KEY + WHOP_PRODUCT_LITE_ID/PRO_ID + WISE_API_KEY -> Vercel env same + set Whop webhooks membership_cancelled/payment_failed -> test /api/entitlement?whop_user_id=xxx -> WF8 retention save",
-  "self_only": "3-man core self-only scalable 5 domains \u2014 Page1 Stickman Finance (stickman-video-director free Shorts) + Other niches (TubeGen/Wan longform) \u2014 OpusClip virality + Higgsfield short-form final polish + character lock (one prompt/one frame) \u2014 cloud free GitHub+Vercel Hobby+Neon free"
+  "self_only": "3-man core self-only scalable 5 domains \u2014 ALL pages Stickman Finance-style stickman free engine (kaomei/stickman-video-director) 30m longform + Shorts \u2192 OpusClip virality 9.2 \u2192 Higgsfield polish longform+shorts \u2192 character lock (one prompt/one frame) \u2014 G4 only (G5 removed) \u2014 cloud free GitHub+Vercel Hobby+Neon free"
 }

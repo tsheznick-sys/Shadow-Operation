@@ -8,8 +8,8 @@
 **Poster:** `docs/n8n_workflow_map.png` (3000px, 5 lanes + engine rail) · **ASCII map:** §1b · **Node tables:** §4
 **Source of truth:** `n8n/n8n_workflows_self_3man.json` · **App:** `jarvis-app` (11 pages, 9 API routes)
 **Workflows:** 10 entries = WF1, WF2, WF3, WF4, WF5, WF5A, WF6, WF7, WF8, WF9
-**Engine:** `both_engines` — Stickman Finance free Shorts (`kaomei/stickman-video-director`) + TubeGen $29 / Wan T4 free longform → OpusClip 9.2 virality → **Higgsfield short-form final polish $0.08/clip** → Buffer 6/day + X 1–2
-**Cost:** MVP **$61/mo** · SCALE 5 pages **$189/mo** (Higgsfield back for Shorts polish only — LUT/watermark stays removed)
+**Engine:** `stickman_all` — `kaomei/stickman-video-director` free renders **30m longform + Shorts on every page** → OpusClip 9.2 → **Higgsfield polish on longform AND shorts $0.08/clip** → Buffer 6/day + X 1–2 (TubeGen/Wan = fallback only)
+**Cost:** MVP **$61/mo** · SCALE 5 pages **$160/mo** (stickman $0 engine, TubeGen $29 fallback only, Higgsfield $29 longform+shorts polish, LUT/watermark stays removed)
 
 ---
 
@@ -239,7 +239,7 @@ gantt
 ## 4. WORKFLOW-BY-WORKFLOW (node level)
 
 ### WF1 — Research Best Monetizable Weekly
-**Role:** Content G4 · **Trigger:** ⏰ `0 8 * * 1` (Mon 08:00 EAT) · **id:** `wf1_research_grok`
+**Role:** Content G4 · **Trigger:** ⏰ `0 8 * * *` (**DAILY** 08:00 EAT per 2026-10-31 answer) · **id:** `wf1_research_grok`
 
 | # | Node (n8n type) | What it does | 🔑 env / config | 🗄 |
 |---|---|---|---|---|

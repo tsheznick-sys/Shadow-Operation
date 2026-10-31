@@ -31,7 +31,7 @@ On first run if CLAUDE_API_KEY missing → run bash jarvis-app/scripts/setup_cla
 
 Flow: X discovery 1-2 filler → WF1 Grok Mon 08:00 top5 buyer_pool_x3 ratio<50 ER 3%+ from config/adaptable.json niches pool (Psychology/Dark Psych/Marketing History/Mindset/Wolf/Consumerism/Self-Improvement/Finance Behavior 1000 niches data/creator_db_faceless_1000_FINAL.csv) → WF2 02:00 6 scripts/domain Claude → Engine 30m p01_32s_9x16.mp4 Katana queue70 → WF3 OpusClip+Higgsfield per-clip → WF4 G4 queue38 → Buffer 6/day serious + X 1-2 discovery → WF5 09:00 demand PASS 1%+25 on IG/TikTok/YT only X ignored → Whop vault auto → Chatfuel IG&TK+Manychat YT 8ch → WF6 05:45 brief + leak→expand daily 05:45 operator_context → WF7 Jive Vesper 3 legs parallel Africa $0.06→Twilio $0.22 Whisper → WF8/WF9 retention/proof.
 
-Costs: MVP $61/mo 1 brand (Wan free+OpusClip free) → SCALE $189/mo 5 brands pocket Year1 $2,328 (till Net $1K/mo for 3 bros 30/20/50 → 100K gross). Annual prepaid saves $336-708 (n8n annual 20% off, TubeGen 6-mo $119, Buffer $10/ch). 3 sales $81 covers MVP, 7 sales $189 covers SCALE.
+Costs: MVP $61/mo 1 brand (Wan free+OpusClip free) → SCALE $160/mo 5 brands pocket Year1 $2,328 (till Net $1K/mo for 3 bros 30/20/50 → 100K gross). Annual prepaid saves $336-708 (n8n annual 20% off, TubeGen 6-mo $119, Buffer $10/ch). 3 sales $81 covers MVP, 7 sales $189 covers SCALE.
 
 Pages: 1 Page=1 YT brand (its TT+IG+Shorts) via Buffer 15 endpoints — PAGES_COUNT env any N. Platforms PLATFORMS=X,IG,TikTok,YT adaptable, X_mode=discovery only.
 
