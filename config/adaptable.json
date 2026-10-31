@@ -5,7 +5,7 @@
     "created": "2026-10-30",
     "branch": "arena/6c47af3d-shadow-operation",
     "status": "pr_open",
-    "updated": "2026-10-31 Round3: churn alert 2.0% \u00b7 3 seats with auth + deep interview \u00b7 autopay HELD until owner grants \u00b7 community self-funding at 40 members \u00b7 pods 5 \u00b7 daily leak / weekly expand kept"
+    "updated": "2026-10-31 Round4: 18 questions per seat \u00b7 Google OAuth + 2FA on money \u00b7 autonomy matrix (80-90% operation, money capped) \u00b7 prizes $750 floor 51 \u00b7 demand test replaces follower gate"
   },
   "niches": {
     "strategy": "Grok weekly re-rank via WF1, not hardcoded",
@@ -112,9 +112,10 @@
       ],
       "asset_gen": "Higgsfield renders each slide in the page operation style \u2014 stickman character lock, 1080x1350 feed / 1080x1920 story",
       "publish": "R2 upload -> G4 once per cycle in /content -> Buffer (IG carousel + TikTok, gated)",
-      "follower_gate": "IG >= 1000 AND TikTok >= 1000 before Buffer publishes; trigger all 3 when both land; one-platform-only starts alone",
+      "follower_gate": "removed 2026-10-31 \u2014 metrics qualify, not follower count",
       "demand_test": "3-slide carousel in Stories only, read after 72h \u2014 50+ comments GREEN, 25-49 AMBER, <25 RED hold",
-      "docs": "docs/GROWTH_OPERATOR_14DAY_SEQUENCE.md"
+      "docs": "docs/GROWTH_OPERATOR_14DAY_SEQUENCE.md",
+      "gate": "DEMAND-TEST GATE (replaces follower count): run the 3-slide carousel in Stories, read at 72h \u2014 50+ comments = PASS -> proceed with the full sequence immediately; 25-49 = AMBER -> warm up and retest; <25 = RED -> hold. Scans update the DB every cycle."
     }
   },
   "conversion": {
@@ -201,7 +202,7 @@
       "content": "content@shadow.local \u2014 G4, scripts, character lock",
       "social": "info.wolf@gmail.com \u2014 DMs, Buffer, sequences"
     },
-    "auth": "HMAC-SHA256 signed cookie (shadow_session, 7d, httpOnly) \u2014 env-seeded seats, edge middleware gate, timing-safe compare",
+    "auth": "Google OAuth via next-auth (only the 3 seeded emails may sign in) + email/password fallback; 6-digit 2FA required on /money and /admin; HMAC-SHA256 shadow_session cookie, edge middleware role gate",
     "permissions": {
       "owner": "*",
       "content": [
@@ -226,28 +227,46 @@
         "/retention"
       ]
     },
-    "interview": "role-specific deep interview \u2014 12 questions owner / 12 content / 12 social, each with a 'why', min-length enforced, saves to Neon team_profiles",
+    "interview": "18 questions per seat (9 shared + 9 role) \u2014 each carries a 'why', min-length enforced, autosaves to Neon team_profiles; second-pass follow-ups can be added per seat",
     "digest": "WF12 weekly Mon 07:30 \u2014 completeness per seat; a seat under 60% does not get unsupervised authority",
-    "docs": "docs/TEAM_ONBOARDING_AUTH.md"
+    "docs": "docs/TEAM_ONBOARDING_AUTH.md",
+    "autonomy": {
+      "target": "80-90% of the operation autonomous",
+      "matrix": {
+        "research": 95,
+        "render": 80,
+        "clip_polish": 90,
+        "publish": 70,
+        "dm_green": 75,
+        "sequence": 85,
+        "retention": 90,
+        "money": 40,
+        "voice": 60
+      },
+      "rule": "money never recommended above 40% (prepare + approve); publish stays 70% until 30 clean G4 approvals",
+      "env": "AUTONOMY_<LANE> overrides any lane, clamped to its floor",
+      "docs": "docs/AUTONOMY_MATRIX.md"
+    }
   },
   "community_funding": {
     "model": "self-funding \u2014 Circle carries tools first, then prizes, then annual fund, then reserve",
     "circle_price": 19,
     "tools_monthly": 165,
-    "prize_target": 500,
+    "prize_target": 750,
     "annual_bills": 1596,
     "annual_fund_per_month": 133,
-    "break_even_members": 35,
-    "recommended_members": 40,
+    "break_even_members": 48,
+    "recommended_members": 51,
     "order": [
       "tools",
       "prizes",
       "annual_fund",
       "reserve"
     ],
-    "prize_rule": "prize pool = max(0, circle revenue - tools), cap 500 \u2014 scales with members, never a fixed promise",
+    "prize_rule": "prize pool = max(0, circle revenue - tools), cap 750 \u2014 scales with members, never a fixed promise",
     "ledger": "Neon funding_ledger",
-    "docs": "docs/COMMUNITY_FUNDING_MODEL.md"
+    "docs": "docs/COMMUNITY_FUNDING_MODEL.md",
+    "decide_from_data": "final floor locked from 60 days of real churn + conversion data, not from a model"
   },
   "autopay": {
     "state_default": "not_granted",

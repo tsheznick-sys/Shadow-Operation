@@ -21,8 +21,8 @@ export const ROLE_LABEL: Record<Role, string> = {
 // What each role may touch. Kept here so middleware and pages agree.
 export const ROLE_ROUTES: Record<Role, string[]> = {
   owner: ["*"],
-  content: ["/content", "/pods", "/onboarding", "/team", "/money", "/drafts", "/jarvis", "/n8n"],
-  social: ["/social", "/pods", "/onboarding", "/team", "/money", "/drafts", "/jarvis", "/n8n", "/retention"],
+  content: ["/content", "/pods", "/onboarding", "/team", "/money", "/drafts", "/jarvis", "/n8n", "/autonomy"],
+  social: ["/social", "/pods", "/onboarding", "/team", "/money", "/drafts", "/jarvis", "/n8n", "/retention", "/autonomy"],
 };
 
 type SeedUser = { email: string; password: string; name: string; role: Role };

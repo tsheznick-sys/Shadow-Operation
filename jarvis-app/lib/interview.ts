@@ -36,6 +36,48 @@ export const COMMON: Question[] = [
     type: "long",
     minLength: 15,
   },
+  {
+    id: "best_post",
+    prompt: "Describe your best-performing post ever — what it was about, the hook, and why you think it worked.",
+    why: "Becomes the reference pattern Jarvis matches new ideas against before writing.",
+    type: "long",
+    minLength: 25,
+  },
+  {
+    id: "never_post",
+    prompt: "What would you never put on the channel, even if it would go viral?",
+    why: "A hard boundary list — Jarvis blocks these before you ever see a draft.",
+    type: "long",
+    minLength: 15,
+  },
+  {
+    id: "competitor",
+    prompt: "Name one channel you admire and say exactly what they do better than us.",
+    why: "Sets the benchmarking target for monthly reviews and A/B tests.",
+    type: "long",
+    minLength: 20,
+  },
+  {
+    id: "bad_week",
+    prompt: "When a week goes badly — low views, no sales — what do you want Jarvis to do first?",
+    why: "Defines the triage order instead of panic-reacting.",
+    type: "long",
+    minLength: 20,
+  },
+  {
+    id: "hours_reality",
+    prompt: "How many hours a week can you realistically give this, and which days?",
+    why: "Caps what Jarvis schedules around you so plans stop assuming time you don't have.",
+    type: "text",
+    minLength: 10,
+  },
+  {
+    id: "definition_done",
+    prompt: "How do you personally know a piece of content is finished — not perfect, finished?",
+    why: "Stops endless revision loops in G4.",
+    type: "long",
+    minLength: 20,
+  },
 ];
 
 export const BY_ROLE: Record<Role, Question[]> = {

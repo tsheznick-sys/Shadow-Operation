@@ -1,5 +1,5 @@
 {
-  "name": "Jarvis SELF 3-Man Content Jarvis - 13 Workflows (content + demand + 3-seat auth/interview + monthly sequence + funding)",
+  "name": "Jarvis SELF 3-Man Content Jarvis - 13 Workflows (auth+interview, autonomy matrix, monthly sequence, self-funding)",
   "workflows": [
     {
       "id": "wf1_research_grok",
@@ -164,23 +164,24 @@
         "Higgsfield: render every slide in page operation style \u2014 stickman character lock, 1080x1350 feed + 1080x1920 story, no watermark, no LUT",
         "R2 upload (canonical, off Drive) -> Postgres INSERT sequence_assets (cycle, day, phase, url, prompt_hash)",
         "Vercel /content: Content G4 approves ONCE per cycle (not per slide) -> status cycle_approved",
-        "IF follower gate open (WF11: IG>=1000 AND TikTok>=1000) -> Buffer schedule IG carousel + TikTok; else queue until gate opens",
+        "IF WF11 demand gate PASS (50+ comments at 72h) -> Buffer schedules the full 14-day sequence; AMBER warms up, RED holds",
         "Telegram/Signal/Gmail all 3: cycle built, slide count, G4 pending, follower headroom on each platform"
       ],
       "rule": "Book-faithful: warm-up never skipped, Stories only, 3-slide demand test read at 72h (50/25 bar), no invented testimonials"
     },
     {
-      "id": "wf11_follower_gate",
-      "name": "WF11 - Follower Gate 1K (IG + TikTok) -> unlock monthly sequence + alert all 3",
-      "trigger": "cron 30 6 * * * (daily 06:30 EAT)",
+      "id": "wf11_demand_gate",
+      "name": "WF11 - Demand-Test Gate (3-slide Stories, 72h) -> qualify the sequence, not follower count",
+      "trigger": "after each cycle's 3-slide test + cron 30 6 * * * refresh",
       "nodes": [
-        "HTTP IG Graph API + TikTok API -> followers_current, followers_delta_7d",
-        "IF IG >= {{$env.FOLLOWER_GATE_IG || 1000}} AND TikTok >= {{$env.FOLLOWER_GATE_TIKTOK || 1000}} -> unlock WF10 cycle for Buffer",
-        "IF only one platform cleared -> publish that platform alone, keep other queued (never block both)",
-        "Telegram + Signal + Gmail all 3: 1K reached on IG and TikTok \u2014 sequence unlocked, cycle live",
-        "Postgres UPDATE follower_gate (platform, followers, unlocked_at) + daily headroom line in 05:45 brief"
+        "Read the 3-slide Stories carousel result at 72h (Stories only \u2014 never a feed post)",
+        "IF comments >= {{$env.THRESHOLD_DEMAND_GREEN || 50}} -> PASS -> unlock the full 14-day sequence to Buffer immediately",
+        "IF {{$env.THRESHOLD_DEMAND_AMBER || 25}}-49 -> AMBER -> warm-up content for 7 days then retest",
+        "IF < {{$env.THRESHOLD_DEMAND_AMBER || 25}} -> RED -> hold, keep publishing organic, no sequence",
+        "Write demand_gate (cycle, comments, verdict, checked_at) + Telegram/Signal/Gmail all 3",
+        "Scans update the DB: IG/TikTok/YT metrics refreshed so the next verdict uses live numbers"
       ],
-      "rule": "TikTok and IG start only after 1K followers on both (owner 2026-10-31) \u2014 triggers all 3 the moment it lands"
+      "rule": "Metrics qualify the sequence, not follower count (owner 2026-10-31) \u2014 50 / 25 / <25 bar from the Growth Operator book"
     },
     {
       "id": "wf12_team_interview",

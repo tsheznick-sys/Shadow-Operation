@@ -140,7 +140,7 @@ def arrow(x1, y1, x2, y2, color=(76, 94, 116), width=3, head=11):
 d.text((40, 28), "JARVIS — n8n WORKFLOW MAP", font=F_TITLE, fill=TEXT)
 d.text(
     (40, 92),
-    "13 workflows · 3-seat auth + deep interview · stickman_all on 5 pages · monthly 14-day sequence · self-funding community",
+    "13 workflows · Google OAuth + 2FA · 18-question interviews · autonomy matrix (80% overall) · stickman_all · self-funding community",
     font=F_SUB,
     fill=MUTED,
 )
@@ -204,7 +204,7 @@ LANES = [
     {
         "label": "2 · DEMAND + MONEY",
         "color": C_AMBER,
-        "note": "fed by WF4 reach · 09:00 gate + comment hooks · GREEN same-day / AMBER monthly 14-day · IG+TikTok wait for 1K",
+        "note": "fed by WF4 reach · 09:00 gate + comment hooks · GREEN same-day / AMBER monthly 14-day · sequence runs on a 72h demand test",
         "width": 431,
         "boxes": [
             ("WF5", "GREEN Demand Gate", "cron 09:00 + comment hooks",
@@ -235,13 +235,13 @@ LANES = [
               "Revenue -> revenue_log -> funding_ledger",
               "Jarvis proposes ladder changes from live market data"],
              "9 members cover tools · 40 self-fund", C_GREEN),
-            ("WF11", "Follower Gate 1K", "cron daily 06:30",
-             ["IG + TikTok followers checked every morning",
-              "Both >= 1000 -> unlock monthly sequence to Buffer",
-              "One platform only -> that one starts alone",
-              "Alert all 3: Telegram + Signal + Gmail",
-              "Writes follower_gate + headroom in 05:45 brief"],
-             "gate on IG & TikTok only", C_BLUE),
+            ("WF11", "Demand-Test Gate", "72h after the 3-slide test",
+             ["3-slide carousel in Stories only — never a feed post",
+              "50+ comments = PASS -> full sequence runs immediately",
+              "25-49 AMBER -> warm up 7 days then retest",
+              "<25 RED -> hold, keep organic, no sequence",
+              "Scans refresh IG/TikTok/YT so the verdict uses live data"],
+             "metrics qualify, not follower count", C_BLUE),
         ],
     },
     {
@@ -351,13 +351,13 @@ LANES = [
         "width": 542,
         "boxes": [
             ("AUTH", "3 seats + login", "/login · signed cookie 7d",
-             ["Owner / Content / Social — one email each, password in env",
-              "HMAC-SHA256 cookie · timing-safe compare · no user enumeration",
+             ["Google OAuth (only the 3 seeded emails) + password fallback",
+              "6-digit 2FA on /money and /admin · HMAC cookie, timing-safe compare",
               "Edge middleware gate: a seat only reaches its own lanes",
               "Owner-only: /admin + payments authority"],
              "blocks every protected route", C_PINK),
-            ("INTERVIEW", "Deep interview", "/onboarding · autosaves",
-             ["12 questions per seat — every one carries a 'why'",
+            ("INTERVIEW", "Deep interview", "/onboarding · 18 per seat",
+             ["18 questions per seat — every one carries a 'why'",
               "Answers under min-length do not count as answered",
               "Saves to Neon team_profiles (memory fallback)",
               "Content -> WF3/WF4 · Social -> WF5 · Owner -> WF8/WF10"],
@@ -369,8 +369,8 @@ LANES = [
               "Owner sees who is actually briefed"],
              "replaces asking you the same questions twice", C_BLUE),
             ("FUNDING", "/money", "self-funding model",
-             ["Circle $19: tools $165 first, prizes to $500, annual fund $133",
-              "Floor 35 · recommended 40 members · reserve 12.5%",
+             ["Circle $19: tools $165 first, prizes to $750, annual fund $133",
+              "Break-even 48 · recommended 51 members · reserve 12.5%",
               "Prize pool scales with revenue — never a fixed promise",
               "Payments HELD until owner grants; grant is audited"],
              "9 members = lights on · 40 = self-funding", C_GREEN),
@@ -452,7 +452,8 @@ def rail(bg, bottom):
         ("BUFFER_SERIOUS_DAILY", "6 / day"),
         ("BUFFER_X_DAILY", "2 / day"),
         ("CHURN_ALERT_PCT", "2.0 %"),
-        ("FOLLOWER_GATE IG/TK", "1000"),
+        ("THRESHOLD_DEMAND_GREEN", "50"),
+        ("THRESHOLD_DEMAND_AMBER", "25"),
     ]:
         kv(k, v)
 
@@ -472,14 +473,25 @@ def rail(bg, bottom):
         d.text((RX + 34, ry), "▸  " + t, font=font(13), fill=MUTED)
         ry += 24
     ry += 8
-    d.text((RX + 34, ry), "12 questions each · min-length", font=font(12, mono=True), fill=DIM)
+    d.text((RX + 34, ry), "18 questions each · min-length", font=font(12, mono=True), fill=DIM)
     ry += 22
     d.text((RX + 34, ry), "under 60% = no unsupervised run", font=font(12, mono=True), fill=DIM)
     ry += 22
 
     section("FUNDING (SELF)")
-    for k, v in [("Circle price", "$19"), ("Tools / mo", "$165"), ("Prize cap", "$500"), ("Annual fund", "$133 / mo"), ("Break-even", "35 members"), ("Recommended", "40 members")]:
+    for k, v in [("Circle price", "$19"), ("Tools / mo", "$165"), ("Prize cap", "$750"), ("Annual fund", "$133 / mo"), ("Break-even", "48 members"), ("Recommended", "51 members")]:
         kv(k, v, vcol=C_GREEN)
+
+    section("AUTONOMY (RECOMMENDED)")
+    for k, v in [
+        ("research", "95%"), ("clip + polish", "90%"), ("retention", "90%"),
+        ("sequence", "85%"), ("render", "80%"), ("GREEN DMs", "75%"),
+        ("publish", "70%"), ("voice", "60%"), ("money", "40%"),
+    ]:
+        kv(k, v, vcol=C_TEAL)
+    ry += 6
+    d.text((RX + 34, ry), "overall 80% · money excluded", font=font(12, mono=True), fill=DIM)
+    ry += 26
 
     section("FAILOVER PATHS")
     for k, v in [

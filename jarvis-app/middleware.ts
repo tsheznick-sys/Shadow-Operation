@@ -2,12 +2,12 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // Edge-safe HMAC verify (WebCrypto) — mirrors lib/auth.ts without node:crypto.
-const PROTECTED = ["/team", "/money", "/onboarding", "/content", "/social", "/admin", "/retention", "/pods", "/drafts"];
+const PROTECTED = ["/team", "/money", "/onboarding", "/content", "/social", "/admin", "/retention", "/pods", "/drafts", "/autonomy"];
 
 const ROLE_ROUTES: Record<string, string[]> = {
   owner: ["*"],
-  content: ["/content", "/pods", "/onboarding", "/team", "/money", "/drafts", "/jarvis", "/n8n"],
-  social: ["/social", "/pods", "/onboarding", "/team", "/money", "/drafts", "/jarvis", "/n8n", "/retention"],
+  content: ["/content", "/pods", "/onboarding", "/team", "/money", "/drafts", "/jarvis", "/n8n", "/autonomy"],
+  social: ["/social", "/pods", "/onboarding", "/team", "/money", "/drafts", "/jarvis", "/n8n", "/retention", "/autonomy"],
 };
 
 function b64urlToBytes(s: string): Uint8Array<ArrayBuffer> {
@@ -72,5 +72,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/team/:path*", "/money/:path*", "/onboarding/:path*", "/content/:path*", "/social/:path*", "/admin/:path*", "/retention/:path*", "/pods/:path*", "/drafts/:path*"],
+  matcher: ["/team/:path*", "/money/:path*", "/onboarding/:path*", "/content/:path*", "/social/:path*", "/admin/:path*", "/retention/:path*", "/pods/:path*", "/drafts/:path*", "/autonomy/:path*"],
 };
