@@ -31,11 +31,13 @@ Why first: in production the app refuses to boot without it, by design.
 
 1. https://whop.com/dashboard → Communities → New (if it does not exist).
 2. Products → New, three times: **Circle $44/mo**, **Pro $53/mo**, **Team $62/mo · 3 seats**. Exact prices; the code validates the tier against config.
-3. Copy each `prod_…` id → `WHOP_PRODUCT_CIRCLE_ID`, `WHOP_PRODUCT_PRO_ID`, `WHOP_PRODUCT_TEAM_ID`.
+3. Copy each `prod_…` id → `WHOP_PRODUCT_CIRCLE_ID` ($44), `WHOP_PRODUCT_PRO_ID` ($53), `WHOP_PRODUCT_TEAM_ID` ($62). These three are the only ids the agent tiers resolve from — a member whose product matches none of them is recorded as FREE.
 4. Settings → Developer → API keys → Create (shown once) → `WHOP_API_KEY`.
 5. Developer → Webhooks → Add endpoint: `https://YOUR-DOMAIN/api/whop/webhook`, events `membership_created`, `membership_cancelled`, `membership_deactivated`, `payment_succeeded`, `payment_failed`.
 6. Copy the signing secret → `WHOP_WEBHOOK_SECRET`.
 7. Send a test event. Expected `{"ok":true,…}`. `signature` = wrong secret; `not configured` = the variable did not save.
+
+> **The three tiers are Circle $44 / Pro $53 / Team $62 — one Whop product each.** A member whose product matches none of the three is recorded as **FREE**, deliberately: an unknown product must never be guessed into paid access. The one-time ladder (First Shot $28, Lite $17, GOOD $35, BETTER $89) is a separate set of products and grants **no recurring agent access**.
 
 > This is the step that matters most. Before the webhook existed a member could pay $44 and nothing happened — no tier, no vault, no access.
 
@@ -86,7 +88,7 @@ Without these the agent opens but cannot write a script.
 | `CRON_SECRET` | you invent it | Vercel Cron sends it as a Bearer |
 | `WHOP_API_KEY` | Whop → Developer | shown once |
 | `WHOP_WEBHOOK_SECRET` | Whop → Webhooks | verifies every event |
-| `WHOP_PRODUCT_CIRCLE_ID` / `_PRO_` / `_TEAM_` | Whop → Products | `prod_…` |
+| `WHOP_PRODUCT_CIRCLE_ID` ($44) / `_PRO_ID` ($53) / `_TEAM_ID` ($62) | Whop → Products | `prod_…` — the only three the agent tiers resolve from |
 | `CLAUDE_API_KEY` | console.anthropic.com | scripts |
 | `GROK_API_KEY` | console.x.ai | daily scan |
 | `HIGGSFIELD_KEY_ID` / `_KEY_SECRET` | console.higgsfield.ai | render |

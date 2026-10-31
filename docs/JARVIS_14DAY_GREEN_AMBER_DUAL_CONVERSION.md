@@ -41,7 +41,7 @@ else -> RED -> goto §3 improve loop
   - IG & TikTok → **ChatFuel** auto-DM `VAULT` keyword within 2 min: “Proof = your demand test 1%+25. Want 1-page teardown? Reply YES → `FINAL TERMS` 10 pts”
   - YT → **ManyChat YT** auto-DM ( ChatFuel cannot YT) same copy → fallback Gmail DM if both fail
 - **Conversion:** Shadow hard-close pattern **3-email cap → FINAL TERMS one-pager 10 points, sign only after PASS** — DMs send Whop $27/$79 link **same day** (no free audit before YES per Hard Rule 2, build_audit_now Anu exception only). No 14-day.
-- **Whop:** Auto-create `Whop Vault $27+$9+$79+$19/mo` on PASS `replies>=max(25, ceil(views*0.01))` via `WHOP_API_KEY` → ManyChat 8ch push → Gmail `Sir PASS`
+- **Whop:** Auto-create `Whop Vault $28+$17+$35+$89+$44+$53+$62/mo` on PASS `replies>=max(25, ceil(views*0.01))` via `WHOP_API_KEY` → ManyChat 8ch push → Gmail `Sir PASS`
 
 ### 2B) 14-day system = Nurture (AMBER)
 

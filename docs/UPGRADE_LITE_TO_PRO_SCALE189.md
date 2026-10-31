@@ -16,7 +16,7 @@
 ### Upgrade Lite→Pro wired (entitlement)
 
 1. Lite member sees: Leaderboard `Pod Red Sarah 12k views` badge `Stack: Higgsfield Pro + OpusClip 9.2` + CTA `Upgrade to BEST $29/mo — same stack auto?` (in `/retention` + `/pods` + Jarvis DM).
-2. Click → `POST /api/whop/upgrade {user_id, from: WHOP_PRODUCT_LITE_ID, to: WHOP_PRODUCT_PRO_ID}` → Whop `change_plan` API via `WHOP_API_KEY`.
+2. Click → `POST /api/whop/upgrade {whopUserId, fromTier:'circle', toTier:'pro'}` → the route resolves both ids through `lib/tiers.ts` (`WHOP_PRODUCT_CIRCLE_ID` → `WHOP_PRODUCT_PRO_ID`) and calls Whop `change_plan` (v1) with `WHOP_API_KEY`. Owner-only, rate-limited, audited.
 3. Webhook `membership_changed` → n8n WF8 `pro_ascension` branch: `UPDATE user_vault tier=pro` → `INSERT retention_events action=upgrade_lite_to_pro` → Telegram `Sir Lite→Pro $29 ascension @sarah pod Red`.
 4. `lib/entitlement.ts` now returns `tier=pro` → `tierLimits() = {runs:9999, domains:5, clipsPerDay:6}` vs Lite `{runs:30, domains:1, clipsPerDay:3}`.
 

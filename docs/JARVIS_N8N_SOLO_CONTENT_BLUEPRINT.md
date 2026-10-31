@@ -12,7 +12,7 @@
 | Scope | Squad 3-5 all ops | **Solo + all niches custom domains** — you own all 1,462 GREEN niches as YOUR content pillars (not outreach) |
 | Content | Squad pipeline (VET→DRAFT→WHOP) | **Your content full-time: short 8s + long 32s/60s** (flow_pillow_wan), 6/day via Publisher queue38 |
 | Autonomy | Auto while sleep + human swipe | **Auto while sleep content** — n8n drafts 6 videos/captions overnight, you wake to G4 approve |
-| Whop | Auto Whop on PASS for creators | **Whop Vault auto on YOUR audience demand** — same 1%+25 gate (R10) but for your own 6/day views → $27+$9+$79+$19/mo ladder (you kept ladder_27_9_79_19) |
+| Whop | Auto Whop on PASS for creators | **Whop Vault auto on YOUR audience demand** — same 1%+25 gate (R10) but for your own 6/day views → $28+$17+$35+$89+$44+$53+$62/mo ladder (you kept ladder_27_9_79_19) |
 | ManyChat | Auto 8ch for creators | **Yes 8ch** (you kept yes_8ch) — solo DM flows to your Whop |
 | Brain | Cloud-only fast | **Hybrid later solo** — OpenAI gpt-4o-mini now ($30/mo), Ollama Beelink later when $10k/mo (your pick) |
 | Memory/Eyes | Forever + full vision | **Forever solo** + **Social Blade/HypeAuditor auto-research** → n8n ranks best performing + monetizable weekly → top 5 auto-rotate as domains |
@@ -41,7 +41,7 @@
 ### Scale (Week 2, add when needed)
 | Tool | Use | Cost |
 |---|---|---|
-| **Whop API** | Whop vault $27+$9+$79+$19/mo ladder auto on PASS (1%+25 of YOUR content views) | $0 + 13% Whop fee |
+| **Whop API** | Whop vault $28+$17+$35+$89+$44+$53+$62/mo ladder auto on PASS (1%+25 of YOUR content views) | $0 + 13% Whop fee |
 | **ManyChat** | 8ch DM flows → Whop | $15/mo |
 | **Apify/Social Blade** | n8n auto-research best monetizable → rank weekly | $49/mo (or manual 12-post check $0) |
 | **R2** | Daily backup Litestream→R2 | $5/mo |
@@ -52,7 +52,7 @@
 ---
 
 ## 2) SELF SUSTAINED LOOPS (both, your pick)
-**Money loop:** n8n makes 6/day → Publisher queue38 → G4 approve → 6/day live → views ×1%+25 → PASS → n8n auto-creates Whop vault $27+$9+$79+$19/mo → sales → pays n8n $20+OpenAI $30 → self funded.
+**Money loop:** n8n makes 6/day → Publisher queue38 → G4 approve → 6/day live → views ×1%+25 → PASS → n8n auto-creates Whop vault $28+$17+$35+$89+$44+$53+$62/mo → sales → pays n8n $20+OpenAI $30 → self funded.
 **Content loop:** Top video comments (buyer_pool_x3 logic repurposed for YOUR audience) → n8n scrapes comments → OpenAI extracts “next video idea from comments” → auto-queues next 6 → viral loop, no creator hunt.
 
 ---
@@ -84,7 +84,7 @@
 **Trigger A:** `publisher_queue38` status `pending_G4` → you approve via Telegram “Approve” button or n8n form → `approved` → HTTP Request Publisher API → 6/day IG+TikTok+YT live
 **Trigger B:** Cron `0 9 * * *` (09:00 EAT daily) — measure YOUR content demand (repurpose Omar R9-11 for yourself):
 1. HTTP Request IG/TikTok/YT analytics → views + replies for last 3 stories/posts
-2. IF `replies >= max(25, ceil(views*0.01))` → PASS → Whop node `Create Product` `Your Domain Official Vault` $27+$9+$79+$19/mo (ladder_27_9_79_19) + grant admin (you)
+2. IF `replies >= max(25, ceil(views*0.01))` → PASS → Whop node `Create Product` `Your Domain Official Vault` $28+$17+$35+$89+$44+$53+$62/mo (ladder_27_9_79_19) + grant admin (you)
 3. ManyChat node `Push Flow 8ch` → DM “Reply VAULT for 40 early” → Whop
 4. Gmail “Sir, PASS — 32 replies ≥ 28 needed (1% of 2,800 views) — Whop vault live — Vault Circle $19/mo” → you decide live (like Omar Sun 09:00)
 5. IF FAIL → log → content loop: OpenAI “Why FAIL? Next reframe?” → auto-queue next 6

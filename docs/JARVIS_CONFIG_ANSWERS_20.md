@@ -14,7 +14,7 @@
 7. Niche: **Ones we want to produce with my bro running Numinous** → Numinous 14-day Sequence v2 first (already in Drive)
 8. Content: **6/day** — Publisher queue38, G4 approve
 9. Outreach: **Manual Gate G4 swipe** — you approve each draft (Hard Rule 2 compliant)
-10. Upsell: **Full Ladder $27→$9→$79→$19/mo** — $40 blended
+10. Upsell: **Full Ladder $28→$17→$35→$89→$44→$53→$62/mo** — $40 blended
 11. Deliverability: **Strict** — 0% 550, Instantly warmup, auto-pause on 2x 550
 12. Backup: **Daily Litestream → R2 ($5/mo)**
 13. Personality: **Butler**

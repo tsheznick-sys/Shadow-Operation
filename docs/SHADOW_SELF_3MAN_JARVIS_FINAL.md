@@ -10,7 +10,7 @@
 
 | Person | Owns | G4 gate | Can SEND | Tools |
 |---|---|---|---|---|
-| **You — Admin** | Whole pipeline, monetization verdicts, agent upgrades, expansion top5, Whop ladder, money/SEND master | Feedback from all, no approval required — decides PASS/FAIL live Sun 09:00 (Omar precedent) | Yes — master SEND + money + sign one-pager | n8n Cloud $20 24/7 + Claude Max brain + Grok competitor research + Linear + Whop $27+$9+$79+$19 + R2 + Neon forever memory + Gmail scott.abuya@gmail.com |
+| **You — Admin** | Whole pipeline, monetization verdicts, agent upgrades, expansion top5, Whop ladder, money/SEND master | Feedback from all, no approval required — decides PASS/FAIL live Sun 09:00 (Omar precedent) | Yes — master SEND + money + sign one-pager | n8n Cloud $20 24/7 + Claude Max brain + Grok competitor research + Linear + Whop $28+$17+$35+$89+$44+$53+$62 + R2 + Neon forever memory + Gmail scott.abuya@gmail.com |
 | **Content guy** | Production pipeline — TubeGen 30min longform, OpusClip auto clipping, Higgsfield per-clip fine-tune, queue38 pending_G4, captions/hashtags SEO pack review | ✅ **G4 approvals queue38** — Approves OpusClip 8s/32s clips before Buffer queue (not scripts/renders) — tweaks captions/LUT then approve to Buffer | Yes equal 3 (your final lock equal_3_all) — can SEND after tweak | Flow wisely 8s/32s/60s + Pillow HD mock 0cr + Wan 1.3B T4 + TubeGen 2h + Higgsfield visuals API + n8n Code node + Drive HQ 17KpzZCm |
 | **Social manager** | Posting + analytics + DM automation — Buffer Team unlimited queue, Publisher queue38, one frontend dashboard, Chatfuel + ManyChat 8ch | ✅ **Posting approvals** — Approves Buffer queue autopublish after Jarvis SEO — reviews analytics single frontend (no per-platform) | Yes equal 3 — gives Jarvis approval to autopublish | Buffer Team $12/channel + Publisher queue38 + Social Blade/NotJustAnalytics/Picuki + Chatfuel + ManyChat 8ch + Telegram/Gmail Shadow Hot |
 
@@ -43,7 +43,7 @@ F. Publisher queue38 + Buffer queue pending_G4 → Content guy G4 approve queue3
    ↓
 G. Analytics back to n8n — Social manager sees ONE custom Vercel dashboard (no per-platform open) — Jarvis Agent running 24/7 in n8n feeds it
    ↓
-H. Chatfuel (social DM) + ManyChat (Whop funnel) — n8n Jarvis handles DM auto, social manager reviews in one-app → Whop vault $27+$9+$79+$19/mo ladder auto on YOUR audience demand
+H. Chatfuel (social DM) + ManyChat (Whop funnel) — n8n Jarvis handles DM auto, social manager reviews in one-app → Whop vault $28+$17+$35+$89+$44+$53+$62/mo ladder auto on YOUR audience demand
    ↓
 I. Monetization loop + Expansion — Admin owns monetization pages: scalable 5 domains template, own vaults, Grok speciality researches competitors (1000 faceless niches) → weekly top5 monetizable → next TubeGen
 ```
@@ -91,7 +91,7 @@ Trigger TubeGen finished webhook → OpusClip HTTP auto-clip 30min → 5-8×8s s
 Queue38 pending_G4 → Claude Max SEO pack per platform (IG hashtags vs TikTok hooks vs YT titles Social Blade ER keywords buyer_pool_x3) → Postgres UPDATE queue38 SEO → Content guy G4 approve queue38 in Vercel /content (swipe) → Social manager sees /social Buffer queue + analytics → gives Jarvis approval → Buffer API schedule 6/day per domain unlimited → Telegram “Sir, 6/day live via Buffer”
 
 ### WF5 — Demand → Whop Vault Auto + Chatfuel/ManyChat (09:00 daily)
-Cron 0 9 * * * → HTTP IG/TikTok/YT analytics views+replies last 3 posts → IF replies≥max(25, ceil(views*0.01)) PASS → Whop Create Product Vault $27+$9+$79+$19 ladder grant admin → Chatfuel Push DM + ManyChat 8ch → Gmail “Sir, PASS vault live — you decide live” → ELSE log FAIL → Claude Max “Why FAIL next reframe” → auto-queue next 6
+Cron 0 9 * * * → HTTP IG/TikTok/YT analytics views+replies last 3 posts → IF replies≥max(25, ceil(views*0.01)) PASS → Whop Create Product Vault $28+$17+$35+$89+$44+$53+$62 ladder grant admin → Chatfuel Push DM + ManyChat 8ch → Gmail “Sir, PASS vault live — you decide live” → ELSE log FAIL → Claude Max “Why FAIL next reframe” → auto-queue next 6
 
 ### WF6 — Brand Gmail + Daily Brief + Leak Finder (05:45 + 24/7)
 Gmail Trigger brand@* → Claude Max classify → Telegram “Sir brand deal inbound” | Cron 45 5 * * * Telegram+Gmail Shadow Hot+Signal all 3: “Sir, 6 live 2.1K views 18 replies 1 Whop $27 — n8n spent $1.20 Claude today” | Cron daily leak_finder → Telegram if queue38 stuck

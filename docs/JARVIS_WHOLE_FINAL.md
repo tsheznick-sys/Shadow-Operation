@@ -1,7 +1,7 @@
 # WHOLE JARVIS — Final Build (Full Squad Hybrid)
 **Branch `arena/6c47af3d-shadow-operation` `pr_open` | Revoked `8e59224` → Revived `jarvis-app/` + n8n | Date 2026-10-29 | 18/18 final locks**
 
-> Whole Jarvis = Vercel PWA Squad (3 bros, equal SEND, Vercel $20+Neon $19) + n8n Cloud $20 full-time content (6/day short 8s + long 32s/60s, Flow/Pillow/Wan, queue38, demand 1%+25→Whop $27+$9+$79+$19, 8ch) + Vercel embeds n8n monitor + Telegram/Gmail/Signal all 3 to squad + Butler text+mic+08:45 briefing + forever memory + Social Blade auto-research → top5 monetizable weekly → both self sustained loops (money+content) → stay n8n Cloud forever (no Beelink). 14-day full live. Zip full with assets + 1,462 GREEN data, delivered to workspace + Drive HQ.
+> Whole Jarvis = Vercel PWA Squad (3 bros, equal SEND, Vercel $20+Neon $19) + n8n Cloud $20 full-time content (6/day short 8s + long 32s/60s, Flow/Pillow/Wan, queue38, demand 1%+25→Whop $28+$17+$35+$89+$44+$53+$62, 8ch) + Vercel embeds n8n monitor + Telegram/Gmail/Signal all 3 to squad + Butler text+mic+08:45 briefing + forever memory + Social Blade auto-research → top5 monetizable weekly → both self sustained loops (money+content) → stay n8n Cloud forever (no Beelink). 14-day full live. Zip full with assets + 1,462 GREEN data, delivered to workspace + Drive HQ.
 
 ## Locks (18/18)
 - Scope **full_squad_jarvis**: Vercel PWA + n8n hybrid (not solo only)
@@ -35,7 +35,7 @@
 1. **n8n WF1 Research Mon 08:00:** Scans 1,462 GREEN pool via Social Blade/HypeAuditor → buyer_pool_x3/ratio/ER → GPT ranks top5 most monetizable → Telegram “Sir, Week 44 top5: Psych Hack 5.1% ER → approve?” → you approve → Postgres `solo_domains`
 2. **n8n WF2 Make 02:00 daily:** For top5 domains, OpenAI gpt-4o-mini writes 6 scripts (3×8s hook+value+CTA +2×32s +1×60s, Butler formal) → Flow 8s + Pillow HD mock 0cr + Wan T4 32s → ffmpeg Katana p01_32s_9x16→queue70 → Drive + `publisher_queue38` pending_G4 → Linear SHA → Telegram “Sir, 6 videos ready for G4”
 3. **Vercel / + /n8n:** Squad sees queue38 in Vercel (/ + /n8n embeds n8n executions) → 3 bros equal approve (you asked equal_all) → Telegram Approve button → Publisher API → 6/day IG+TikTok+YT live
-4. **n8n WF3 Demand→Whop 09:00:** IG/TikTok/YT analytics views+replies → if `replies>=max(25,ceil(views*0.01))` PASS (strict 1%+25 R10) → Whop Create Product Squad Vault $27+$9+$79+$19 ladder → ManyChat 8ch push → Gmail “Sir, PASS — vault live” → R9 no Whop before PASS kept
+4. **n8n WF3 Demand→Whop 09:00:** IG/TikTok/YT analytics views+replies → if `replies>=max(25,ceil(views*0.01))` PASS (strict 1%+25 R10) → Whop Create Product Squad Vault $28+$17+$35+$89+$44+$53+$62 ladder → ManyChat 8ch push → Gmail “Sir, PASS — vault live” → R9 no Whop before PASS kept
 5. **n8n WF4 Brand+Brief 05:45:** Gmail brand IMAP → classify → Telegram brand deal ping + daily brief “6 live, 2.1K views, 18 replies, 1 Whop $27” → all 3 channels to squad
 6. **Both loops self sustained:** Whop $27×20 sales $540 → funds n8n $20+OpenAI $30+Vercel $20 (money loop) + comments→next video ideas (content loop) → no creator hunt/60/40, Jarvis works full-time for squad
 

@@ -69,7 +69,7 @@
 |---|---|---|---|---|---|---|---|---|
 | 19 | **Chatfuel `CHATFUEL_TOKEN`** | **You picked both:** Chatfuel handles all DM automation (IG/TikTok) → n8n Jarvis handles DM auto, social reviews in one-app (repo `chatfuel-app/` Docker) | Social | **$15/mo Starter / $25/mo Growth** | **$180/yr / $300/yr** | $180 / $300 | monthly | **KEEP** (repo ready) |
 | 20 | **ManyChat `MANYCHAT_API_KEY`** | ManyChat 8ch Whop funnel → Whop vault ladder | n8n WF5 | **$15/mo Pro 500 contacts** | **$180/yr** | $180/yr | monthly | **KEEP** (both) |
-| 21 | **Whop `WHOP_API_KEY`** | Whop ladder $27+$9+$79+$19/mo per domain (your `ladder_27_9_79_19` lock) + grant admin — 3% fee only | Admin → n8n Whop node | **$0 + 3% fee** | **$0 + fees** | $0 + fees | per sale | KEEP |
+| 21 | **Whop `WHOP_API_KEY`** | Whop ladder $28+$17+$35+$89+$44+$53+$62/mo per domain (your `ladder_27_9_79_19` lock) + grant admin — 3% fee only | Admin → n8n Whop node | **$0 + 3% fee** | **$0 + fees** | $0 + fees | per sale | KEEP |
 | 22 | **Telegram `TELEGRAM_BOT_TOKEN`** | Telegram bot all 3 channels squad 3 (equal all lock) + daily 05:45 brief | n8n Telegram node | $0 free | $0 | $0 | — | KEEP |
 | 23 | **Signal `SIGNAL_API`** | Signal @scott.428 all 3 (optional) | n8n Signal | $0 free | $0 | $0 | — | KEEP |
 
@@ -131,7 +131,7 @@
 | Admin | TubeGen + OpusClip + Higgsfield | Content guy runs via n8n | $149+15+0-89/mo | 1st |
 | Admin | Buffer Team | Social manager unlimited queue + approval | $60/mo 5ch | 1st |
 | Admin | Claude Max + Grok | Admin owns brain + research | $36/mo | 1st |
-| Whop sales $27+$9+$79+$19 | Admin wallet | Ladder funds loops — **money loop** pays all above | 1-3 sales = MVP covered, 15 sales = SCALE full | per sale 3% Whop fee |
+| Whop sales $28+$17+$35+$89+$44+$53+$62 | Admin wallet | Ladder funds loops — **money loop** pays all above | 1-3 sales = MVP covered, 15 sales = SCALE full | per sale 3% Whop fee |
 
 **Equal SEND 3 lock:** All 3 can SEND (your `equal_3_all`) but **money = Admin only** — super-admin toggle (you) per `app/bros/page.tsx`.
 

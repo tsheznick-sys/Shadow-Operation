@@ -321,7 +321,7 @@ gantt
 | 2 | IF GREEN | `ratio < THRESHOLD_RATIO_GREEN` **and** `er >= THRESHOLD_ER_GREEN` **and** gate GREEN → GREEN; else AMBER check | `THRESHOLD_RATIO_GREEN=50` `THRESHOLD_ER_GREEN=5` | `creators` |
 | 3 | ChatFuel / ManyChat | Auto-DM `VAULT` keyword within **2 min** — ChatFuel IG & TikTok, ManyChat YT (ChatFuel cannot do YT) | `CHATFUEL_TOKEN` `MANYCHAT_API_KEY` | — |
 | 4 | Hard close | 3-email cap → **FINAL TERMS** one-pager 10 pts, sign only after PASS (no free audit, Rule 9) | `ADMIN_EMAIL` | — |
-| 5 | Whop API | Vault ladder `$28 + $17 + $35 + $89 + $53 + $44/mo`, grant to `scott.abuya@gmail.com` + `info.wolf@gmail.com`, Buffer Team | `WHOP_API_KEY` `WHOP_PRODUCT_LITE_ID` `WHOP_PRODUCT_PRO_ID` | `members` |
+| 5 | Whop API | Vault ladder `$28 + $17 + $35 + $89 + $53 + $44/mo`, grant to `scott.abuya@gmail.com` + `info.wolf@gmail.com`, Buffer Team | `WHOP_API_KEY` `WHOP_PRODUCT_CIRCLE_ID` `WHOP_PRODUCT_PRO_ID` `WHOP_PRODUCT_TEAM_ID` | `members` |
 | 6 | ChatFuel Push / ManyChat Push | 8 channels push → Jarvis DM auto, social manager reviews in one app | `CHATFUEL_TOKEN` `MANYCHAT_API_KEY` | — |
 | 7 | Gmail + Telegram | "Sir PASS — GREEN fast-close, vault live" to all 3 pods | `GMAIL_OAUTH` `TELEGRAM_BOT_TOKEN` | — |
 
@@ -509,7 +509,7 @@ Only **G4 + G5 + G6** require a human swipe; everything else is automatic.
 | Clip / polish | `OPUSCLIP_API_KEY`, `HIGGSFIELD_API_KEY`, `HIGGSFIELD_ENABLED` | WF3, WF9 |
 | Publish | `BUFFER_TOKEN`, `PLATFORMS`, `X_MODE`, `BUFFER_SERIOUS_DAILY`, `BUFFER_X_DAILY` | WF4, WF9 |
 | DM | `CHATFUEL_TOKEN`, `CHATFUEL_SCOPE`, `MANYCHAT_API_KEY` | WF5, WF5A, WF8, WF9 |
-| Money | `WHOP_API_KEY`, `WHOP_WEBHOOK`, `WHOP_PRODUCT_LITE_ID`, `WHOP_PRODUCT_PRO_ID`, `WISE_API_KEY`, `TIER_*` | WF5, WF8 |
+| Money | `WHOP_API_KEY`, `WHOP_WEBHOOK_SECRET`, `WHOP_PRODUCT_CIRCLE_ID`, `WHOP_PRODUCT_PRO_ID`, `WHOP_PRODUCT_TEAM_ID`, `WISE_API_KEY`, `TIER_*` | WF5, WF8 |
 | Thresholds | `THRESHOLD_RATIO_GREEN=50`, `THRESHOLD_ER_GREEN=5`, `THRESHOLD_RATIO_AMBER_MAX=70`, `THRESHOLD_ER_AMBER_MIN=3`, `THRESHOLD_BUYER_POOL_MIN=3000` | WF1, WF5, WF5A |
 | Niches | `NICHES_POOL` (7, Stickman first) | WF1, WF2, WF6 |
 | Notify | `TELEGRAM_BOT_TOKEN`, `SIGNAL_API`, `GMAIL_OAUTH`, `LINEAR_API_KEY` | all |

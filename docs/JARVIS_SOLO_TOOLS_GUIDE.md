@@ -55,7 +55,7 @@ Pick **ONE** "another software" host — all listed below work solo. Recommended
 ### D) Product / Launch (solo)
 | Tool | Use solo | Solo note |
 |---|---|---|
-| **Whop** | Auto-create vault on PASS (PremiereProTutos style $27+$9+$79+$19/mo) | `WHOP_API_KEY` → `whop.py` / Make scenario → grant admin on PASS |
+| **Whop** | Auto-create vault on PASS (PremiereProTutos style $28+$17+$35+$89+$44+$53+$62/mo) | `WHOP_API_KEY` → `whop.py` / Make scenario → grant admin on PASS |
 | **ManyChat** | 8ch DM flows | Push on Whop LIVE — solo owns all |
 | **Publisher queue38** | 6/day IG+TikTok+YT | `marketing/publisher/` → queue38 → G4 approve |
 | **Stripe (alt)** | If not Whop | Payouts — Whop preferred solo |

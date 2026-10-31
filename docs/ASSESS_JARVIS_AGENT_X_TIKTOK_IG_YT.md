@@ -34,7 +34,7 @@
 ## 4) Next Gaps Before Go-Live (none block Jarvis run)
 
 - Set `CHATFUEL_TOKEN` only for IG & TikTok channels in ChatFuel dashboard — delete X/YT connections — saves one ManyChat $15 → MVP $56 stays $56, scale $189→$174 if you drop ManyChat (you chose keep Both? — now ChatFuel only IG & TikTok, ManyChat optional $0* ≤1k fallback)
-- Confirm `WHOP_PRODUCT_LITE_ID/PRO_ID` map to `GOOD_BETTER_BEST` — already wired — test `/api/entitlement?whop_user_id=xxx`
+- Confirm `WHOP_PRODUCT_CIRCLE_ID/PRO_ID/TEAM_ID` map to $44/$53/$62 through `lib/tiers.ts` — test `/api/entitlement?whop_user_id=xxx`
 - Run `scripts/migrate.sql` once in Neon SQL Editor — auto-seeds 6 pods
 
 ## 5) Totals Unchanged (platform cut saves 0$ — same 4 Buffer channels $12/ch)

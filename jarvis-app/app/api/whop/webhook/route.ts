@@ -34,10 +34,13 @@ export async function POST(req: NextRequest) {
 
   try {
     if (plan.action === "upsert_member" && plan.tier) {
+      // watermark comes from the resolver, not from comparing the tier name to "free" —
+      // Lite $17 is a paid product whose watermark is off, and a string comparison would
+      // have branded a paying member's exports.
       await sql`
         INSERT INTO agent_members (id, tier, joined_via, watermark)
-        VALUES (${memberId}, ${plan.tier}, 'funnel', ${plan.tier === "free"})
-        ON CONFLICT (id) DO UPDATE SET tier = ${plan.tier}, watermark = ${plan.tier === "free"}
+        VALUES (${memberId}, ${plan.tier}, 'funnel', ${plan.watermark ?? true})
+        ON CONFLICT (id) DO UPDATE SET tier = ${plan.tier}, watermark = ${plan.watermark ?? true}
       `;
     }
     if (plan.action === "revoke_access") {

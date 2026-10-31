@@ -55,7 +55,7 @@ Jarvis message in /jarvis chat (any bro) -> Postgres messages
 
 | Caller phone | Voiceflow KB filtered view | What agent knows on call |
 |---|---|---|
-| **Owner (you, +254 Admin)** | **All things** - full pipeline 2026: Hard Rules 1-11, buyer_pool_x3, 1%+25 STRICT, Whop $27+$9+$79+$19 ladder, 1,462 GREEN, TubeGen 30m->OpusClip virality->Higgsfield LUT->Buffer Team $60 5ch, all 20 truly needed tools, payments totals MVP $60 SCALE $348-437 via Whop virtual card Wise $0 | Can ask anything, can authorize cross-role share on emergency |
+| **Owner (you, +254 Admin)** | **All things** - full pipeline 2026: Hard Rules 1-11, buyer_pool_x3, 1%+25 STRICT, Whop $28+$17+$35+$89+$44+$53+$62 ladder, 1,462 GREEN, TubeGen 30m->OpusClip virality->Higgsfield LUT->Buffer Team $60 5ch, all 20 truly needed tools, payments totals MVP $60 SCALE $348-437 via Whop virtual card Wise $0 | Can ask anything, can authorize cross-role share on emergency |
 | **Social manager** | **Account only** - Buffer Team queue + Publisher queue38 + Chatfuel+ManyChat 8ch + Social Blade ER + buyer_pool_x3 account-facing + analytics one-frontend only - cannot ask TubeGen scripts or Whop finance unless emergency shared | Emergency: if Owner says on feedback call share Content queue38, agent briefly shares |
 | **Content guy** | **Content only** - TubeGen 30m script, OpusClip 5-8 shorts virality, Higgsfield fine-tune LUT per clip, queue38 pending_G4, captions/hashtags SEO, publisher queue70 - cannot ask Whop sales unless emergency | Same emergency override via Owner |
 

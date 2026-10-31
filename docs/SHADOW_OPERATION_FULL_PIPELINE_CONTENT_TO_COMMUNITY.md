@@ -101,7 +101,9 @@
 
 ---
 
-## 4) PRODUCTS — Digital Ladder ($27 → $9 → $79 → $19/mo)
+## 4) PRODUCTS — Digital Ladder ($28 → $17 → $35 → $89 → $44 → $53 → $62)
+
+> **Superseded 2026-10-31.** The table below is the original plan and is kept only so the history is legible. The live ladder is: **First Shot $28** (14 days, no auto-charge) → **Lite $17** → **GOOD $35** → **BETTER $89** → **Circle $44/mo** → **Pro $53/mo** → **Team $62** (3 seats). The three recurring agent products are the last three, mapped in `jarvis-app/lib/tiers.ts`.
 
 **Goal:** 3 tiers + continuity → $40 blended net → 1M math works.
 

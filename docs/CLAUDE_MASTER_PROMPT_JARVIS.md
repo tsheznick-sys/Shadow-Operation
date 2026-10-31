@@ -25,7 +25,7 @@ GREEN ratio <THRESHOLD_RATIO_GREEN (50) + ER >=THRESHOLD_ER_GREEN (5%) + buyer_p
 AMBER ratio THRESHOLD_RATIO_GREEN-THRESHOLD_RATIO_AMBER_MAX (50-70) + ER THRESHOLD_ER_AMBER_MIN-MAX (3-5%) → 14-day drip Day1-3 proof Day4-7 teardown Day8-14 close $19 Circle daily CTA, YES any day → jump to GREEN fast-close
 RED >70 or <3% → HOLD improve loop (A/B Higgsfield/OpusClip + daily ER + weekly Grok 1000 re-rank + Whop A/B no G4)
 
-Entitlement: lib/entitlement.ts checks Whop has_access (WHOP_PRODUCT_LITE_ID/PRO_ID/TEAM_ID) → Lite $17 (30 runs 1 domain 3/day) / Pro $44 (9999 5 6/day) / Team $62. Retention WF8 save Pause $8 / 35% off $17 / Downgrade $17 → 40% saves → 1.4% churn → 1.1% with pods≤5 (WF9). Upgrade all_three triggers (Day3 win + Day7 streak + Top3) via POST /api/whop/upgrade.
+Entitlement: lib/tiers.ts is the single product→tier registry; lib/entitlement.ts checks Whop v1 memberships against WHOP_PRODUCT_CIRCLE_ID ($44, 40 runs/5h, 600/mo) / WHOP_PRODUCT_PRO_ID ($53, 80/5h, 1200/mo) / WHOP_PRODUCT_TEAM_ID ($62, Pro x3 seats). No product match = FREE, never a guessed tier. Retention WF8 save Pause $8 / 35% off $17 / Downgrade $17 → 40% saves → 1.4% churn → 1.1% with pods≤5 (WF9). Upgrade all_three triggers (Day3 win + Day7 streak + Top3) via POST /api/whop/upgrade.
 
 On first run if CLAUDE_API_KEY missing → run bash jarvis-app/scripts/setup_claude_key.sh — prompts ANTHROPIC_API_KEY + GROK_API_KEY + NICHES_POOL + PAGES_COUNT + THRESHOLD_* + SOCIAL_MASTER_EMAIL + ADMIN_EMAIL and writes .env.local + Vercel env add itself (prompt_on_first_run per your lock). Never commit keys (.gitignore blocks .env).
 

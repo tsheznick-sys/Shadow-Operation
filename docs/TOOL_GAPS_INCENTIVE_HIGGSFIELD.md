@@ -11,7 +11,7 @@
 | **OpusClip $15/mo virality** | **Distribution multiplier** — 30m → 5-8 shorts + virality 9.2 score + auto-reframe 9:16 | Higgsfield outputs 32s only → 1 post/day → Publisher starves. OpusClip gives queue38 6-8 from 1 longform | Incentive: Bundle as `Virality Engine` — members see virality score inside Agent. Keep tier 0 free until 5 pages, then $15 is 1 vault sale. |
 | **Buffer Team $12/channel** | **Publishing without opening apps** — 6/day auto after G4. No Buffer = you open IG/TikTok/YT daily → Social quits | Content piles in drive, never posts → streak breaks → churn spike | Incentive: One-frontend `jarvis-app/app/social` embeds Buffer analytics + no-per-platform open = Social Manager loves it ($12 = his time saved). |
 | **Claude Max $20 + Grok $16 = $36 brain** | **Decision** — VET 8-Gate, scripts, SEO, triage FINAL TERMS, WWS copy | Higgsfield can't write, vet, or SEO. Without brain, you post junk er<2% | Incentive: Main brain — show token meter in `/n8n` embeds, cost $1.20/day → member sees AI cost, values $19. |
-| **Whop + ManyChat 8ch + Chatfuel $15+15** | **Money** — Ladder $27+$9+$79+$19, DM automation where stuck | No funnel → views never become $ — community empty | Incentive: 3 sales $81 covers MVP $60/mo. Show `Whop live Sun 09:00` in /admin. |
+| **Whop + ManyChat 8ch + Chatfuel $15+15** | **Money** — Ladder $28+$17+$35+$89+$44+$53+$62, DM automation where stuck | No funnel → views never become $ — community empty | Incentive: 3 sales $81 covers MVP $60/mo. Show `Whop live Sun 09:00` in /admin. |
 | **n8n Cloud $20** | **Orchestrator** — 9 WFs host. Without = manual Zap hell | Breaks 24/7 alias + retention + proof | Incentive: Embeds in Vercel `/n8n` 24/7, all 3 bros see same board. |
 
 ## The stack that locks 1-2% (incentivized tiers)
@@ -29,7 +29,7 @@
 
 | Gap | Risk | Fix in ZIP v2 |
 |---|---|---|
-| **Whop entitlement env missing** | Agent mock open → free riders | `lib/entitlement.ts` wired — set `WHOP_API_KEY` + `WHOP_PRODUCT_LITE_ID` in Vercel — now enforces. |
+| **Whop entitlement env missing** | Agent mock open → free riders | `lib/tiers.ts` + `lib/entitlement.ts` wired — set `WHOP_API_KEY` + `WHOP_PRODUCT_CIRCLE_ID/PRO_ID/TEAM_ID` — now enforces. |
 | **No card for Higgsfield/OpusClip** | Manual UI bottleneck | WF3 supports `n8n_auto_higgsfield` node but fallback manual checkbox in `/content` G4. |
 | **No TubeGen credits** | 30m stall | WF2 fallback to Wan T4 Colab URL (env `WAN_T4_URL`) — already in n8n solo JSON. |
 | **Buffer Team not Team** | Social opens apps | WF4 fallback Publisher API direct if BUFFER_TOKEN missing. |

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSql } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { audit, rateLimit } from "@/lib/limits";
-import adaptable from "@/config/adaptable.json";
+import { PRODUCT_ENV, TIER_SPECS, TierSpec, auditTiers } from "@/lib/tiers";
 
 /**
  * WHOP UPGRADE — hardened 2026-10-31.
@@ -18,19 +18,16 @@ import adaptable from "@/config/adaptable.json";
  * moving themselves), the target must be a real tier, and the prices come from config.
  */
 
-type Tier = "lite" | "good" | "better" | "pro" | "circle" | "team";
-
-const PRICES: Record<Tier, number> = (() => {
-  const p = (adaptable as any)?.paywalls ?? {};
-  return {
-    lite: p.lite ?? 17,
-    good: p.good ?? 35,
-    better: p.better ?? 89,
-    pro: p.pro ?? 53,
-    circle: p.circle ?? 44,
-    team: p.team ?? 62,
-  };
-})();
+/**
+ * Only the three AGENT tiers are movable here. The one-time ladder (First Shot, Lite, GOOD,
+ * BETTER) is deliberately excluded: those are builds and a save path, not subscriptions, and
+ * change_plan on them is meaningless.
+ *
+ * The old version accepted six tier names and built env names dynamically, so an upgrade to
+ * "good" looked up WHOP_PRODUCT_GOOD_ID — a variable that has never existed — and sent
+ * undefined to Whop while reporting success.
+ */
+const AGENT_TIERS = Object.keys(TIER_SPECS) as (keyof typeof TIER_SPECS)[];
 
 export const dynamic = "force-dynamic";
 
@@ -47,7 +44,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "owner_only" }, { status: 403 });
   }
 
-  let body: { whopUserId?: string; toTier?: Tier; fromTier?: Tier } = {};
+  let body: { whopUserId?: string; toTier?: string; fromTier?: string } = {};
   try {
     body = await req.json();
   } catch {
@@ -55,10 +52,14 @@ export async function POST(req: NextRequest) {
   }
 
   const whopUserId = (body.whopUserId ?? "").trim();
-  const toTier = body.toTier;
+  const toTier = body.toTier as keyof typeof TIER_SPECS | undefined;
+  const fromTier = body.fromTier as keyof typeof TIER_SPECS | undefined;
   if (!whopUserId) return NextResponse.json({ ok: false, error: "whopUserId required" }, { status: 400 });
-  if (!toTier || !(toTier in PRICES)) {
-    return NextResponse.json({ ok: false, error: `toTier must be one of ${Object.keys(PRICES).join(", ")}` }, { status: 400 });
+  if (!toTier || !AGENT_TIERS.includes(toTier)) {
+    return NextResponse.json({ ok: false, error: `toTier must be one of ${AGENT_TIERS.join(", ")}`, prices: auditTiers().prices }, { status: 400 });
+  }
+  if (fromTier && !AGENT_TIERS.includes(fromTier)) {
+    return NextResponse.json({ ok: false, error: `fromTier must be one of ${AGENT_TIERS.join(", ")}` }, { status: 400 });
   }
 
   if (!process.env.WHOP_API_KEY) {
@@ -76,8 +77,9 @@ export async function POST(req: NextRequest) {
       headers: { Authorization: `Bearer ${process.env.WHOP_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         user_id: whopUserId,
-        from_product_id: process.env[`WHOP_PRODUCT_${(body.fromTier ?? "").toUpperCase()}_ID`] || undefined,
-        to_product_id: process.env[`WHOP_PRODUCT_${toTier.toUpperCase()}_ID`],
+        // Both sides resolved through the registry, so an id can never be invented from a name.
+        from_product_id: fromTier ? process.env[PRODUCT_ENV[fromTier]] || undefined : undefined,
+        to_product_id: process.env[PRODUCT_ENV[toTier]],
       }),
     });
     const data = await res.json().catch(() => ({}));
@@ -88,11 +90,11 @@ export async function POST(req: NextRequest) {
                 VALUES (${`upg_${Date.now()}`}, ${whopUserId}, 'plan_change', ${toTier})`;
       // Money moved. It gets written down or it did not happen.
       await audit(
-        { actor: session.email, role: session.role, action: "plan_change", target: whopUserId, result: res.ok ? "ok" : "error", meta: { toTier, price: PRICES[toTier] } },
+        { actor: session.email, role: session.role, action: "plan_change", target: whopUserId, result: res.ok ? "ok" : "error", meta: { fromTier, toTier, price: TIER_SPECS[toTier].price } },
         sql,
       );
     }
-    return NextResponse.json({ ok: res.ok, tier: toTier, price: PRICES[toTier], whop: data }, { status: res.ok ? 200 : 502 });
+    return NextResponse.json({ ok: res.ok, tier: toTier, price: TIER_SPECS[toTier].price, whop: data }, { status: res.ok ? 200 : 502 });
   } catch (e: any) {
     const sql = getSql();
     if (sql) await audit({ actor: session.email, role: session.role, action: "plan_change", target: whopUserId, result: "error", meta: { error: e?.message } }, sql);
@@ -104,7 +106,7 @@ export async function GET() {
   return NextResponse.json({
     ok: true,
     note: "POST as the owner. Prices are read from config, never from the client.",
-    prices: PRICES,
+    tiers: AGENT_TIERS.map((t) => ({ tier: t, price: (TIER_SPECS[t] as TierSpec).price, env: PRODUCT_ENV[t as keyof typeof PRODUCT_ENV] })),
     auth: "owner session required",
   });
 }

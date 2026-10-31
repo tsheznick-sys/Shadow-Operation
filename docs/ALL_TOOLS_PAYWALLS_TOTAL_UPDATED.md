@@ -21,7 +21,7 @@
 | 9 | **Buffer Team `BUFFER_TOKEN` $12/ch** | Publish: 6/day auto 15 endpoints + one-app analytics `views/replies/ER/buyer_pool_x3` in `/social` | $0 Free 3ch | $60 5 pages | $0 | $720 | Opens IG/TikTok/YT daily → Social quits |
 | 10 | **R2 S3 $5** | Backup: daily queue38 + vault + `NUMINOUS_WHOP_DEPLOY/17KpzZCm/` proofs | $5 | $5 | $60 | $60 | Leak → no restore |
 | 11 | **ManyChat + Chatfuel** `MANYCHAT_API_KEY` `CHATFUEL_TOKEN` | DM: 8ch `VAULT` keyword auto-DM + stuck detector 48h + save-offer push + pod DM | $0-$30 free tier | $30 | $0* | $360 | Views never become $ |
-| 12 | **Whop API** `WHOP_API_KEY` `WHOP_PRODUCT_LITE_ID/PRO_ID/TEAM_ID` + webhooks | Pay + entitlement `lib/entitlement.ts` Lite→Pro + WF8 save Pause $5/50% off/Downgrade $9 + WF9 pods≤5 | $0 + fees | $0 + fees | $0 | $0 | No paywall → no entitlement |
+| 12 | **Whop API** `WHOP_API_KEY` `WHOP_PRODUCT_CIRCLE_ID/PRO_ID/TEAM_ID` + webhooks | Pay + entitlement `lib/tiers.ts` → `lib/entitlement.ts`, Circle $44 / Pro $53 / Team $62 + WF8 save Pause $8 / Downgrade $17 + WF9 pods≤5 | $0 + fees | $0 + fees | $0 | $0 | No paywall → no entitlement |
 | 13 | **Wise `WISE_API_KEY` + Telegram `TELEGRAM_BOT_TOKEN` + Signal `SIGNAL_API` + Gmail `GMAIL_*` + Linear `LINEAR_API_KEY` + Vapi Jive `JIVE_JARVIS_NUMBER=+25418XXXX710` `voice-00` Vesper** | Money + notify: TikTok/YouTube→Wise USD→Social approve→Wise batch $0.43% + Jive Vesper Africa's Talking $0.06/min primary→Twilio $0.22 fallback | $0 + $1-5 PSTN emergency only | $0 + $1-5 | $0 | ~$60 PSTN | Alias pay fails → leak |
 
 \* ManyChat free ≤1k contacts covers MVP.

@@ -15,6 +15,8 @@
 //   3. Nobody publishes freely until they pass rules, policy and disclosure. Machine gate
 //      always; G4 human review for the first three publishes, then earned auto-publish.
 
+import { TIER_SPECS } from "./tiers";
+
 export type Tier = "free" | "circle" | "pro" | "team";
 
 // MAX WAS DROPPED 2026-10-31. At $71 it sat ABOVE the $62 Team tier, which is the same
@@ -30,11 +32,11 @@ export const WINDOW_HOURS = 5;
 /** Runs per 5-hour window. This is the number the member feels. */
 export const WINDOW_RUNS: Record<Tier, number> = {
   free: 20,
-  circle: 40,
-  pro: 80,
+  circle: TIER_SPECS.circle.runs_window,
+  pro: TIER_SPECS.pro.runs_window,
   // Team is 3 seats, each with a Pro-shaped window rather than one shared pool —
   // a shared pool means the loudest member spends it by Tuesday.
-  team: 80,
+  team: TIER_SPECS.team.runs_window,
 };
 
 /**
@@ -43,9 +45,9 @@ export const WINDOW_RUNS: Record<Tier, number> = {
  */
 export const MONTHLY_RUNS: Record<Tier, number> = {
   free: 300,
-  circle: 600,
-  pro: 1200,
-  team: 1200, // per seat, not per team
+  circle: TIER_SPECS.circle.runs_month,
+  pro: TIER_SPECS.pro.runs_month,
+  team: TIER_SPECS.team.runs_month, // per seat, not per team
 };
 
 /**
@@ -58,8 +60,8 @@ export const MONTHLY_RUNS: Record<Tier, number> = {
  * is not a team, and a decorative $53 tier is a mess we would have built ourselves.
  */
 export const TEAM = {
-  seats: 3,
-  price: 62,
+  seats: TIER_SPECS.team.seats,
+  price: TIER_SPECS.team.price,
   inherits: "every Pro entitlement, per seat",
   extra: ["seat management", "shared hook bank", "team ledger view", "one bill, one invoice"],
   claim_window_days: 30,
@@ -79,15 +81,15 @@ export const TIER_RULES: Record<Tier, { watermark: boolean; polish: boolean; raw
     includes: "20 runs/5h · our content to clip · watermark on every export · downloads, no direct publishing",
   },
   circle: {
-    watermark: false, polish: false, raw_vault: true, pod_priority: true, direct_publish: false, price: 44,
+    watermark: false, polish: false, raw_vault: true, pod_priority: true, direct_publish: false, price: TIER_SPECS.circle.price,
     includes: "clean exports, the raw vault, pods, 40 runs/5h, scheduling through our publisher",
   },
   pro: {
-    watermark: false, polish: true, raw_vault: true, pod_priority: true, direct_publish: true, price: 53,
+    watermark: false, polish: true, raw_vault: true, pod_priority: true, direct_publish: true, price: TIER_SPECS.pro.price,
     includes: "everything in Circle, polish, 80 runs/5h, DIRECT publishing to their own accounts, 2-hour review SLA until auto-publish is earned",
   },
   team: {
-    watermark: false, polish: true, raw_vault: true, pod_priority: true, direct_publish: true, price: 62,
+    watermark: false, polish: true, raw_vault: true, pod_priority: true, direct_publish: true, price: TIER_SPECS.team.price,
     includes: "everything in Pro for 3 seats, plus seat management, a shared hook bank, the team ledger view and one invoice",
   },
 };

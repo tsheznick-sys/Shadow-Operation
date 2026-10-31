@@ -8,12 +8,12 @@
 |---|---|---|---|---|
 | **GOOD — Starter $35** | $35 one-time | Pillow 0cr thumbs + Wan T4 free 32s script pack + manual hashtag bank | None auto — teach how to manual Higgsfield UI | Lite not needed |
 | **BETTER — Pro $89** | $89 one-time | TubeGen 30m prompts + OpusClip presets (virality 9.2 checklist) + Buffer Team SOP | Unlock `TubeGen auto + OpusClip virality score` in Agent (1 domain, 3 clips/day) | Requires Lite $17/mo |
-| **BEST — Vault+Agent Pro $89+$44/mo** | $89 + $44/mo | All above + 5-domain template + Higgsfield polish per-clip preset pack (no LUT, no watermark) + Whop WWS replay | Unlock full stack $189 scale: TubeGen $29 + OpusClip $15 + Higgsfield auto per-clip $0.08 + Buffer Team $60 → shown as `Included` | Requires Pro $44/mo |
+| **BEST — Vault+Agent Pro $89+$53/mo** | $89 one-time + $53/mo | All above + 5-domain template + Higgsfield polish per-clip preset pack (no LUT, no watermark) + Whop WWS replay | Unlock full stack $189 scale: TubeGen $29 + OpusClip $15 + Higgsfield auto per-clip $0.08 + Buffer Team $60 → shown as `Included` | Requires Pro $53/mo |
 | **Continuity $44/mo** | $44/mo | Vault Circle community + monthly teardown live + 5 new prompts | Keeps access to whichever tier bought — if cancel, pod+streak frozen not deleted 7d |
 
 **Incentive logic:** Member buys GOOD → sees Leaderboard winner `Higgsfield Pro + OpusClip 9.2 — 12k views` → clicks `Upgrade to BEST to get same stack?` → Whop `change_plan` → instant unlock via `lib/entitlement.ts` → WF8 logs ascension (churn becomes expansion).
 
-**Wired:** `WHOP_PRODUCT_LITE_ID = Better (Pro $89)` + `WHOP_PRODUCT_PRO_ID = Best (Vault+Agent Pro)` — see `.env.example`. `lib/entitlement.ts` tierLimits() now maps vault tier → agent runs.
+**Wired (corrected 2026-10-31):** the three AGENT products are `WHOP_PRODUCT_CIRCLE_ID` $44, `WHOP_PRODUCT_PRO_ID` $53, `WHOP_PRODUCT_TEAM_ID` $62 — mapped in `lib/tiers.ts`, the only place a product id is allowed to be mapped. The one-time ladder (`WHOP_PRODUCT_LITE_ID` $17, `GOOD_ID` $35, `BETTER_ID` $89) is a separate set of products and grants no recurring agent access. The previous line claimed `LITE_ID = Better $89`, which contradicted both the code and the price list.
 
 ## Full Stack Scale $189/mo 5 Pages — Why not Higgsfield only
 
@@ -50,7 +50,7 @@ CREATE TABLE user_vault (user_id TEXT PRIMARY KEY, scripts INT, tier TEXT, pod_i
 
 ## Next steps
 
-1. Vercel env set `WHOP_PRODUCT_LITE_ID` + `WHOP_PRODUCT_PRO_ID` from Whop Dashboard → Products → copy Product ID
+1. Vercel env: create **three** products in Whop — Circle $44, Pro $53, Team $62 — then set `WHOP_PRODUCT_CIRCLE_ID`, `WHOP_PRODUCT_PRO_ID`, `WHOP_PRODUCT_TEAM_ID`. A product id that matches none of them resolves to FREE, never to a guessed tier.
 2. Whop Dashboard → Webhooks → add `membership_created` → `https://your-n8n.app/webhook/pod-assign` → test join
 3. Import updated `n8n_workflows_self_3man.json` 9 WFs (WF9 pod_assign already added)
 4. Verify `/api/entitlement?whop_user_id=test` shows `lite/pro` then `/retention` shows pods live

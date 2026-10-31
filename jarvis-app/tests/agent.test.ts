@@ -19,6 +19,10 @@ import { planFor, tierFromProduct, verifySignature } from "../lib/webhook";
 import { pickEngine, preflight, render } from "../lib/render";
 import { LIMITS, moneyRouteReady, rateLimit, resetLimits } from "../lib/limits";
 import { authHeader, credentials, higgsfieldRender } from "../lib/render-paid";
+import {
+  FREE_SPEC, LADDER, PRODUCT_ENV, TIER_SPECS, auditTiers, requiredProductEnv, resolveProduct, specForProduct,
+} from "../lib/tiers";
+import { tierLimits } from "../lib/entitlement";
 
 type Case = { id: string; dimension: string; what: string; expect: string; run: () => { pass: boolean; got: string } | Promise<{ pass: boolean; got: string }> };
 const results: Case[] = [];
@@ -449,6 +453,125 @@ add({ id: "H06", dimension: D.EXE, what: "every request carries an idempotency k
     return { pass: !!key && key.length > 3, got: key };
   }});
 
+/* ---------------- TIER WIRING: the $44 buyer must never be recorded as free ---------------- */
+
+const TIER = "tiers";
+const ENV_SAMPLE = {
+  WHOP_PRODUCT_CIRCLE_ID: "prod_circle",
+  WHOP_PRODUCT_PRO_ID: "prod_pro",
+  WHOP_PRODUCT_TEAM_ID: "prod_team",
+} as any;
+
+add({ id: "T01", dimension: TIER, what: "a $44 Circle product", expect: "resolves to circle with watermark off",
+  run: () => {
+    const r = resolveProduct("prod_circle", ENV_SAMPLE);
+    return { pass: r.tier === "circle" && r.watermark === false && r.runs_window === 40, got: `${r.tier} wm=${r.watermark} runs=${r.runs_window}` };
+  }});
+
+add({ id: "T02", dimension: TIER, what: "a $53 Pro product", expect: "resolves to pro",
+  run: () => {
+    const r = resolveProduct("prod_pro", ENV_SAMPLE);
+    return { pass: r.tier === "pro" && r.runs_window === 80, got: `${r.tier} runs=${r.runs_window}` };
+  }});
+
+add({ id: "T03", dimension: TIER, what: "a $62 Team product", expect: "resolves to team with 3 seats",
+  run: () => {
+    const r = resolveProduct("prod_team", ENV_SAMPLE);
+    return { pass: r.tier === "team" && r.seats === 3, got: `${r.tier} seats=${r.seats}` };
+  }});
+
+add({ id: "T04", dimension: TIER, what: "an unset product env must not match an empty id", expect: "free, not circle",
+  run: () => {
+    const r = resolveProduct("", {} as any);
+    return { pass: r.tier === "free" && !r.matched, got: `${r.tier} matched=${r.matched}` };
+  }});
+
+add({ id: "T05", dimension: TIER, what: "an unknown product", expect: "free, never a guessed tier",
+  run: () => {
+    const r = resolveProduct("prod_mystery", ENV_SAMPLE);
+    return { pass: r.tier === "free" && !r.matched, got: `${r.tier} matched=${r.matched}` };
+  }});
+
+add({ id: "T06", dimension: TIER, what: "the ticket that broke: Circle env declared in .env.example", expect: "every product var code reads is declared",
+  run: () => {
+    const env = readFileSync(join(ROOT, "jarvis-app", ".env.example"), "utf8");
+    // literals found in source...
+    const roots = [join(ROOT, "jarvis-app", "lib"), join(ROOT, "jarvis-app", "app")];
+    const found = new Set<string>(requiredProductEnv());
+    const walk = (dir: string) => {
+      for (const f of readdirSync(dir, { withFileTypes: true })) {
+        const full = join(dir, f.name);
+        if (f.isDirectory()) { if (!/node_modules|\.next|\.test-build/.test(full)) walk(full); continue; }
+        if (!/\.(ts|tsx)$/.test(f.name)) continue;
+        const t = readFileSync(full, "utf8");
+        Array.from(t.matchAll(/WHOP_PRODUCT_[A-Z_]+/g)).forEach((m) => found.add(m[0]));
+      }
+    };
+    roots.forEach(walk);
+    const missing = Array.from(found).filter((v) => !new RegExp(`^${v}=`, "m").test(env));
+    return { pass: missing.length === 0, got: missing.length ? `UNDECLARED: ${missing.join(", ")}` : `${found.size} vars all declared` };
+  }});
+
+add({ id: "T07", dimension: TIER, what: "prices across registry, agent, and config", expect: "44/53/62 everywhere",
+  run: () => {
+    const cfg = JSON.parse(readFileSync(join(ROOT, "config", "adaptable.json"), "utf8"));
+    const at = cfg.paywalls.agent_tiers;
+    const reg = [TIER_SPECS.circle.price, TIER_SPECS.pro.price, TIER_SPECS.team.price];
+    const conf = [at.circle.price, at.pro.price, at.team.price];
+    const agent = [TIER_RULES.circle.price, TIER_RULES.pro.price, TIER_RULES.team.price];
+    const same = JSON.stringify(reg) === JSON.stringify(conf) && JSON.stringify(reg) === JSON.stringify(agent);
+    return { pass: same, got: `registry=${reg} config=${conf} agent=${agent}` };
+  }});
+
+add({ id: "T08", dimension: TIER, what: "the caps across registry, agent and entitlement", expect: "identical",
+  run: () => {
+    const reg = [TIER_SPECS.circle.runs_window, TIER_SPECS.pro.runs_window, TIER_SPECS.team.runs_window];
+    const agent = [WINDOW_RUNS.circle, WINDOW_RUNS.pro, WINDOW_RUNS.team];
+    const ent = [tierLimits("circle").runs_window, tierLimits("pro").runs_window, tierLimits("team").runs_window];
+    const same = JSON.stringify(reg) === JSON.stringify(agent) && JSON.stringify(reg) === JSON.stringify(ent);
+    return { pass: same, got: `registry=${reg} agent=${agent} entitlement=${ent}` };
+  }});
+
+add({ id: "T09", dimension: TIER, what: "no two tiers share a price, all reduce to 8", expect: "clean",
+  run: () => {
+    const a = auditTiers();
+    return { pass: a.clean, got: `prices=${a.prices} dupes=${a.dupes.length} off=${a.offPattern.length}` };
+  }});
+
+add({ id: "T10", dimension: TIER, what: "the product env map has all three and no stragglers", expect: "exactly 3",
+  run: () => {
+    const keys = Object.keys(PRODUCT_ENV).sort();
+    return { pass: keys.length === 3 && keys.join(",") === "circle,pro,team", got: keys.join(",") };
+  }});
+
+add({ id: "T11", dimension: TIER, what: "Lite $17 is still a paid product with no watermark", expect: "tier free, watermark false",
+  run: () => {
+    const l = LADDER.lite;
+    return { pass: l.price === 17 && l.watermark === false && l.agent_tier === "free", got: `$${l.price} wm=${l.watermark} tier=${l.agent_tier}` };
+  }});
+
+add({ id: "T12", dimension: TIER, what: "the upgrade route cannot invent a product env name", expect: "no dynamic WHOP_PRODUCT_ template left",
+  run: () => {
+    const src = readFileSync(join(ROOT, "jarvis-app", "app", "api", "whop", "upgrade", "route.ts"), "utf8");
+    const dynamic = /WHOP_PRODUCT_\$\{/.test(src);
+    const usesRegistry = /PRODUCT_ENV\[/.test(src);
+    return { pass: !dynamic && usesRegistry, got: `dynamic=${dynamic} registry=${usesRegistry}` };
+  }});
+
+add({ id: "T13", dimension: TIER, what: "entitlement reads Whop v1, not the retired v2", expect: "v1 only in the request",
+  run: () => {
+    const src = readFileSync(join(ROOT, "jarvis-app", "lib", "entitlement.ts"), "utf8");
+    const url = (src.match(/fetch\(`([^`]+)`/) ?? [])[1] ?? "none";
+    return { pass: url.includes("api.whop.com/api/v1"), got: url.slice(0, 60) };
+  }});
+
+add({ id: "T14", dimension: TIER, what: "entitlement has no unlimited-runs promise", expect: "no 9999",
+  run: () => {
+    const src = readFileSync(join(ROOT, "jarvis-app", "lib", "entitlement.ts"), "utf8");
+    const code = stripComments(src);
+    return { pass: !/9999/.test(code), got: /9999/.test(code) ? "still promises 9999 runs" : "clean" };
+  }});
+
 /* ---------------- MEMORY: does the code still match the locks ---------------- */
 
 const lock = (id: string, what: string, expect: string, run: () => { pass: boolean; got: string }) =>
@@ -591,13 +714,24 @@ add({ id: "J05", dimension: D.JUD, what: "the ladder still contains the retired 
     return { pass: hits.length === 0, got: short(hits) };
   }});
 
-add({ id: "J06", dimension: D.JUD, what: "the LIVE env actually carries the current ladder", expect: "$28+$17+$35+$89+$53+$44",
+add({ id: "J06", dimension: D.JUD, what: "the LIVE env ladder matches the config ladder", expect: "same prices, same order",
   run: () => {
+    // Derived from config instead of hardcoded. The previous version asserted a literal string,
+    // so it failed the moment the ladder legitimately gained Team $62 — a stale test blaming
+    // correct code, which is its own kind of false positive.
+    const cfg = JSON.parse(readFileSync(join(ROOT, "config", "adaptable.json"), "utf8"));
+    const cfgPrices = (String(cfg.paywalls.ladder).match(/\$(\d+)/g) ?? []).map((x) => x.slice(1));
     const env = readFileSync(join(ROOT, "jarvis-app", ".env.example"), "utf8");
     const ladder = (env.match(/WHOP_LADDER_PRICES=(\S+)/) ?? [])[1] ?? "missing";
+    const envPrices = ladder.replace(/^\$/, "").split("+").map((x) => x.replace("$", ""));
     const circle = (env.match(/TIER_CIRCLE_PRICE=(\d+)/) ?? [])[1] ?? "?";
     const pro = (env.match(/TIER_PRO_PRICE=(\d+)/) ?? [])[1] ?? "?";
-    return { pass: ladder === "$28+$17+$35+$89+$53+$44" && circle === "44" && pro === "53", got: `${ladder} circle=${circle} pro=${pro}` };
+    const team = (env.match(/TIER_TEAM_PRICE=(\d+)/) ?? [])[1] ?? "?";
+    const same = JSON.stringify(cfgPrices) === JSON.stringify(envPrices);
+    return {
+      pass: same && circle === "44" && pro === "53" && team === "62",
+      got: `config=${cfgPrices.join("+")} env=${envPrices.join("+")} circle=${circle} pro=${pro} team=${team}`,
+    };
   }});
 
 add({ id: "J07", dimension: D.JUD, what: "a doc still promises all five pages live on day one", expect: "none",
@@ -614,6 +748,22 @@ add({ id: "BUG-002", dimension: D.JUD, what: "the excluded file is still a defec
     const t = readFileSync(join(DOCS, "QUALITY_GATE.md"), "utf8");
     const isRegister = /defect/i.test(t) && /does NOT prove/i.test(t);
     return { pass: isRegister, got: isRegister ? "register" : "no longer a register — exclusion is now unjustified" };
+  }});
+
+add({ id: "J08", dimension: D.JUD, what: "no doc still sells the retired $27/$9/$79/$19 ladder", expect: "none",
+  run: () => {
+    // A line marked Superseded is history, not an offer. Excluded by marker, not by filename.
+    const hits = scanDocs(/\$27\s*[+→]\s*\$9|\$9\/mo.*\$79|Whop ladder \$27/)
+      .filter((h) => !/QUALITY_GATE|PAGE_LAW/.test(h))
+      .filter((h) => !/^[^:]+:\d+\s*>?\s*\*\*Superseded|Superseded 2026/.test(h));
+    return { pass: hits.length === 0, got: short(hits) };
+  }});
+
+add({ id: "J09", dimension: D.JUD, what: "no doc claims Pro is $44", expect: "Pro is $53 everywhere",
+  run: () => {
+    const hits = scanDocs(/(Pro|PRO)[^|\n]{0,24}\$44|\$44[^|\n]{0,16}(Pro|PRO)/)
+      .filter((h) => !/Circle|bench|collid|was|moved|equals|collision|QUALITY_GATE|HISTORY/i.test(h));
+    return { pass: hits.length === 0, got: short(hits) };
   }});
 
 /* ---------------- EXECUTION: run a real asset end to end ---------------- */

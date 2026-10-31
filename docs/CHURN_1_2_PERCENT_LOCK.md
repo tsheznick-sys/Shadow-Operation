@@ -41,7 +41,7 @@
 **Pricing tiers (Whop one checkout):**
 
 - `Agent Lite $17/mo add-on` — 30 runs/mo, 1 domain, 3 clips/day — for Circle $26 members
-- `Agent Pro $44/mo add-on` — unlimited, 5 domains, 6/day Buffer auto — unlocks when they hit $100
+- `Agent Pro $53/mo add-on` — 80 runs/5h, 1200/mo, direct publish — unlocks when they hit $100. (Circle $44 is the entry tier; Pro moved to $53 in 2026-10-31 so the two do not collide.)
 - `Agent Team $62/mo` — for your own 3-man only (not community)
 
 **Where it keeps engagement:**

@@ -14,7 +14,7 @@
 | 8 | **year1-scale** | `docs/YEAR1_POCKET_TO_100K_SCALE.md` | Pocket $189/mo×12=$2,268 → Net $1K/mo 3 bros 30/20/50 → 100K gross before re-tool |
 | 9 | **platform-scope** | `docs/ASSESS_JARVIS_AGENT_X_TIKTOK_IG_YT.md` + `GROK_CLAUDE_AGENT_MCP.md` | X discovery light + ChatFuel IG & TikTok only + YT comments→Gmail triage |
 | 10 | **voice-vesper** | `docs/JARVIS_VESPER_VOICE_WIRED.md` + `JARVIS_JIVE_VOICE_SPEC.md` + `VESPER_ADAPTIVE_SENSOR_TONALITY.md` + `jarvis-app/lib/voice.ts` + `audio/vesper_voice_*.mp3` + `audio/jarvis_voice_*.mp3` | Vapi SIP Jive One `+25418XXXX710` secure env only — 3 legs parallel (Owner All/Social account/Content) — voice-00 Vesper 20yo playful witty adaptive per role intro — Whisper transcribe → Neon/Drive 17KpzZCm/calls + Linear — feedback call Owner only Big Red Button optional |
-| 11 | **whop-pay** | `docs/SHADOW_OPERATION_FULL_PIPELINE_CONTENT_TO_COMMUNITY.md` + `data/product_blueprint.md` | Ladder $27+$9+$79+$19/mo via Whop `whop.py` + ManyChat 8ch VAULT keyword → DM → Whop |
+| 11 | **whop-pay** | `docs/SHADOW_OPERATION_FULL_PIPELINE_CONTENT_TO_COMMUNITY.md` + `data/product_blueprint.md` | Ladder $28+$17+$35+$89+$44+$53+$62/mo via Whop `whop.py` + ManyChat 8ch VAULT keyword → DM → Whop |
 | 12 | **higgsfield-stack** | `docs/TOOL_GAPS_INCENTIVE_HIGGSFIELD.md` + `JARVIS_AGENT_ZIP_TRULY_NEEDED_TOOLS.md` | Higgsfield finish $0.08/clip only — needs Wan T4 free / TubeGen $29 engine + OpusClip clip + Buffer publish — incentivized Good-Better-Best tiers |
 | 13 | **live-links** | `docs/LIVE_LINKS_SETUP.md` (this ZIP) | Step-by-step with live https:// links to set all things for Jarvis Agent — see below section |
 

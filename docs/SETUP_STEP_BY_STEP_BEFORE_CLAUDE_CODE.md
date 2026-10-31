@@ -119,9 +119,14 @@ TUBEGEN_API_KEY=tubegen_xxx        # OR PICTORY_API_KEY / FLIKI_API_KEY + ENGINE
 HIGGSFIELD_API_KEY=higgsfield_xxx   # $0.08/clip finish only
 OPUSCLIP_API_KEY=opus_xxx
 WHOP_API_KEY=whop_xxx
-WHOP_PRODUCT_LITE_ID=prod_lite_xxx
+# the three agent products — $44 / $53 / $62
+WHOP_PRODUCT_CIRCLE_ID=prod_circle_xxx
 WHOP_PRODUCT_PRO_ID=prod_pro_xxx
 WHOP_PRODUCT_TEAM_ID=prod_team_xxx
+# one-time ladder (not agent subscriptions)
+WHOP_PRODUCT_LITE_ID=prod_lite_xxx
+WHOP_PRODUCT_GOOD_ID=prod_good_xxx
+WHOP_PRODUCT_BETTER_ID=prod_better_xxx
 WISE_API_KEY=wise_xxx
 TELEGRAM_BOT_TOKEN=xxx
 JIVE_JARVIS_NUMBER=+25418XXXX710   # Vesper Vapi Africa $0.06 → Twilio $0.22
@@ -131,7 +136,7 @@ PLATFORMS=X,IG,TikTok,YT
 BUFFER_SERIOUS_DAILY=6
 BUFFER_X_DAILY=2
 PAGES_COUNT=5
-WHOP_LADDER_PRICES=$27+$9+$79+$19/mo
+WHOP_LADDER_PRICES=$28+$17+$35+$89+$44+$53+$62/mo
 ```
 
 **Why before Claude Code:** `lib/jarvis.ts` builds `JARVIS_SYSTEM` from `CONFIG` (lib/config.ts reads these envs). If env empty, Claude still answers with mock `Sir, CLAUDE_API_KEY missing...` and you know to set it.
@@ -192,7 +197,7 @@ npm run dev          # Starts 0.0.0.0:3000 PWA
 | **WF2→WF3** | OpusClip 5-8 shorts + Higgsfield LUT per-clip → `pending_G4` | Sleep |
 | **09:00** | WF5 checks IG/TikTok/YT analytics, GREEN `<50+5%+` → Chatfuel IG&TK + ManyChat YT auto-DM `VAULT` + Gmail triage, AMBER → 14-day drip | Wake to `/content` G4 swipe + `/social` give Jarvis autopublish → Buffer 6/day live, X 1-2 discovery filler no gate |
 | **05:45** | WF6 daily brief `Sir 6 videos live 2.1K views 18 replies` + leak finder biggest leak | Read on Vercel `/` |
-| **Thu→Sun** | Demand test `1%+25` on last 3 posts (X ignored) → PASS → Whop vault $27+$9+$79+$19 auto-create | You pressed SEND 3-cap → sign FINAL TERMS 10pts |
+| **Thu→Sun** | Demand test `1%+25` on last 3 posts (X ignored) → PASS → Whop vault $28+$17+$35+$89+$44+$53+$62 auto-create | You pressed SEND 3-cap → sign FINAL TERMS 10pts |
 | **Sun 09:00 + 05:45 daily** | WF9 WWS + leaderboard Pod Red 28 vs Blue 22, WF8 save Pause $5/50% off/Downgrade $9 | `/retention` / `/pods` |
 
 **Total daily human:** 2 min — `/drafts` swipe SEND + `/content` approve + `/social` approve. Everything else is Agent.

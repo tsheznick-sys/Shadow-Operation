@@ -26,7 +26,7 @@ Branch: `arena/6c47af3d-shadow-operation` | Date: 2026-10-29 | Mode: Cloud-hoste
 14. VET: Apparatus 1000 GREEN uses buyer_pool_x3, ratio<50:1, ER 3%+ — should JARVIS **auto-reject** RED (<2% ER) or flag for your manual review?
 15. Outreach: Gate G4 requires your swipe to SEND — keep **human SEND** (Gmail DRAFT+INBOX), or allow **auto-send 6/day** with your pre-approval template?
 16. Demand test: Omar locked strict 1%+25 raw + screenshot-only until PASS — should app have **camera scan** (photo of IG Story views → auto-read numbers) + auto PASS/FAIL email to you?
-17. Whop: $27+$9+$79+$19/mo via whop.py — should JARVIS **auto-create Whop product** on PASS (PremiereProTutos Official Vault style) + grant admin, or draft only?
+17. Whop: $28+$17+$35+$89+$44+$53+$62/mo via whop.py — should JARVIS **auto-create Whop product** on PASS (PremiereProTutos Official Vault style) + grant admin, or draft only?
 18. ManyChat 8ch: Should JARVIS push DM flows to ManyChat automatically on launch, or you wire ManyChat manually?
 
 ## D) REAL-LIFE JARVIS POWERS (19-24)

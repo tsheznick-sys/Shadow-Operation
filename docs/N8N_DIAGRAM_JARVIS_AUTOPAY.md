@@ -61,7 +61,7 @@ flowchart TD
 | 9 | **Buffer Team** `BUFFER_TOKEN` $12/ch | Publish 6/day 15 endpoints + one-app analytics | $0 Free 3ch | **$60** 5 pages | $0 | **$720** | https://buffer.com/pricing |
 | 10 | **R2** Cloudflare | Backup queue38 daily + HQ `17KpzZCm...` proofs | $5 | $5 | **$60** | **$60** | https://cloudflare.com/products/r2 |
 | 11 | **ChatFuel** `CHATFUEL_TOKEN` + **ManyChat** `MANYCHAT_API_KEY` | DM IG & TikTok only 8ch `VAULT` → DM + save-offer + pod DM | $0-$30 free tier | $30 | $0* | **$360** | https://chatfuel.com + https://manychat.com |
-| 12 | **Whop** `WHOP_API_KEY` `WHOP_PRODUCT_LITE/PRO/TEAM_ID` | Pay ladder $27+$9+$79+$19 + entitlement `lib/entitlement.ts` + webhooks | $0 + 3%+2.7%+$0.30 | $0 + fees | $0 | Fees only | https://whop.com/dashboard/api |
+| 12 | **Whop** `WHOP_API_KEY` `WHOP_PRODUCT_LITE/PRO/TEAM_ID` | Pay ladder $28+$17+$35+$89+$44+$53+$62 + entitlement `lib/entitlement.ts` + webhooks | $0 + 3%+2.7%+$0.30 | $0 + fees | $0 | Fees only | https://whop.com/dashboard/api |
 | 13 | **Wise** `WISE_API_KEY` + **Telegram** `TELEGRAM_BOT_TOKEN` + **Signal** `SIGNAL_API` + **Gmail** `GMAIL_*` + **Linear** `LINEAR_API_KEY` + **Vapi** `VAPI_API_KEY` `JIVE_JARVIS_NUMBER=+25418XXXX710` `voice-00` + **Africa's Talking** $0.06→**Twilio** $0.22 + **ElevenLabs** `ELEVENLABS_API_KEY` | Money+notify+broadcast — Wise batch $0.43% + PSTN $1-5 emergency only | $1-5 PSTN | $1-5 PSTN | ~$0 | **~$60** PSTN/yr | https://wise.com + https://vapi.ai + https://elevenlabs.io + https://africastalking.com |
 
 \* ManyChat free ≤1k contacts covers MVP.
@@ -86,7 +86,7 @@ flowchart TD
 ```
 Revenue In (daily crons):
   YT Analytics API + TikTok API → Wise Business USD (you set payout bank = Wise USD routing)
-  + Whop API $27+$9+$79+$19 ladder → same Wise USD (or Whop → Wise transfer)
+  + Whop API $28+$17+$35+$89+$44+$53+$62 ladder → same Wise USD (or Whop → Wise transfer)
   → WF8 cron 1st 08:00 EAT POST YouTube+TikTok+Whop revenue_last_month → Neon revenue_log
         ↓
 Alias Proposal (autopilot, human swipe kept on money — R7):

@@ -10,7 +10,7 @@
 - Triggers all_three: Day 3 micro-win + Day 7 streak + Leaderboard Top 3 all fire upgrade nudge Lite→Pro via `POST /api/whop/upgrade`.
 
 **Sustainance Trigger: 1K/mo net for 3 bros**
-- When Net = $1K/mo after fees/payouts (Whop $27+$9+$79+$19 ladder, Wise batch $0.43%): allocate **% to pushing community upwards**:
+- When Net = $1K/mo after fees/payouts (Whop $28+$17+$35+$89+$44+$53+$62 ladder, Wise batch $0.43%): allocate **% to pushing community upwards**:
   - 30% → community content push (pod challenges, WWS Sun 09:00 prizes, pod streak bonuses)
   - 20% → tool scale reserve (topping $189 scale buffer)
   - 50% → bros split (your take-home) — keeps pocket recovery

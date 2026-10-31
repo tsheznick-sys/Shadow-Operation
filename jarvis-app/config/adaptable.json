@@ -264,7 +264,7 @@
       "35": 8,
       "89": 8,
       "44": 8,
-      "26": 8,
+      "53": 8,
       "62": 8,
       "710": 8
     },
@@ -273,15 +273,15 @@
       "price": 28,
       "cadence": "one-time",
       "what": "14 days all-access: all 5 domains, 6 posts/day, character lock, sequence slides, vault",
-      "after_14_days": "upgrade to Circle $26/mo or any one-time build — no auto-charge, no card kept on file",
+      "after_14_days": "upgrade to Circle $44/mo or any one-time build — no auto-charge, no card kept on file",
       "why_28": "reduces to 1 — the opening move; the only non-8 in the system, by design",
       "env": "TIER_FIRST_SHOT_PRICE"
     },
-    "ladder": "$28 first shot -> $17 Lite/mo -> $35 GOOD -> $89 BETTER -> $53 Pro/mo -> $44 Circle/mo -> $62 Team (env WHOP_LADDER_PRICES)",
+    "ladder": "$28 first shot -> $17 Lite/mo -> $35 GOOD -> $89 BETTER -> $44 Circle/mo -> $53 Pro/mo -> $62 Team (env WHOP_LADDER_PRICES)",
     "good_better_best": {
       "GOOD": "$35 Starter Pillow+Wan manual — no auto (was $27)",
-      "BETTER": "$89 Pro TubeGen+OpusClip presets — Lite $17 unlocks 1 domain 3 clips/day (was $79)",
-      "BEST": "$89+$53/mo Vault+Agent Pro full stack auto stickman 5 pages 6/day — Pro unlocks (was $89+$44)",
+      "BETTER": "$89 one-time build — no recurring agent access",
+      "BEST": "$89 one-time build + $53/mo Pro for the recurring agent — the build is bought, the agent is rented",
       "Circle": "$44/mo Continuity pod streak WWS (was $26 — raised to cut churn, not to chase revenue)",
       "Team": "$62 three seats (was $59)"
     },
@@ -295,12 +295,42 @@
       "downgrade": 17
     },
     "save_math": "No percentage discount. At $44 every clean rate lands off-pattern: 35% = $28.60 (a 2), 36% = $28.16 (a 2), 44% = $24.64 (a 7). The save menu is now PAUSE $8 or DOWNGRADE to Lite $17 — both 8s, both honest, and neither teaches a member that the price was negotiable.",
-    "entitlement": "lib/entitlement.ts Lite $17 (30 runs, 1d, 3c/d) / Pro $53 (9999, 5d, 6c/d) via WHOP_PRODUCT_LITE_ID/PRO_ID/TEAM_ID + Whop API v2/memberships",
+    "entitlement": "lib/tiers.ts is the ONLY product-to-tier map. Three agent products: WHOP_PRODUCT_CIRCLE_ID ($44) / WHOP_PRODUCT_PRO_ID ($53) / WHOP_PRODUCT_TEAM_ID ($62), resolved through lib/entitlement.ts against Whop API v1. A product id that matches nothing resolves to FREE, never to a guessed tier.",
     "take": "Whop 3%+2.7%+$0.30 per sale (~$3.11 on $53, ~$2.81 on $44)",
     "consult_owner": "Jarvis never reprices without the owner — it presents live market data and waits for a decision",
     "code": "jarvis-app/lib/numerology.ts (digitalRoot, nextEight, LADDER) + scripts/check_numerology.py",
     "docs": "docs/PRICING_NUMEROLOGY.md",
-    "change_log": "2026-10-31 Circle $26 -> $44. Price is the single biggest lever on churn: curated high-ticket communities run 2-3% monthly vs 8-12% in the $27-97 band, and $26 sat in that band while targeting 2%. Pro moved $44 -> $53 to stay above Circle (it collided at 44). Both reduce to 8."
+    "change_log": "2026-10-31 Circle $26 -> $44. Price is the single biggest lever on churn: curated high-ticket communities run 2-3% monthly vs 8-12% in the $27-97 band, and $26 sat in that band while targeting 2%. Pro moved $44 -> $53 to stay above Circle (it collided at 44). Both reduce to 8.",
+    "agent_tiers": {
+      "rule": "three products, one per agent tier — 44 / 53 / 62, all reduce to 8",
+      "circle": {
+        "env": "WHOP_PRODUCT_CIRCLE_ID",
+        "price": 44,
+        "runs_window": 40,
+        "runs_month": 600,
+        "watermark": false,
+        "vault": true
+      },
+      "pro": {
+        "env": "WHOP_PRODUCT_PRO_ID",
+        "price": 53,
+        "runs_window": 80,
+        "runs_month": 1200,
+        "watermark": false,
+        "vault": true,
+        "direct_publish": true
+      },
+      "team": {
+        "env": "WHOP_PRODUCT_TEAM_ID",
+        "price": 62,
+        "seats": 3,
+        "runs_window": 80,
+        "runs_month": 1200,
+        "watermark": false,
+        "vault": true
+      },
+      "broke_on": "2026-10-31 — webhook read WHOP_PRODUCT_CIRCLE_ID that .env.example never declared, so a $44 buyer was recorded as FREE; entitlement had no circle tier at all; the upgrade route looked up WHOP_PRODUCT_GOOD_ID/BETTER_ID which never existed. Single registry + declared-env test now."
+    }
   },
   "retention": {
     "target": "1.1-1.4% churn → 1-2% lock",
