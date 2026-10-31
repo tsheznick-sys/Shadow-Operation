@@ -420,7 +420,7 @@ COMMENT ON TABLE board_motions IS
 -- ============================================================
 CREATE TABLE IF NOT EXISTS agent_members (
   id             TEXT PRIMARY KEY,
-  tier           TEXT NOT NULL DEFAULT 'free' CHECK (tier IN ('free','circle','pro')),
+  tier           TEXT NOT NULL DEFAULT 'free' CHECK (tier IN ('free','circle','pro','team')),
   joined_via     TEXT NOT NULL DEFAULT 'funnel' CHECK (joined_via IN ('funnel','direct_community','referral')),
   watermark      BOOLEAN NOT NULL DEFAULT true,
   publish_passes INT NOT NULL DEFAULT 0,
@@ -460,7 +460,7 @@ CREATE INDEX IF NOT EXISTS agent_schedule_due ON agent_schedule (publish_at) WHE
 
 -- Max was dropped 2026-10-31: at $71 it sat above the $62 Team tier. Team is SEATS, not a bigger agent.
 ALTER TABLE agent_members DROP CONSTRAINT IF EXISTS agent_members_tier_check;
-ALTER TABLE agent_members ADD CONSTRAINT agent_members_tier_check CHECK (tier IN ('free','circle','pro'));
+ALTER TABLE agent_members ADD CONSTRAINT agent_members_tier_check CHECK (tier IN ('free','circle','pro','team'));
 
 ALTER TABLE agent_schedule ADD COLUMN IF NOT EXISTS publish_path TEXT
   CHECK (publish_path IN ('manual_download','buffer_scheduled','oauth_direct'));

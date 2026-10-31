@@ -572,6 +572,26 @@ add({ id: "T14", dimension: TIER, what: "entitlement has no unlimited-runs promi
     return { pass: !/9999/.test(code), got: /9999/.test(code) ? "still promises 9999 runs" : "clean" };
   }});
 
+add({ id: "T15", dimension: TIER, what: "the DATABASE tier list matches the code tier list", expect: "agent_members CHECK == free + TIER_SPECS",
+  run: () => {
+    // This is the bug from the tier round, one layer down. lib/tiers.ts said four tiers;
+    // migrate.sql said three — a Team member paying $62 hit a CHECK violation on webhook
+    // insert, and the route answered 500 while Whop had already taken the money.
+    // The registry is only the source of truth if the schema agrees with it.
+    const sqlSrc = readFileSync(join(ROOT, "jarvis-app", "scripts", "migrate.sql"), "utf8");
+    const expected = Array.from(new Set(["free"].concat(Object.keys(TIER_SPECS)))).sort().join(",");
+    const found: string[] = [];
+    const re = /tier\s+IN\s*\(([^)]*)\)/gi;
+    const m = sqlSrc.matchAll(re);
+    for (const hit of Array.from(m)) {
+      const list = (hit[1] || "").split(",").map((x) => x.replace(/['"\s]/g, "")).filter(Boolean).sort().join(",");
+      found.push(list);
+    }
+    if (found.length === 0) return { pass: false, got: "no tier CHECK found in migrate.sql — did the guard get deleted?" };
+    const bad = found.filter((l) => l !== expected);
+    return { pass: bad.length === 0, got: bad.length ? `schema says ${bad[0]}, code says ${expected}` : `${found.length} CHECK(s) == ${expected}` };
+  }});
+
 /* ---------------- MEMORY: does the code still match the locks ---------------- */
 
 const lock = (id: string, what: string, expect: string, run: () => { pass: boolean; got: string }) =>
