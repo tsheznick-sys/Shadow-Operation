@@ -62,7 +62,7 @@ export function split(script: string, opts: { title: string; niche: string; form
 
   const edited: Cut = {
     kind: "edited",
-    destination: "youtube+tiktok+ig+fb+x",
+    destination: "youtube+tiktok+ig+fb",
     title: opts.title,
     body: editedBody,
     disclosure: DISCLOSURE,

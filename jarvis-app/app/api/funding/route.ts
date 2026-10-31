@@ -5,19 +5,27 @@ import { autopayState, computeFunding, fundingInputs } from "@/lib/funding";
 
 export const dynamic = "force-dynamic";
 
-async function memberCount(): Promise<{ members: number; source: string }> {
+/**
+ * How many paying members are there — the number the whole funding model divides by.
+ *
+ * This used to be `SELECT count(*) FROM members WHERE plan = 'circle'`. There is no `members`
+ * table. It threw on every call, and the `catch` fell through to counting `user_vault` rows —
+ * a different population entirely (anyone with a script vault, including free members) — and
+ * reported it as `source: "neon:user_vault"`, which reads like a successful query.
+ *
+ * So the solvency model was dividing by a number that meant something else, and saying so in a
+ * field nobody would question. Found by D02, which compares the SQL in this repo to the SQL that
+ * builds it.
+ */
+async function memberCount(): Promise<{ members: number; source: string; exact: boolean }> {
   const sql = getSql();
-  if (!sql) return { members: Number(process.env.FUNDING_MEMBERS || 0), source: "env" };
+  if (!sql) return { members: Number(process.env.FUNDING_MEMBERS || 0), source: "env", exact: false };
   try {
-    const rows: any = await sql`SELECT count(*)::int AS c FROM members WHERE plan = 'circle'`;
-    return { members: rows?.[0]?.c || 0, source: "neon" };
-  } catch {
-    try {
-      const rows: any = await sql`SELECT count(*)::int AS c FROM user_vault`;
-      return { members: rows?.[0]?.c || 0, source: "neon:user_vault" };
-    } catch {
-      return { members: Number(process.env.FUNDING_MEMBERS || 0), source: "env" };
-    }
+    const rows: any = await sql`SELECT count(*)::int AS c FROM agent_members WHERE tier <> 'free'`;
+    return { members: rows?.[0]?.c || 0, source: "agent_members", exact: true };
+  } catch (e: any) {
+    // No fallback population. A number from the wrong table is worse than no number.
+    return { members: Number(process.env.FUNDING_MEMBERS || 0), source: `unavailable: ${String(e?.message || e).slice(0, 80)}`, exact: false };
   }
 }
 
@@ -33,7 +41,7 @@ async function dbAuthority(): Promise<string | null> {
 }
 
 export async function GET() {
-  const { members, source } = await memberCount();
+  const { members, source, exact } = await memberCount();
   const model = computeFunding(fundingInputs(members));
   const dbAuth = await dbAuthority();
   const state = autopayState();
@@ -41,6 +49,7 @@ export async function GET() {
     ok: true,
     members,
     membersSource: source,
+    membersExact: exact,
     model,
     autopay: { ...state, granted: dbAuth ? dbAuth === "granted" : state.granted, authority: dbAuth ?? state.authority },
   });

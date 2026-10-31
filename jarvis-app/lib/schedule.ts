@@ -146,6 +146,9 @@ export type BookedSlot = { surface: Surface; publish_at: string; page_ref?: stri
 export type PlanInput = {
   asset_id: string;
   page_ref: string;
+  /** the finished file — required, because a slot with no asset is a promise with no product */
+  video_url?: string;
+  caption?: string;
   member_id?: string;
   tier: Tier;
   /** the gate inputs, straight from the asset */
@@ -166,6 +169,8 @@ export type PlannedRow = {
   asset_id: string;
   page_ref: string;
   member_id?: string;
+  video_url: string | null;
+  caption: string | null;
   surface: Surface;
   publish_at: string;
   watermark: boolean;
@@ -198,6 +203,16 @@ export function planAsset(input: PlanInput, opts: { env?: Env; booked?: BookedSl
   const now = opts.now ?? new Date();
   const offset = utcOffsetMinutes(env);
 
+  // No asset, no slot. A booking without a file is a promise that fails at 09:00 on a Tuesday
+  // when nobody is watching — and the failure would be logged as "no_asset_url", hours later.
+  const videoUrl = (input.video_url || "").trim();
+  if (!videoUrl) {
+    return { rows: [], refused: { code: "no_asset", detail: "no finished video — a slot is booked against a file, not an intention" } };
+  }
+  if (!/^https?:\/\//i.test(videoUrl)) {
+    return { rows: [], refused: { code: "asset_not_public", detail: "the file must be reachable by URL; Buffer fetches it itself" } };
+  }
+
   // Tier gate. Free does not reach a publisher at all: the download IS the product.
   const path = publishPath(input.tier, input.passes ?? 0);
   if (path.path === "manual_download") {
@@ -222,7 +237,13 @@ export function planAsset(input: PlanInput, opts: { env?: Env; booked?: BookedSl
   }
 
   const wm = watermarkFor(input.tier).apply;
-  const booked = new Set((opts.booked ?? []).map((b) => dayKey(b.surface, b.publish_at, offset)));
+  // A Set here made the counter return 0 or 1, so any per_surface_per_day above 1 let every
+  // asset claim THE SAME slot — the cap collapsed into "unlimited at one timestamp".
+  const booked = new Map<string, number>();
+  for (const b of opts.booked ?? []) {
+    const k = dayKey(b.surface, b.publish_at, offset);
+    booked.set(k, (booked.get(k) ?? 0) + 1);
+  }
   const perDay = Math.max(1, input.per_surface_per_day ?? 1);
   const surfaces = (input.surfaces ?? SCHEDULABLE_SURFACES).filter((s) => SCHEDULABLE_SURFACES.includes(s));
 
@@ -241,7 +262,7 @@ export function planAsset(input: PlanInput, opts: { env?: Env; booked?: BookedSl
       const key = dayKey(surface, slot.toISOString(), offset);
       const used = countBooked(booked, key);
       if (used < perDay) {
-        booked.add(key);
+        booked.set(key, used + 1);
         placed = slot;
       } else {
         // jump past this day entirely
@@ -255,6 +276,8 @@ export function planAsset(input: PlanInput, opts: { env?: Env; booked?: BookedSl
       asset_id: input.asset_id,
       page_ref: input.page_ref,
       member_id: input.member_id,
+      video_url: (input.video_url || "").trim() || null,
+      caption: input.caption ?? null,
       surface,
       publish_at: placed.toISOString(),
       watermark: wm,
@@ -273,14 +296,8 @@ export function planAsset(input: PlanInput, opts: { env?: Env; booked?: BookedSl
   return { rows, refused: null };
 }
 
-function countBooked(booked: Set<string>, key: string): number {
-  // The set holds one entry per booked occurrence; duplicates were never added, so room is
-  // tracked by a shadow count keyed off the same string.
-  let n = 0;
-  for (const _ of Array.from(booked)) {
-    if (_ === key) n++;
-  }
-  return n;
+function countBooked(booked: Map<string, number>, key: string): number {
+  return booked.get(key) ?? 0;
 }
 
 /* ------------------------------- the publisher ------------------------------- */
@@ -310,7 +327,8 @@ UPDATE agent_schedule s
    SET claimed_at = NOW(), attempts = s.attempts + 1
   FROM due
  WHERE s.id = due.id
-RETURNING s.id, s.member_id, s.page_ref, s.platform, s.asset_id, s.watermark, s.publish_at, s.attempts
+RETURNING s.id, s.member_id, s.page_ref, s.platform, s.asset_id, s.watermark, s.publish_at, s.attempts,
+            s.video_url, s.caption
 `;
 
 /** The mark. `published` only after Buffer confirmed a post id. */
@@ -339,6 +357,8 @@ export type DueRow = {
   watermark: boolean;
   publish_at: string;
   attempts: number;
+  video_url: string | null;
+  caption: string | null;
 };
 
 /** Should this row be sent right now? The publisher asks this of every claimed row. */

@@ -4,20 +4,31 @@ import { autopayState, computeFunding, fundingInputs } from "@/lib/funding";
 
 export const dynamic = "force-dynamic";
 
-async function getMembers() {
+/**
+ * This is the revenue page, so the number it shows has to be the number that exists.
+ *
+ * It queried `FROM members WHERE plan = 'circle'` — a table that has never existed. The query
+ * threw on every render, the catch substituted FUNDING_MEMBERS (usually 0), and the page said
+ * "source: env" in 11px grey. The owner's money page has been reporting a placeholder as if it
+ * were a measurement. Found by D01/D02, which compare the SQL here to the SQL that builds the
+ * database.
+ */
+async function getMembers(): Promise<{ members: number; source: string; exact: boolean }> {
   const sql = getSql();
-  if (!sql) return { members: Number(process.env.FUNDING_MEMBERS || 0), source: "env" };
+  if (!sql) return { members: Number(process.env.FUNDING_MEMBERS || 0), source: "env", exact: false };
   try {
-    const rows: any = await sql`SELECT count(*)::int AS c FROM members WHERE plan = 'circle'`;
-    return { members: rows?.[0]?.c || 0, source: "neon" };
-  } catch {
-    return { members: Number(process.env.FUNDING_MEMBERS || 0), source: "env" };
+    const rows: any = await sql`SELECT count(*)::int AS c FROM agent_members WHERE tier <> 'free'`;
+    return { members: rows?.[0]?.c || 0, source: "agent_members", exact: true };
+  } catch (e: any) {
+    // No substituted population. A confident wrong number on the money page is the worst output
+    // this project can produce, because it is the one nobody double-checks.
+    return { members: Number(process.env.FUNDING_MEMBERS || 0), source: `unavailable: ${String(e?.message || e).slice(0, 60)}`, exact: false };
   }
 }
 
 export default async function MoneyPage() {
   const session = getSession();
-  const { members, source } = await getMembers();
+  const { members, source, exact } = await getMembers();
   const model = computeFunding(fundingInputs(members));
   const pay = autopayState();
   const isOwner = session?.role === "owner";
@@ -33,7 +44,7 @@ export default async function MoneyPage() {
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         {[
-          { k: "Active Circle members", v: `${members}`, note: `source: ${source}` },
+          { k: "Paying agent members", v: exact ? `${members}` : `${members} (unverified)`, note: `source: ${source}` },
           { k: "Circle revenue / mo", v: `$${model.circleRevenue.toLocaleString()}`, note: `@ $${model.inputs.circlePrice}/mo` },
           { k: "Self-funding floor", v: `${model.breakEvenMembers}`, note: "tools + prizes, no reserve" },
           { k: "Recommended floor", v: `${model.recommendedMembers}`, note: floorGap > 0 ? `${floorGap} members to go` : "cleared" },

@@ -7,11 +7,17 @@ export const VESPER_PROMPT = `You are Vesper, 20yo playful witty joke, adaptive 
 export async function triggerJiveBroadcast({ event, roleFilter }: { event: string; roleFilter?: "owner"|"social"|"content"|"all" }) {
   const sql = getSql();
   // WF7 Jive Vapi: POST to n8n webhook /webhook/jive-broadcast with 3 legs parallel not conference
-  const webhook = process.env.N8N_JIVE_WEBHOOK || "https://your-n8n.app/webhook/jive-broadcast";
+  const webhook = (process.env.N8N_JIVE_WEBHOOK || "").trim();
+  // This used to default to "https://your-n8n.app/webhook/jive-broadcast" and return ok:true
+  // regardless. A broadcast to a host that does not exist is not a broadcast; it is a silent
+  // no-op that reads as success in a log. There is no default for a phone line.
+  if (!webhook) {
+    return { ok: false as const, error: "jive_webhook_not_configured" as const, detail: "WF7 and the Jive/Vapi SIP line are not provisioned; nothing was sent" };
+  }
   const payload = { event, roleFilter: roleFilter || "all", voice_id: VESPER_VOICE_ID, vesper_prompt: VESPER_PROMPT, jive_number_env: JIVE_NUMBER_ENV, timestamp: new Date().toISOString() };
   // Log to Neon + Drive 17KpzZCm/calls placeholder — real n8n WF7 handles Vapi SIP -> Africa's Talking $0.06 primary -> Twilio $0.22 fallback, Voiceflow 3 KBs owner_all/social_account/content
   if (sql) await sql`INSERT INTO retention_events (id, user_id, action, offer) VALUES (${`jive_${Date.now()}`}, ${"jive"}, ${"jive_broadcast"}, ${event})`.catch(()=>{});
-  return { ok: true, webhook, payload, note: "Real broadcast via n8n WF7 Vapi 3 legs parallel — this POST triggers it. Bundle voice agent here in ZIP jarvis-app/lib/voice.ts + audio/*.mp3 + docs/JARVIS_VESPER_VOICE_WIRED.md" };
+  return { ok: true as const, webhook, payload, note: "Real broadcast via n8n WF7 Vapi 3 legs parallel — this POST triggers it. Bundle voice agent here in ZIP jarvis-app/lib/voice.ts + audio/*.mp3 + docs/JARVIS_VESPER_VOICE_WIRED.md" };
 }
 export async function getVesperSamples() {
   return [

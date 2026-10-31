@@ -469,6 +469,19 @@ ALTER TABLE agent_schedule ADD COLUMN IF NOT EXISTS claimed_at     TIMESTAMPTZ;
 ALTER TABLE agent_schedule ADD COLUMN IF NOT EXISTS published_at   TIMESTAMPTZ;
 ALTER TABLE agent_schedule ADD COLUMN IF NOT EXISTS buffer_post_id TEXT;
 ALTER TABLE agent_schedule ADD COLUMN IF NOT EXISTS last_error     TEXT;
+-- The asset travels WITH the row. The publisher used to look it up across two tables —
+-- one of them (agent_runs) has no video_url column at all, and the lookup was wrapped in a
+-- catch that made a broken query look identical to "no video yet". A row now carries the exact
+-- file it was approved with, so what a human approved is what gets published.
+ALTER TABLE agent_schedule ADD COLUMN IF NOT EXISTS video_url      TEXT;
+ALTER TABLE agent_schedule ADD COLUMN IF NOT EXISTS caption        TEXT;
+COMMENT ON COLUMN agent_schedule.video_url IS
+  'Copied from the source asset at booking time. The publisher never re-resolves it.';
+
+-- agent_runs records what a run cost and what it made. The URL lived nowhere, so the render
+-- route had no place to write its result.
+ALTER TABLE agent_runs ADD COLUMN IF NOT EXISTS video_url TEXT;
+ALTER TABLE agent_runs ADD COLUMN IF NOT EXISTS tier      TEXT;
 -- One row per asset per surface. A double-submitted plan is a duplicate post otherwise.
 CREATE UNIQUE INDEX IF NOT EXISTS agent_schedule_once
   ON agent_schedule (member_id, asset_id, platform);

@@ -72,6 +72,13 @@ export const TEAM = {
 /** Blended cost per run: script generation + free stickman render + storage. No paid polish. */
 export const COST_PER_RUN = 0.008;
 
+/**
+ * The text burned into every free export. It was hard-coded inside watermarkFor() as a literal,
+ * which meant lib/run.ts could not name it when it recorded a run — and a second spelling would
+ * have appeared the moment two files each needed it.
+ */
+export const WATERMARK_LABEL = "STICKMAN";
+
 /** Higgsfield polish is a real cost, so it is a paid action, not a toggle. */
 export const POLISH_COST = 0.08;
 
@@ -168,7 +175,7 @@ export function watermarkFor(tier: Tier) {
   if (!TIER_RULES[tier].watermark) return { apply: false as const, label: null };
   return {
     apply: true as const,
-    label: "STICKMAN",
+    label: WATERMARK_LABEL,
     position: "bottom-right, 40% opacity, static",
     // never on the face — the drawing is the product
     never_covers: "the character or the caption",

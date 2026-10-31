@@ -29,6 +29,8 @@ import {
 } from "../lib/brain";
 import { askJarvis } from "../lib/jarvis";
 import { canScheduleToBuffer, publishPathFor } from "../lib/publish";
+import { split } from "../lib/split";
+import { beforeRender, quotaFromRow, refund, renderSpec, reserve, runRecord, tierFrom } from "../lib/run";
 import {
   CLAIM_SQL, LONGFORM_DAYS, MARK_SQL, MAX_ATTEMPTS, SCHEDULABLE_SURFACES, backoffMinutes, batchSize,
   dayKey, localWeekday, nextSlot, parseHHMM, planAsset, resolveChannel, shouldCountAsPublished,
@@ -44,7 +46,7 @@ const results: Case[] = [];
 const short = (hits: string[]) => (hits.length ? hits.slice(0, 3).map((h) => h.slice(0, 80)).join(" | ") : "none");
 const add = (c: Case) => results.push(c);
 
-const D = { REL: "reliability", JUD: "judgment", EXE: "execution", MEM: "memory", BRAIN: "brain", AUTO: "automation", PUB: "publish", SCH: "schedule" };
+const D = { REL: "reliability", JUD: "judgment", EXE: "execution", MEM: "memory", BRAIN: "brain", AUTO: "automation", PUB: "publish", SCH: "schedule", DB: "schema", RUN: "run" };
 
 /* ---------------- RELIABILITY: fault injection ---------------- */
 
@@ -103,6 +105,7 @@ add({ id: "R09", dimension: D.REL, what: "free member, 20 runs already used in t
     const q = quotaCheck("free", { used_in_window: 20, used_this_month: 20, window_started: new Date(Date.now() - 3600e3).toISOString(), month: "2026-10" });
     return { pass: !q.allowed && q.resets_in_mins > 0, got: `${q.allowed} / ${q.reason}` };
   }});
+
 
 add({ id: "R10", dimension: D.REL, what: "monthly ceiling reached but window reset", expect: "still denied — the month does not reset",
   run: () => {
@@ -339,37 +342,37 @@ add({ id: "W08", dimension: SEC, what: "the configured pro product", expect: "pr
 
 /* ---------------- RENDER: can the agent actually make a video ---------------- */
 
-add({ id: "P01", dimension: D.EXE, what: "no engine configured", expect: "refuses and says why — never a fake asset",
+add({ id: "EN01", dimension: D.EXE, what: "no engine configured", expect: "refuses and says why — never a fake asset",
   run: () => {
     const r = pickEngine({} as any);
     return { pass: r === null, got: String(r) };
   }});
 
-add({ id: "P02", dimension: D.EXE, what: "stickman configured", expect: "picked first, ahead of the paid engine",
+add({ id: "EN02", dimension: D.EXE, what: "stickman configured", expect: "picked first, ahead of the paid engine",
   run: () => {
     const e = pickEngine({ STICKMAN_REPO_URL: "https://x", TUBEGEN_API_KEY: "k" } as any);
     return { pass: e === "stickman_free", got: String(e) };
   }});
 
-add({ id: "P03", dimension: D.EXE, what: "only the paid engine configured", expect: "tubegen, last resort",
+add({ id: "EN03", dimension: D.EXE, what: "only the paid engine configured", expect: "tubegen, last resort",
   run: () => {
     const e = pickEngine({ TUBEGEN_API_KEY: "k" } as any);
     return { pass: e === "tubegen", got: String(e) };
   }});
 
-add({ id: "P04", dimension: D.EXE, what: "a render attempt on a blocked script", expect: "refused before spending anything",
+add({ id: "EN04", dimension: D.EXE, what: "a render attempt on a blocked script", expect: "refused before spending anything",
   run: () => {
     const p = preflight({ script: "x".repeat(300), niche: "Stickman", format: "longform", characterLock: "lock", tier: "pro" }, false, true);
     return { pass: !p.ok && p.problems[0].includes("blocked"), got: p.problems.join("; ") };
   }});
 
-add({ id: "P05", dimension: D.EXE, what: "a longform with no character lock", expect: "refused — the page would drift",
+add({ id: "EN05", dimension: D.EXE, what: "a longform with no character lock", expect: "refused — the page would drift",
   run: () => {
     const p = preflight({ script: "x".repeat(300), niche: "Stickman", format: "longform", tier: "pro" }, true, true);
     return { pass: !p.ok && p.problems.some((x) => x.includes("character lock")), got: p.problems.join("; ") };
   }});
 
-add({ id: "P06", dimension: D.EXE, what: "render with no engine", expect: "ok=false, no asset_url, explicit reason",
+add({ id: "EN06", dimension: D.EXE, what: "render with no engine", expect: "ok=false, no asset_url, explicit reason",
   async run() {
     const r = await render({ script: "x".repeat(300), niche: "S", format: "short", tier: "free" }, { rulesPassed: true, policyPassed: true });
     return { pass: !r.ok && !r.asset_url && !!r.reason, got: r.reason ?? "no reason" };
@@ -1444,6 +1447,7 @@ const ENV_TZ = { SCHEDULE_UTC_OFFSET_MIN: "180" } as any;
 const planOnce = (over: any = {}, opts: any = {}) =>
   planAsset({
     asset_id: "a1", page_ref: "page-1", tier: "circle",
+    video_url: "https://cdn.example.com/a1.mp4",
     rules_ok: true, policy_ok: true, disclosure_ok: true, ...over,
   }, { env: ENV_TZ, now: new Date("2026-11-04T04:00:00Z"), ...opts }); // Wed 07:00 EAT
 
@@ -1471,7 +1475,7 @@ add({ id: "SC03", dimension: SC, what: "two assets want the same surface on the 
     const first = planOnce({ asset_id: "a1", surfaces: ["tiktok"] });
     const booked = first.rows.map((r) => ({ surface: r.surface, publish_at: r.publish_at }));
     const second = planAsset(
-      { asset_id: "a2", page_ref: "page-1", tier: "circle", rules_ok: true, policy_ok: true, disclosure_ok: true, surfaces: ["tiktok"] },
+      { asset_id: "a2", page_ref: "page-1", tier: "circle", video_url: "https://cdn.example.com/a2.mp4", rules_ok: true, policy_ok: true, disclosure_ok: true, surfaces: ["tiktok"] },
       { env: ENV_TZ, now: new Date("2026-11-04T04:00:00Z"), booked: booked as any },
     );
     const sameDay = second.rows.length > 0 && second.rows[0].publish_at.slice(0, 10) === first.rows[0].publish_at.slice(0, 10);
@@ -1647,6 +1651,359 @@ add({ id: "SC19", dimension: D.SCH, what: "the agent schedules to a surface the 
     const expected = ["youtube_longform", "youtube_shorts", "tiktok", "instagram", "facebook"];
     const matches = expected.every((e) => list.includes(e)) && !list.some((x) => /^x$|twitter/i.test(x));
     return { pass: matches, got: list.join(",") || "no platform CHECK found" };
+  }});
+
+
+/* ---------------- SCHEMA: does the SQL in this repo match the SQL that builds it ---------------- */
+
+const DB = D.DB;
+
+/**
+ * Parse migrate.sql into table -> columns.
+ *
+ * CREATE TABLE bodies plus every `ALTER TABLE x ADD COLUMN y` — because half this schema is
+ * evolved, and a checker that only reads CREATE TABLE would miss the half that changes.
+ */
+function schemaColumns(): Record<string, Set<string>> {
+  const sql = readFileSync(join(ROOT, "jarvis-app", "scripts", "migrate.sql"), "utf8");
+  const tables: Record<string, Set<string>> = {};
+
+  const createRe = /CREATE TABLE IF NOT EXISTS\s+([a-z_][a-z0-9_]*)\s*\(([\s\S]*?)\n\);/g;
+  for (const m of Array.from(sql.matchAll(createRe))) {
+    const name = m[1].toLowerCase();
+    tables[name] = tables[name] ?? new Set<string>();
+    for (const line of m[2].split("\n")) {
+      const col = /^\s{2}([a-z_][a-z0-9_]*)\s+[A-Z]/.exec(line);
+      if (col) tables[name].add(col[1].toLowerCase());
+    }
+  }
+
+  const altRe = /ALTER TABLE\s+([a-z_][a-z0-9_]*)\s+ADD COLUMN IF NOT EXISTS\s+([a-z_][a-z0-9_]*)/g;
+  for (const m of Array.from(sql.matchAll(altRe))) {
+    const name = m[1].toLowerCase();
+    tables[name] = tables[name] ?? new Set<string>();
+    tables[name].add(m[2].toLowerCase());
+  }
+  return tables;
+}
+
+/** Every tagged-template SQL string in app/ and lib/. */
+function sqlSnippets(): { file: string; sql: string }[] {
+  const out: { file: string; sql: string }[] = [];
+  const walk = (dir: string) => {
+    for (const f of readdirSync(dir, { withFileTypes: true })) {
+      const full = join(dir, f.name);
+      if (f.isDirectory()) { if (!/node_modules|\.next|\.test-build/.test(full)) walk(full); continue; }
+      if (!/\.(ts|tsx)$/.test(f.name)) continue;
+      const src = stripComments(readFileSync(full, "utf8"));
+      for (const m of Array.from(src.matchAll(/sql`([\s\S]*?)`/g))) out.push({ file: full, sql: m[1] });
+    }
+  };
+  walk(join(ROOT, "jarvis-app", "app"));
+  walk(join(ROOT, "jarvis-app", "lib"));
+  return out;
+}
+
+add({ id: "D01", dimension: DB, what: "a query selects a column the table does not have", expect: "every selected column exists",
+  run: () => {
+    // Found by running this check by hand: app/api/cron/publish-due selected `video_url FROM
+    // agent_runs`, and agent_runs has never had that column. The query sat inside a try/catch,
+    // so a broken SELECT was indistinguishable from "no video yet" — the same failure-reads-as-
+    // success shape as everything else, this time written by me an hour earlier.
+    const tables = schemaColumns();
+    const bad: string[] = [];
+
+    for (const { file, sql } of sqlSnippets()) {
+      const flat = sql.replace(/\s+/g, " ").trim();
+      // plain SELECT column list FROM table
+      const sel = /SELECT\s+([^]*?)\s+FROM\s+([a-z_][a-z0-9_]*)/i.exec(flat);
+      if (sel && !/\b(count|\*|sum|max|min|avg)\s*\(/i.test(sel[1]) && !/^\*$/.test(sel[1])) {
+        const table = sel[2].toLowerCase();
+        const cols = tables[table];
+        if (cols) {
+          const list = sel[1].split(",").map((c) => c.trim().split(/\s+/)[0].replace(/::.*$/, ""));
+          for (const c of list) {
+            if (!/^[a-z_][a-z0-9_]*$/i.test(c)) continue;
+            if (/\.\*$/.test(c) || c === "*") continue;
+            const bare = c.includes(".") ? c.split(".").pop()! : c;
+            if (!cols.has(bare.toLowerCase())) bad.push(`${file.replace(ROOT + "/", "")}: ${table}.${bare}`);
+          }
+        }
+      }
+      // INSERT INTO table (cols)
+      const ins = /INSERT INTO\s+([a-z_][a-z0-9_]*)\s*\(([^)]*)\)/i.exec(flat);
+      if (ins) {
+        const table = ins[1].toLowerCase();
+        const cols = tables[table];
+        if (cols) {
+          for (const c of ins[2].split(",").map((x) => x.trim())) {
+            if (!cols.has(c.toLowerCase())) bad.push(`${file.replace(ROOT + "/", "")}: INSERT ${table}.${c}`);
+          }
+        }
+      }
+    }
+    return { pass: bad.length === 0, got: bad.length ? short(bad) : `${sqlSnippets().length} SQL snippets reference real columns` };
+  }});
+
+add({ id: "D02", dimension: DB, what: "a workspace table is referenced but never created", expect: "every table in code exists in migrate.sql",
+  run: () => {
+    const tables = schemaColumns();
+    const known = new Set(Object.keys(tables));
+    const missing = new Set<string>();
+    const SQL_WORDS = ["set", "on", "where", "values", "conflict", "select", "due", "agent_schedule"];
+    for (const { sql } of sqlSnippets()) {
+      // CTE names are tables for the length of the statement, and `FROM now()` is a function.
+      // Both are legitimate, and a checker that flags them teaches people to ignore it.
+      const ctes = new Set(
+        Array.from(sql.matchAll(/(?:WITH|,)\s+([a-z_][a-z0-9_]*)\s+AS\s*\(/gi)).map((m) => m[1].toLowerCase()),
+      );
+      for (const m of Array.from(sql.matchAll(/\b(?:FROM|INTO|UPDATE)\s+([a-z_][a-z0-9_]*)\s*(\()?/gi))) {
+        const t = m[1].toLowerCase();
+        const isCall = m[2] === "("; // function, not table
+        if (isCall || SQL_WORDS.includes(t) || ctes.has(t)) continue;
+        if (!known.has(t)) missing.add(t);
+      }
+    }
+    return { pass: missing.size === 0, got: missing.size ? `not in migrate.sql: ${Array.from(missing).join(", ")}` : `${known.size} tables, all references resolve` };
+  }});
+
+add({ id: "D03", dimension: DB, what: "the schema parser found nothing at all", expect: "a plausible number of tables and columns",
+  run: () => {
+    // A checker that silently finds zero tables passes every other check in this dimension.
+    const tables = schemaColumns();
+    const n = Object.keys(tables).length;
+    const cols = Object.values(tables).reduce((a, s) => a + s.size, 0);
+    const agentSchedule = tables["agent_schedule"] ? Array.from(tables["agent_schedule"]) : [];
+    return {
+      pass: n >= 30 && cols >= 150 && agentSchedule.includes("claimed_at") && agentSchedule.includes("video_url"),
+      got: `${n} tables, ${cols} columns, agent_schedule has ${agentSchedule.length}`,
+    };
+  }});
+
+add({ id: "D04", dimension: DB, what: "a booking is made with no file behind it", expect: "refused, not scheduled",
+  run: () => {
+    const p = planAsset(
+      { asset_id: "a1", page_ref: "page-1", tier: "circle", rules_ok: true, policy_ok: true, disclosure_ok: true, surfaces: ["tiktok"] },
+      { env: ENV_TZ, now: new Date("2026-11-04T04:00:00Z") },
+    );
+    const local = planAsset(
+      { asset_id: "a1", page_ref: "page-1", tier: "circle", rules_ok: true, policy_ok: true, disclosure_ok: true, surfaces: ["tiktok"], video_url: "/assets/x.mp4" },
+      { env: ENV_TZ, now: new Date("2026-11-04T04:00:00Z") },
+    );
+    return { pass: p.refused?.code === "no_asset" && local.refused?.code === "asset_not_public", got: `${p.refused?.code} / ${local.refused?.code}` };
+  }});
+
+
+
+add({ id: "SC20", dimension: D.SCH, what: "a surface already has its full per-day quota of 2 booked", expect: "the asset slides to another day instead of stacking on the same timestamp",
+  run: () => {
+    // Bookings arrive as a list, so two posts on one day have the same dayKey. The old Set
+    // collapsed them to a single entry, countBooked returned 1, 1 < 2 was true — and a third post
+    // was booked onto the exact minute already used. A Set cannot hold a count.
+    const slot = "2026-11-04T09:00:00Z"; // 12:00 EAT — the Shorts slot
+    const booked = [
+      { surface: "youtube_shorts" as const, publish_at: slot },
+      { surface: "youtube_shorts" as const, publish_at: slot },
+    ];
+    const out = planAsset(
+      { asset_id: "a1", page_ref: "p", tier: "circle", surfaces: ["youtube_shorts"], per_surface_per_day: 2,
+        video_url: "https://cdn.example/v.mp4", rules_ok: true, policy_ok: true, disclosure_ok: true },
+      { now: new Date("2026-11-04T06:00:00Z"), booked },
+    );
+    const row = out.rows[0];
+    const sameDay = row ? dayKey(row.surface, row.publish_at, 180) === dayKey("youtube_shorts", slot, 180) : true;
+    return { pass: out.rows.length === 1 && !sameDay, got: `${out.rows.length} row · ${row ? row.publish_at : "none"} same_day=${sameDay}` };
+  }});
+
+/* ---------------- RUN: the one route that spends money ---------------- */
+
+const R = D.RUN;
+
+add({ id: "RN09", dimension: R, what: "a library module nothing in production imports", expect: "dead = 0, and the test-only ones are named with a reason",
+  run: () => {
+    // The first version of this check walked app/ and lib/ and called split/render/standard/voice
+    // "orphans". They are not: the TEST SUITE imports them. That is the worse failure, because a
+    // suite can cover a feature no route ever reaches — exercised and unreachable at once. So the
+    // classes are separated: wired (production imports it), test_only (only tests do), dead (nothing).
+    const LIB = join(ROOT, "jarvis-app", "lib");
+    const APP = join(ROOT, "jarvis-app", "app");
+    const read = (dir: string, into: { path: string; text: string }[]) => {
+      for (const f of readdirSync(dir, { withFileTypes: true })) {
+        const full = join(dir, f.name);
+        if (f.isDirectory()) { if (!/node_modules|\.next|\.test-build/.test(full)) read(full, into); continue; }
+        if (/\.(ts|tsx)$/.test(f.name)) into.push({ path: full, text: readFileSync(full, "utf8") });
+      }
+    };
+    const prod: { path: string; text: string }[] = [];
+    const tst: { path: string; text: string }[] = [];
+    read(APP, prod); read(LIB, prod);
+    read(join(ROOT, "jarvis-app", "tests"), tst);
+
+    // Modules that exist without a production caller. Each owes a reason AND the thing that would
+    // retire it, or the register becomes a place to hide dead code.
+    const UNSCHEDULED: Record<string, string> = {
+      standard: "scorecard maths for the money page; no route exposes it yet — retire it by adding the /money scorecard section",
+      voice: "Vesper/Vapi needs the Jive SIP line (WF7), which is unprovisioned — retire it when N8N_JIVE_WEBHOOK exists",
+    };
+
+    const cls: Record<string, "wired" | "test_only" | "dead"> = {};
+    for (const f of readdirSync(LIB)) {
+      if (!f.endsWith(".ts") || /\.d\.ts$/.test(f)) continue;
+      const mod = f.replace(/\.ts$/, "");
+      const src = readFileSync(join(LIB, f), "utf8");
+      if (!/^export /m.test(src)) continue;
+      const ref = (xs: { path: string; text: string }[]) =>
+        xs.some((x) => !x.path.endsWith(`lib/${f}`) && new RegExp(`from\\s+["'][./@][^"']*\\b${mod}["']`).test(x.text));
+      cls[mod] = ref(prod) ? "wired" : ref(tst) ? "test_only" : "dead";
+    }
+
+    const unlisted = Object.keys(cls).filter((k) => cls[k] !== "wired" && !(k in UNSCHEDULED));
+    const stale = Object.keys(UNSCHEDULED).filter((k) => UNSCHEDULED[k].trim().length < 20 || cls[k] === "wired" || !cls[k]);
+    const total = Object.keys(cls).length;
+    return {
+      pass: total >= 30 && unlisted.length === 0 && stale.length === 0,
+      got: `${total} modules · wired=${Object.values(cls).filter((v) => v === "wired").length} unlisted=[${unlisted.join(",")}] stale=[${stale.join(",")}]`,
+    };
+  }});
+
+add({ id: "RN12", dimension: R, what: "a caller omits policy_ok so the handler treated it as true", expect: "the verdict is computed server-side; the body asserts nothing",
+  run: () => {
+    const route = readFileSync(join(ROOT, "jarvis-app", "app", "api", "agent", "run", "route.ts"), "utf8");
+    const selfAsserted = /body\?\.(rules_ok|policy_ok|disclosure_ok)/.test(route);
+    const fromSplit = /rules_ok:\s*cuts\.policy\.pass/.test(route) && /policy_ok:\s*!cuts\.blocked/.test(route);
+    const fromCut = /disclosure_ok:\s*cuts\.edited\.disclosure\.trim\(\)\.length\s*>\s*0/.test(route);
+    return { pass: !selfAsserted && fromSplit && fromCut, got: `self_asserted=${selfAsserted} split=${fromSplit} disclosure=${fromCut}` };
+  }});
+
+add({ id: "RN13", dimension: R, what: "the public cut is destined for a platform that was removed", expect: "four surfaces, no X — the config scrub missed this file",
+  run: () => {
+    const r = split("A script long enough to survive the shape check. ".repeat(8), { title: "t", niche: "n", format: "short" });
+    const dest = r.edited.destination.split("+").map((x) => x.trim().toLowerCase());
+    const surfaces = new Set(["youtube", "tiktok", "ig", "instagram", "fb", "facebook"]);
+    const bad = dest.filter((d) => !surfaces.has(d));
+    return { pass: dest.length === 4 && bad.length === 0, got: `${r.edited.destination} · bad=[${bad.join(",")}]` };
+  }});
+
+add({ id: "RN14", dimension: R, what: "a longform with no character lock, or a 90-character script", expect: "refused before the renderer is paid",
+  run: () => {
+    const long = "This is a full episode of the scripted short. ".repeat(8);
+    const noLock = beforeRender({ rules_ok: true, policy_ok: true, disclosure_ok: true, script: long, format: "longform" });
+    const caption = beforeRender({ rules_ok: true, policy_ok: true, disclosure_ok: true, script: "too short to be an episode", format: "short" });
+    const good = beforeRender({ rules_ok: true, policy_ok: true, disclosure_ok: true, script: long, format: "longform", characterLock: "lock-1" });
+    return {
+      pass: !noLock.ok && /character lock/i.test(noLock.reason || "") && !caption.ok && /200/.test(caption.reason || "") && good.ok,
+      got: `nolock=${noLock.ok} caption=${caption.ok} good=${good.ok}`,
+    };
+  }});
+
+add({ id: "RN15", dimension: R, what: "two tests share one id", expect: "no duplicate id — a collision hides a deletion",
+  run: () => {
+    // R01-R09 existed twice (reliability and run) and P01-P06 twice (execution and publish). A
+    // re-run count still looked green, and my own slice deleted reliability R09 without a single
+    // test noticing. The counter is worthless if the keys are not unique.
+    const ids = results.map((c) => c.id);
+    const seen = new Set<string>();
+    const dupes = ids.filter((id) => (seen.has(id) ? true : (seen.add(id), false)));
+    return { pass: dupes.length === 0, got: dupes.length ? `duplicate: ${dupes.join(", ")}` : `${ids.length} unique ids` };
+  }});
+
+const emptyQuota = (over: any = {}) => ({ used_in_window: 0, used_this_month: 0, window_started: "2026-11-04T04:00:00Z", month: "2026-11", ...over });
+const NOW = new Date("2026-11-04T05:00:00Z");
+
+add({ id: "RN01", dimension: R, what: "a run is taken and the window is fresh", expect: "allowed, counters increment by one",
+  run: () => {
+    const r = reserve("circle", emptyQuota(), NOW);
+    return { pass: r.allowed && r.next.used_in_window === 1 && r.next.used_this_month === 1, got: `${r.allowed} win=${r.next.used_in_window} mo=${r.next.used_this_month}` };
+  }});
+
+add({ id: "RN02", dimension: R, what: "the window expired six hours ago", expect: "reset and allow, not refuse",
+  run: () => {
+    // A member idle overnight must not be told they are out of runs until the month rolls over.
+    const stale = emptyQuota({ used_in_window: 40, used_this_month: 40, window_started: "2026-11-03T20:00:00Z" });
+    const r = reserve("circle", stale, NOW);
+    return { pass: r.allowed && r.next.used_in_window === 1 && r.window_reset, got: `allowed=${r.allowed} used=${r.next.used_in_window} reset=${r.window_reset}` };
+  }});
+
+add({ id: "RN03", dimension: R, what: "the monthly ceiling is reached", expect: "refused even though the 5h window has room",
+  run: () => {
+    const q = emptyQuota({ used_this_month: 600, used_in_window: 0 });
+    const r = reserve("circle", q, NOW);
+    return { pass: !r.allowed && r.next.used_this_month === 600, got: `allowed=${r.allowed} reason=${(r.reason || "").slice(0, 40)}` };
+  }});
+
+add({ id: "RN04", dimension: R, what: "two requests read the same counter at once", expect: "the second cannot spend the last run",
+  run: () => {
+    // Sequentially reserving off the SAME base models what two concurrent readers do when the
+    // counter is not claimed first: both believe there is room. The fix is reserving before
+    // rendering, so the second reserve sees the first one's write.
+    const base = emptyQuota({ used_in_window: 39, used_this_month: 100 });
+    const first = reserve("circle", base, NOW);
+    const second = reserve("circle", first.next, NOW);
+    return { pass: first.allowed && !second.allowed, got: `first=${first.allowed} second=${second.allowed}` };
+  }});
+
+add({ id: "RN05", dimension: R, what: "the script fails the policy gate", expect: "blocked before the renderer is paid",
+  run: () => {
+    const g = beforeRender({ rules_ok: true, policy_ok: false, disclosure_ok: true });
+    const ok = beforeRender({ rules_ok: true, policy_ok: true, disclosure_ok: true });
+    return { pass: !g.ok && /policy/.test(g.reason || "") && ok.ok, got: `${g.ok} / ${ok.ok}` };
+  }});
+
+add({ id: "RN06", dimension: R, what: "a run fails at the renderer", expect: "cost recorded as 0, and the run is given back",
+  run: () => {
+    const failed = runRecord({ member_id: "m", tier: "pro", status: "failed", cost: 0.1, asset_id: null, video_url: null, reason: "timeout" });
+    const ok = runRecord({ member_id: "m", tier: "pro", status: "ok", cost: 0.1, asset_id: "a", video_url: "https://x/v.mp4" });
+    const back = refund({ used_in_window: 5, used_this_month: 9, window_started: NOW.toISOString(), month: "2026-11" });
+    return {
+      pass: failed.cost === 0 && failed.detail.billed === false && ok.cost === 0.1 && back.used_in_window === 4 && back.used_this_month === 8,
+      got: `failed_cost=${failed.cost} ok_cost=${ok.cost} refunded=${back.used_in_window}/${back.used_this_month}`,
+    };
+  }});
+
+add({ id: "RN07", dimension: R, what: "what a free member's file looks like next to a paid one", expect: "watermark + 720p vs clean + 1080p",
+  run: () => {
+    const free = renderSpec("free");
+    const pro = renderSpec("pro");
+    return {
+      pass: free.watermark && free.watermark_label === "STICKMAN" && free.resolution === "720p" && !pro.watermark && pro.watermark_label === null && pro.resolution === "1080p",
+      got: `free=${free.resolution}/wm:${free.watermark_label} pro=${pro.resolution}/wm:${pro.watermark_label}`,
+    };
+  }});
+
+add({ id: "RN08", dimension: R, what: "a caller claims a tier in the request body", expect: "the body is not evidence",
+  run: () => {
+    const junk = ["team", "owner", "admin", " ", null, undefined, "PRO "];
+    const parsed = junk.map((j) => tierFrom(j as any));
+    const valid = tierFrom("pro");
+    return {
+      pass: parsed[0] === "team" && parsed[1] === null && parsed[2] === null && parsed[3] === null && parsed[4] === null && parsed[6] === "pro" && valid === "pro",
+      got: parsed.map((x) => String(x)).join(","),
+    };
+  }});
+
+add({ id: "RN10", dimension: R, what: "the quota row is read with a stale month", expect: "the month counter resets, the window does not",
+  run: () => {
+    const staleMonth = quotaFromRow({ used_in_window: 7, used_this_month: 550, month_key: "2026-09", window_started: "2026-11-04T04:30:00Z" }, NOW);
+    const r = reserve("circle", staleMonth, NOW);
+    return { pass: staleMonth.used_this_month === 0 && r.allowed && r.next.used_this_month === 1 && r.next.used_in_window === 8, got: `month_in=${staleMonth.used_this_month} out=${r.next.used_this_month} win=${r.next.used_in_window}` };
+  }});
+
+add({ id: "RN11", dimension: R, what: "the run route is written but nothing calls the renderer", expect: "the route imports render-paid, and the adapter is paid-first",
+  run: () => {
+    const route = readFileSync(join(ROOT, "jarvis-app", "app", "api", "agent", "run", "route.ts"), "utf8");
+    const order: string[] = [];
+    const idx = (name: string) => route.indexOf(name);
+    order.push(`reserve:${idx("reserve(tier")}`);
+    order.push(`gate:${idx("beforeRender(")}`);
+    order.push(`render:${idx("higgsfieldRender(")}`);
+    const reserveFirst = idx("reserve(tier") > -1 && idx("reserve(tier") < idx("higgsfieldRender(");
+    const gateBeforeRender = idx("beforeRender(") > -1 && idx("beforeRender(") < idx("higgsfieldRender(");
+    const importsAdapter = /from "@\/lib\/render-paid"/.test(route);
+    const writesRuns = /INSERT INTO agent_runs/.test(route);
+    return {
+      pass: reserveFirst && gateBeforeRender && importsAdapter && writesRuns,
+      got: `reserve<render=${reserveFirst} gate<render=${gateBeforeRender} imports=${importsAdapter} writes_runs=${writesRuns}`,
+    };
   }});
 
 /* ---------------- run ---------------- */

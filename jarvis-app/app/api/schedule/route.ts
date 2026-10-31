@@ -84,8 +84,15 @@ export async function POST(req: Request) {
   const assetId = typeof body?.asset_id === "string" ? body.asset_id.trim() : "";
   const pageRef = typeof body?.page_ref === "string" ? body.page_ref.trim() : "";
   const memberId = typeof body?.member_id === "string" ? body.member_id.trim() : "";
+  const videoUrl = typeof body?.video_url === "string" ? body.video_url.trim() : "";
   if (!assetId || !pageRef) {
     return NextResponse.json({ ok: false, error: "asset_id_and_page_ref_required" }, { status: 400 });
+  }
+  if (!videoUrl) {
+    return NextResponse.json(
+      { ok: false, error: "video_url_required", detail: "a slot is booked against a finished file, not an intention" },
+      { status: 422 },
+    );
   }
 
   // Tier comes from the database, not the request body. A client that says "I am team" is not
@@ -126,6 +133,8 @@ export async function POST(req: Request) {
     {
       asset_id: assetId,
       page_ref: pageRef,
+      video_url: videoUrl,
+      caption: typeof body?.caption === "string" ? body.caption : "",
       member_id: memberId || undefined,
       tier,
       rules_ok: body?.rules_ok !== false,
@@ -151,8 +160,8 @@ export async function POST(req: Request) {
   for (const r of plan.rows) {
     try {
       const out: any[] = await sql`
-        INSERT INTO agent_schedule (member_id, page_ref, platform, publish_at, asset_id, watermark, gate_status, publish_path, sla_due_at)
-        VALUES (${r.member_id || null}, ${r.page_ref}, ${r.surface}, ${r.publish_at}, ${r.asset_id}, ${r.watermark}, ${r.gate_status}, ${r.publish_path}, ${r.sla_due_at})
+        INSERT INTO agent_schedule (member_id, page_ref, platform, publish_at, asset_id, video_url, caption, watermark, gate_status, publish_path, sla_due_at)
+        VALUES (${r.member_id || null}, ${r.page_ref}, ${r.surface}, ${r.publish_at}, ${r.asset_id}, ${r.video_url}, ${r.caption}, ${r.watermark}, ${r.gate_status}, ${r.publish_path}, ${r.sla_due_at})
         ON CONFLICT (member_id, asset_id, platform) DO NOTHING
         RETURNING id, platform, publish_at, gate_status
       `;

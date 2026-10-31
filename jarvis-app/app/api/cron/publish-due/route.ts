@@ -119,7 +119,8 @@ async function run(req: Request) {
       continue;
     }
 
-    const videoUrl = await assetUrl(sql, row.asset_id);
+    // Read from the row itself. No cross-table lookup, no catch that hides a bad column.
+    const videoUrl = (row.video_url || "").trim();
     if (!videoUrl) {
       await mark(sql, row.id, "blocked", null, `asset ${row.asset_id} has no public URL`);
       failed++;
@@ -130,7 +131,7 @@ async function run(req: Request) {
     const out = await publish({
       surface: row.platform,
       channelId: resolved.channelId,
-      text: await captionFor(sql, row.asset_id),
+      text: row.caption || "",
       videoUrl,
       dueAt: undefined, // publish now; the slot already decided "when"
     });
