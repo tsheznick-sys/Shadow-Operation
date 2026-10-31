@@ -9,7 +9,7 @@
 | **GOOD — Starter $35** | $35 one-time | Pillow 0cr thumbs + Wan T4 free 32s script pack + manual hashtag bank | None auto — teach how to manual Higgsfield UI | Lite not needed |
 | **BETTER — Pro $89** | $89 one-time | TubeGen 30m prompts + OpusClip presets (virality 9.2 checklist) + Buffer Team SOP | Unlock `TubeGen auto + OpusClip virality score` in Agent (1 domain, 3 clips/day) | Requires Lite $17/mo |
 | **BEST — Vault+Agent Pro $89+$44/mo** | $89 + $44/mo | All above + 5-domain template + Higgsfield polish per-clip preset pack (no LUT, no watermark) + Whop WWS replay | Unlock full stack $189 scale: TubeGen $29 + OpusClip $15 + Higgsfield auto per-clip $0.08 + Buffer Team $60 → shown as `Included` | Requires Pro $44/mo |
-| **Continuity $26/mo** | $26/mo | Vault Circle community + monthly teardown live + 5 new prompts | Keeps access to whichever tier bought — if cancel, pod+streak frozen not deleted 7d |
+| **Continuity $44/mo** | $44/mo | Vault Circle community + monthly teardown live + 5 new prompts | Keeps access to whichever tier bought — if cancel, pod+streak frozen not deleted 7d |
 
 **Incentive logic:** Member buys GOOD → sees Leaderboard winner `Higgsfield Pro + OpusClip 9.2 — 12k views` → clicks `Upgrade to BEST to get same stack?` → Whop `change_plan` → instant unlock via `lib/entitlement.ts` → WF8 logs ascension (churn becomes expansion).
 

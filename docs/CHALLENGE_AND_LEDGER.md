@@ -22,9 +22,9 @@ Two engines, both live in the app, both run by Jarvis, both public.
 | **Eligibility** | paying community members only — no public sign-ups |
 | **Tenure required** | **14 days paid** before the room opens |
 | **Entry fee** | **$0 — the membership is the ticket** |
-| **Qualifies** | First Shot $28 (its 14-day pass *is* the tenure) · Circle $26/mo after 14 days |
+| **Qualifies** | First Shot $28 (its 14-day pass *is* the tenure) · Circle $44/mo after 14 days |
 
-**Why no extra charge:** asking a $26 member for a $28 deposit to join a task makes entry $54 and empties the room. The 14-day wait does the filtering money would do — and tourists do not pay for two weeks to get in. Tenure is the one filter that cannot be bought.
+**Why no extra charge:** asking a $44 member for a $28 deposit to join a task makes entry $54 and empties the room. The 14-day wait does the filtering money would do — and tourists do not pay for two weeks to get in. Tenure is the one filter that cannot be bought.
 
 The gate also does a second job: a member with a 14-day task list at day 14 has a reason to stay past the churn cliff, which is where your 1–2% target is won or lost.
 
@@ -70,7 +70,7 @@ Completion is the metric. **60%+ completion beats member count every time.** A 5
 
 | Their own number | What happens |
 |---|---|
-| **PASS (50+ comments)** | **$28 First Shot → Circle $26 → an operator seat** running their own page. They already proved it. |
+| **PASS (50+ comments)** | **$28 First Shot → Circle $44 → an operator seat** running their own page. They already proved it. |
 | **AMBER (25–49)** | Another cycle, **free**. |
 | **RED (<25)** | **A different niche** — never a discount. |
 | **Did not finish** | **Lite $17/mo.** "You did not finish, so I will not pretend you did." |
@@ -150,7 +150,7 @@ That last one matters commercially: any prospect, any page, any partner can pull
         ↓
 $28 First Shot     →  risk on us, not them, and it is refundable          (BET)
         ↓
-Circle $26/mo      →  the membership that funds the operation
+Circle $44/mo      →  the membership that funds the operation
 ```
 
 The challenge is the **DO**. The ledger is the **SHOW**. Neither works alone: proof without a task is a claim, and a task without proof is a homework club.
@@ -171,7 +171,7 @@ The challenge is the **DO**. The ledger is the **SHOW**. Neither works alone: pr
 | Workflows | **WF14** (challenge) · **WF9** (ledger) |
 | Env | `CHALLENGE_*` · `PROOF_*` · `LEDGER_REFRESH_SECONDS` |
 
-**17 tables · 15 workflows · 34 pages.**
+**30 tables · 17 workflows · 42 pages.**
 
 ---
 

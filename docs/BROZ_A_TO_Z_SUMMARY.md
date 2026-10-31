@@ -204,7 +204,7 @@ n8n Cloud $20 · Buffer Team $60 · Claude · OpusClip · Higgsfield $0.08/clip 
 
 ## K — Go-live (today)
 
-**All 5 pages at once.**
+**One page at a time.** Page 1 (Stickman) runs alone until it posts a GREEN week; each later page needs a 3-of-3 board vote. Five channels compounding beats twenty-five guessing.
 
 1. Neon → run `jarvis-app/scripts/migrate.sql` (16 tables)
 2. n8n → import `n8n/n8n_workflows_self_3man.json` (**14 workflows**) + `config/n8n_workflow_variables.json`

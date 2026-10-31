@@ -68,7 +68,7 @@ So: **7 members keep the lights on, 26 covers tools + prizes, 35 funds everythin
 ## 4. Where the money physically needs to be
 
 1. **One Wise USD balance** — Circle revenue lands here (via Whop payouts).
-2. **Whop** — holds the products and the $26/mo subscription; it pays out to Wise.
+2. **Whop** — holds the products and the $44/mo subscription; it pays out to Wise.
 3. **A ledger in Neon** (`funding_ledger`) — one row per month: revenue in, tools paid, prizes paid, annual fund moved, reserve left. This is what Jarvis reads to answer "can we afford X?".
 
 Nothing else is needed. No second bank, no spreadsheet.
@@ -120,7 +120,7 @@ At 62 members the operation is fully funded, annually pre-paid, and holds a $370
 
 ## 8. What to do this week
 
-1. Set the Circle price to **$26** and keep it (changing price mid-cohort resets trust).
+1. Set the Circle price to **$44** and keep it (changing price mid-cohort resets trust).
 2. Publish the prize formula openly: *"After tools, everything up to $710 goes to prizes. Below 35 members, prizes scale — we never promise what we cannot pay."*
 3. Run `scripts/migrate.sql` so `funding_ledger` exists.
 4. Open `/money`, look at the numbers, and decide whether to grant authority. **Nothing moves until you do.**
@@ -128,4 +128,4 @@ At 62 members the operation is fully funded, annually pre-paid, and holds a $370
 
 ---
 
-*Superseded 2026-10-31: Circle $19→$26, prizes $750→$710, saves $5/50%/$9 → $8/35%/$17. **Break-even 48→44 and recommended 51→53**, now solved on NET revenue after processor fees — the intermediate 35/44 was fee-blind and insolvent at 35.*
+*History: Circle passed through $19 → $26 → **$44** on 2026-10-31. Each move was forced by a measured failure: $19 could not fund prizes, $26 sat in the 10%-churn band and collided with any clean percentage discount, $44 is a curated-room price with a 2-3% churn profile. Saves are $8 pause / $17 downgrade; there is no percentage discount. Break-even 26 / recommended 35 at full ARPU, 35/44 at median ARPU, 44/53 at the 25th percentile. Solved on NET after processor fees, never gross.*

@@ -2,13 +2,14 @@
   "name": "jarvis-shadow",
   "version": "1.0.0",
   "private": true,
-  "description": "JARVIS — Real-life brain for Shadow Operation: PWA + Vercel + Cloud Agent + Squad 3-5 bros — Claude Primary + Grok Secondary (OPENAI_API_KEY removed, entitlement wired)",
+  "description": "JARVIS \u2014 Real-life brain for Shadow Operation: PWA + Vercel + Cloud Agent + Squad 3-5 bros \u2014 Claude Primary + Grok Secondary (OPENAI_API_KEY removed, entitlement wired)",
   "scripts": {
     "dev": "next dev -H 0.0.0.0 -p 3000",
     "build": "next build",
     "start": "next start -H 0.0.0.0 -p 3000",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:agent": "tsc tests/agent.test.ts --outDir .test-build --module commonjs --target es2020 --moduleResolution node --skipLibCheck --esModuleInterop --resolveJsonModule && REPO_ROOT=.. NODE_PATH=$PWD/node_modules node .test-build/tests/agent.test.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",

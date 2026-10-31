@@ -89,7 +89,7 @@ At 5 brands that is **10 YouTube channels**, plus each brand's TikTok and IG (an
 
 ## 6. Go-live order
 
-**All 5 pages at once.**
+**One page at a time.** Page 1 (Stickman) runs alone until it posts a GREEN week; each later page is a 3-of-3 board vote (docs/PAGE_LAW_ONE_NICHE.md).
 
 1. Neon → run `scripts/migrate.sql`
 2. n8n → import `n8n_workflows_self_3man.json` (**14 workflows**)
@@ -99,7 +99,7 @@ At 5 brands that is **10 YouTube channels**, plus each brand's TikTok and IG (an
 6. Start WF1 → WF2 → WF3 → WF4 for **every page at once**, with 2 YT channels per brand
 7. First 72 hours: watch G4 queue, `/autonomy`, first demand test
 
-**First-week target:** all 5 pages live · **30 clips out** · **first 3 Circle members**.
+**First-week target:** **page 1 live** (Stickman, 5 channels) · **30 clips out** · **first 3 Circle members**. The other four pages are designed and queued, not live — one page at a time (docs/PAGE_LAW_ONE_NICHE.md).
 
 **Phase 2 (triggered by numbers, not dates):** once the Shadow Operation role converts the required number of clients, Jarvis gets the full backend — run the pipeline end-to-end, monetise the pages, and make the sales itself.
 
@@ -115,8 +115,8 @@ At 5 brands that is **10 YouTube channels**, plus each brand's TikTok and IG (an
 | Kill switch scope | global | `CONTROL_STATE` |
 | Masters retention | 30 days | `RETENTION_MASTERS_DAYS=30` |
 | Offline behaviour | full autonomy | — |
-| Go-live | 5 pages at once | `PAGES_COUNT=5` |
-| YT channels per brand | 2 | `YT_CHANNELS_PER_BRAND=2` |
+| Go-live | 1 page live, 4 queued | `PAGES_COUNT=1` |
+| Channels per page | 5 (2 YouTube, no X) | `CHANNELS_PER_PAGE=5` |
 | Longform publish days | Mon/Wed/Fri | `LONGFORM_PUBLISH_DAYS=1,3,5` |
 
 ---

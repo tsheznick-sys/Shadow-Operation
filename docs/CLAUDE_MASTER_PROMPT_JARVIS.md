@@ -2,7 +2,7 @@
 
 **Branch:** `arena/6c47af3d-shadow-operation` `pr_open` | **Date:** 2026-10-31 Nairobi EAT | **Repo:** `tsheznick-sys/Shadow-Operation` | **Engine:** Grok `grok-2-latest` + Claude `claude-3-5-sonnet-20241022` | **ZIP:** `jarvis_self_3man_bundle.zip` 3.0M adaptable
 
-> **ADAPTABLE LOCKS 31 Oct:** X discovery 1-2/day filler no gate, IG/TikTok/YT 6/day serious, Chatfuel IG&TikTok only, ManyChat YT, Gmail triage, STRICT GREEN `<50+5%+` fast-close vs AMBER `50-70+3-5%` 14-day, both → Whop, leak→expand, PAGES_COUNT=5 any N via env, niches pool 8 any CSV, ladder $28+$17+$35+$89+$44+$26 env (numerology_8 — every price reduces to 8 except the $28 first shot), TubeGen alternatives engine provider.
+> **ADAPTABLE LOCKS 31 Oct:** X discovery 1-2/day filler no gate, IG/TikTok/YT 6/day serious, Chatfuel IG&TikTok only, ManyChat YT, Gmail triage, STRICT GREEN `<50+5%+` fast-close vs AMBER `50-70+3-5%` 14-day, both → Whop, leak→expand, PAGES_COUNT=5 any N via env, niches pool 8 any CSV, ladder $28+$17+$35+$89+$53+$44 env (numerology_8 — every price reduces to 8 except the $28 first shot), TubeGen alternatives engine provider.
 
 This is the MASTER prompt Claude Code reads on first run. Paste into `00_MASTER_SYSTEM_PROMPT.md` + `CLAUDE.md` or `claude.ai` Project Instructions + `JARVIS_SOLO_MASTER_PROMPT.md`.
 
@@ -17,7 +17,7 @@ Accounts — SPLIT LOCKED:
 • Jarvis admin = scott.abuya@gmail.com (Vercel + Neon DATABASE_URL + n8n Cloud $20 + Claude CLAUDE_API_KEY + Grok GROK_API_KEY/XAI_API_KEY + WHOP_API_KEY + WISE_API_KEY + Linear + Telegram + Jive +25418XXXX710) — never social
 • Social master = info.wolf@gmail.com — 5 YT brands (its TT+IG+Shorts) via Buffer Team $60, ChatFuel IG & TikTok only, X discovery 1-2/day filler only no gate, YT comments → Gmail triage FINAL TERMS → Whop
 
-Stack you must wire — FULLY ADAPTABLE HYBRID STICKMAN FINANCE (see .env.example):
+Stack you must wire — FULLY ADAPTABLE HYBRID STICKMAN (see .env.example):
 Vercel + Neon + n8n **14 WFs** (n8n/n8n_workflows_self_3man.json WF1 daily whole-internet scan + Claude action plan → WF4 G4 only publish gate → WF5 GREEN fast-close / WF5A AMBER → WF10 monthly 14-day sequence → WF11 72h demand test → WF12 interview digest → **WF13 global pause**) + Claude 3.5 Sonnet primary + Grok secondary api.x.ai/v1 + Engine **stickman_all**: kaomei/stickman-video-director free renders 30-min longform AND Shorts on ALL pages (one prompt/one frame character lock) + Wan T4 free fallback WAN_T4_URL + TubeGen $29 fallback only (or pictory $25 / fliki $21 / invideo $17 / heygen $24 / frameloop $19 via ENGINE_PROVIDER env docs/TUBEGEN_ALTERNATIVES_NICHES.md) + OpusClip virality 9.2 + Higgsfield polish $0.08/clip on LONG AND SHORTS + Buffer Team 6/day Shorts + longform Mon/Wed/Fri + Whop $28 first shot + $17/$35/$89/$53/$44 ladder (numerology_8) + Chatfuel/ManyChat 8ch + R2 $5 canonical (30-day masters) + Wise alias pay (autopay held) + Vessy on Vapi/ElevenLabs +25418XXXX710. **5 channels per page** (2 YouTube — Longform is page 1 — plus TikTok, IG, FB; X removed for growth reasons) = 25 channels at 5 pages. **Page 1 is Stickman, live alone until it posts a GREEN week.** **ONE PAGE = ONE NICHE**; a sixth slot is held, not filled (docs/PAGE_LAW_ONE_NICHE.md). **Signals**: daily email → PWA → SMS if offline → voice call after 10 min. **2FA** on /money and /admin. **/control** = owner-only Global Pause.
 
 Thresholds (adaptable THRESHOLD_*):

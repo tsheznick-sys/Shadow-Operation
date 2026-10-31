@@ -22,7 +22,7 @@ Before any of this could be trusted, the funding arithmetic had to be true.
 
 | | Gross model (wrong) | Reality |
 |---|---|---|
-| Net per $26 member | $26.00 | **$24.22** (fees $1.78) |
+| Net per $26 member *(historical — the $26 era)* | $26.00 | **$24.22** (fees $1.78) |
 | At 35 members | "covers prizes" | net $847.63 − $165 tools = **$682.63** → **$27 short of the $710 prize pool** |
 
 **The fix — solved on net, snapped up to the next 8:**

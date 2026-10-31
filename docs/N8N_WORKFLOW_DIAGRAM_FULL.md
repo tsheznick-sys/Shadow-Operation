@@ -146,7 +146,7 @@ flowchart TD
   └──────────┘       │ ManyChat │      └──────────┘      │ 14-day   │
        │ AMBER       └──────────┘            │           └──────────┘
        └────────────────────────────────────┼──────────────────┘
-                                            │ $28 · $17 · $35 · $89 · $44 · $26/mo
+                                            │ $28 · $17 · $35 · $89 · $53 · $44/mo
                                             ▼
  LANE 3 · OPS LOOPS                     always on, no human
 
@@ -261,7 +261,7 @@ gantt
 
 | # | Node (n8n type) | What it does | 🔑 env / config | 🗄 |
 |---|---|---|---|---|
-| 1 | Postgres SELECT | `SELECT top5 FROM solo_domains` — scalable `PAGES_COUNT` pages: Page1 Stickman Finance (free Shorts), Page2+ other niches (TubeGen longform) | `PAGES_COUNT=5` | `solo_domains` |
+| 1 | Postgres SELECT | `SELECT top5 FROM solo_domains` — scalable `PAGES_COUNT` pages: Page1 Stickman (free Shorts), Page2+ other niches (TubeGen longform) | `PAGES_COUNT=5` | `solo_domains` |
 | 2 | Claude Code | 6 scripts/domain → `3 × 8s short + 2 × 32s long + 1 × 60s deep` = **4,500 words ≈ 30 min**, Butler tone, JSON `{title,script,captions,hashtags}` | `CLAUDE_API_KEY` | — |
 | 3 | HTTP Request → TubeGen | 30-min faceless longform per domain; **♻ fallback** `WAN_T4_URL` (Colab free) if TubeGen missing/fails | `TUBEGEN_API_KEY` `WAN_T4_URL` | — |
 | 4 | Stickman branch (Page1) | `stickman-video-director` free scenes → 9:16 master, one master prompt + one reference frame = character lock | `STICKMAN_REPO_URL` `STICKMAN_FREE_REPO` | — |
@@ -275,7 +275,7 @@ gantt
 
 ---
 
-### WF3 — Stickman Finance Shorts + OpusClip virality + Higgsfield polish
+### WF3 — Stickman Shorts + OpusClip virality + Higgsfield polish
 **Role:** Content G4 · **Trigger:** 🪝 webhook "TubeGen finished" · **id:** `wf3_autoclip_virality`
 
 | # | Node (n8n type) | What it does | 🔑 env / config | 🗄 |
@@ -285,7 +285,7 @@ gantt
 | 3 | ffmpeg | Katana `p01_32s_9x16.mp4` → 9:16 master, loudness −14 LUFS, caption burn | — | — |
 | 4 | HTTP OpusClip | 30m → **5–8 shorts**, virality target **9.2**, auto-reframe 9:16, captions | `OPUSCLIP_API_KEY` | — |
 | 5 | HTTP Higgsfield | **short-form final polish $0.08/clip** — upscale / clean / smooth the **final Shorts only** (no teal-purple LUT, no watermark) | `HIGGSFIELD_API_KEY` | — |
-| 6 | Character lock | Stickman Finance: 1 master prompt + 1 reference frame → identity consistent across clips (replaces old LUT branding) | `config/adaptable.json → content.engine_hybrid.brand_lock` | — |
+| 6 | Character lock | Stickman: 1 master prompt + 1 reference frame → identity consistent across clips (replaces old LUT branding) | `config/adaptable.json → content.engine_hybrid.brand_lock` | — |
 | 7 | Postgres INSERT | `publisher_queue38 (date, domain, caption, video_url, virality, status='pending_G4')`, schedule 38/day | — | `publisher_queue38` |
 | 8 | Linear + Telegram | Create issue SHA "6 clips ready — content guy G4" | `LINEAR_API_KEY` `TELEGRAM_BOT_TOKEN` | — |
 
@@ -321,7 +321,7 @@ gantt
 | 2 | IF GREEN | `ratio < THRESHOLD_RATIO_GREEN` **and** `er >= THRESHOLD_ER_GREEN` **and** gate GREEN → GREEN; else AMBER check | `THRESHOLD_RATIO_GREEN=50` `THRESHOLD_ER_GREEN=5` | `creators` |
 | 3 | ChatFuel / ManyChat | Auto-DM `VAULT` keyword within **2 min** — ChatFuel IG & TikTok, ManyChat YT (ChatFuel cannot do YT) | `CHATFUEL_TOKEN` `MANYCHAT_API_KEY` | — |
 | 4 | Hard close | 3-email cap → **FINAL TERMS** one-pager 10 pts, sign only after PASS (no free audit, Rule 9) | `ADMIN_EMAIL` | — |
-| 5 | Whop API | Vault ladder `$28 + $17 + $35 + $89 + $44 + $26/mo`, grant to `scott.abuya@gmail.com` + `info.wolf@gmail.com`, Buffer Team | `WHOP_API_KEY` `WHOP_PRODUCT_LITE_ID` `WHOP_PRODUCT_PRO_ID` | `members` |
+| 5 | Whop API | Vault ladder `$28 + $17 + $35 + $89 + $53 + $44/mo`, grant to `scott.abuya@gmail.com` + `info.wolf@gmail.com`, Buffer Team | `WHOP_API_KEY` `WHOP_PRODUCT_LITE_ID` `WHOP_PRODUCT_PRO_ID` | `members` |
 | 6 | ChatFuel Push / ManyChat Push | 8 channels push → Jarvis DM auto, social manager reviews in one app | `CHATFUEL_TOKEN` `MANYCHAT_API_KEY` | — |
 | 7 | Gmail + Telegram | "Sir PASS — GREEN fast-close, vault live" to all 3 pods | `GMAIL_OAUTH` `TELEGRAM_BOT_TOKEN` | — |
 
@@ -338,7 +338,7 @@ gantt
 | 1 | IF AMBER | `ratio 50–70` **and** `er 3–5%` → enroll; else RED → HOLD + improve loop | `THRESHOLD_RATIO_AMBER_MAX=70` `THRESHOLD_ER_AMBER_MIN=3` `THRESHOLD_ER_AMBER_MAX=5` |
 | 2 | ChatFuel + ManyChat enroll | Day 1–3 Value Proof (1 script moving + WF3 value clip) | `CHATFUEL_SCOPE=IG&TikTok` |
 | 3 | Sequence | Day 4–7 DM scripts + teardown (quietwolfzz 514K case + GS variants) | — |
-| 4 | Sequence | Day 8–14 DM close + Whop `$26/mo` Circle — daily CTA (not 3-email cap) | `TIER_CIRCLE_PRICE=26` |
+| 4 | Sequence | Day 8–14 DM close + Whop `$44/mo` Circle — daily CTA (not 3-email cap) | `TIER_CIRCLE_PRICE=44` |
 | 5 | IF YES any day | Exit 14-day → jump to WF5 GREEN fast-close FINAL TERMS | — |
 | 6 | Post-14d no YES | HOLD → WF6 leak finder + WF1 re-rank; improve loop: A/B Higgsfield short-form + OpusClip 9.2 + daily ER + weekly Grok re-rank + Whop ladder A/B | — |
 
@@ -446,7 +446,7 @@ gantt
 ```mermaid
 flowchart LR
     S["Page slot<br/>PAGES_COUNT 5"] --> Q{"page_no = 1 ?"}
-    Q -->|"yes · Stickman Finance"| ST["stickman-video-director<br/>free · git clone · $0<br/>one master prompt + one frame"]
+    Q -->|"yes · Stickman"| ST["stickman-video-director<br/>free · git clone · $0<br/>one master prompt + one frame"]
     Q -->|"no · Page2+"| TB{"TUBEGEN_API_KEY ?"}
     TB -->|"yes"| TG["TubeGen $29/mo<br/>30 min faceless 4.5k words"]
     TB -->|"no / 402"| WAN["Wan T4 free<br/>WAN_T4_URL Colab"]
@@ -511,7 +511,7 @@ Only **G4 + G5 + G6** require a human swipe; everything else is automatic.
 | DM | `CHATFUEL_TOKEN`, `CHATFUEL_SCOPE`, `MANYCHAT_API_KEY` | WF5, WF5A, WF8, WF9 |
 | Money | `WHOP_API_KEY`, `WHOP_WEBHOOK`, `WHOP_PRODUCT_LITE_ID`, `WHOP_PRODUCT_PRO_ID`, `WISE_API_KEY`, `TIER_*` | WF5, WF8 |
 | Thresholds | `THRESHOLD_RATIO_GREEN=50`, `THRESHOLD_ER_GREEN=5`, `THRESHOLD_RATIO_AMBER_MAX=70`, `THRESHOLD_ER_AMBER_MIN=3`, `THRESHOLD_BUYER_POOL_MIN=3000` | WF1, WF5, WF5A |
-| Niches | `NICHES_POOL` (9, Stickman Finance first) | WF1, WF2, WF6 |
+| Niches | `NICHES_POOL` (7, Stickman first) | WF1, WF2, WF6 |
 | Notify | `TELEGRAM_BOT_TOKEN`, `SIGNAL_API`, `GMAIL_OAUTH`, `LINEAR_API_KEY` | all |
 | Voice | `VAPI_API_KEY`, `JIVE_JARVIS_NUMBER`, `ELEVENLABS_API_KEY` | WF7 |
 | Data | `DATABASE_URL` (Neon), `DRIVE_OAUTH`, `R2_*` | all |
