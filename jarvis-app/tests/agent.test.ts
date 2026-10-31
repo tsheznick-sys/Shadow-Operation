@@ -12,8 +12,13 @@ import {
 import { resolve, nicheEvidence, PARTNERS } from "../lib/board";
 import { scorecard, netPerMember, CEILINGS } from "../lib/standard";
 import { cloneBrief } from "../lib/scaleout";
+import { DEFAULT_SECRETS, SecurityError, authSecret, assertProductionEnv, isKnownDefault } from "../lib/security";
+import { cronAllowed } from "../lib/cron-auth";
+import { createHmac } from "crypto";
+import { planFor, tierFromProduct, verifySignature } from "../lib/webhook";
+import { pickEngine, preflight, render } from "../lib/render";
 
-type Case = { id: string; dimension: string; what: string; expect: string; run: () => { pass: boolean; got: string } };
+type Case = { id: string; dimension: string; what: string; expect: string; run: () => { pass: boolean; got: string } | Promise<{ pass: boolean; got: string }> };
 const results: Case[] = [];
 const short = (hits: string[]) => (hits.length ? hits.slice(0, 3).map((h) => h.slice(0, 80)).join(" | ") : "none");
 const add = (c: Case) => results.push(c);
@@ -124,6 +129,229 @@ add({ id: "R17", dimension: D.REL, what: "a scorecard row that fails", expect: "
   run: () => {
     const s = scorecard({ stack: 900, fixed: 875, net_per_member: 41.19, churn_pct: 2, assets_shipped: 10, assets_produced: 100, hours: 1, surfaces: 5, ideas: 100, revenue: 2000 });
     return { pass: !s.pass, got: `${s.score}% — ${s.verdict}` };
+  }});
+
+/* ---------------- SECURITY: the three holes found in the live-readiness audit ---------------- */
+
+const SEC = "security";
+function withEnv<T>(vars: Record<string, string | undefined>, fn: () => T): T {
+  const prev: Record<string, string | undefined> = {};
+  for (const k of Object.keys(vars)) {
+    prev[k] = process.env[k];
+    if (vars[k] === undefined) delete process.env[k];
+    else process.env[k] = vars[k];
+  }
+  try {
+    return fn();
+  } finally {
+    for (const k of Object.keys(vars)) {
+      if (prev[k] === undefined) delete process.env[k];
+      else process.env[k] = prev[k];
+    }
+  }
+}
+
+add({ id: "S01", dimension: SEC, what: "production with no AUTH_SECRET", expect: "refuses to issue a session secret",
+  run: () => withEnv({ NODE_ENV: "production", VERCEL_ENV: undefined, AUTH_SECRET: undefined, NEXTAUTH_SECRET: undefined }, () => {
+    try { authSecret(); return { pass: false, got: "returned a secret anyway" }; }
+    catch (e) { return { pass: e instanceof SecurityError, got: (e as Error).name }; }
+  })});
+
+add({ id: "S02", dimension: SEC, what: "production with the published default secret", expect: "refuses — it is forgeable by anyone reading the repo",
+  run: () => withEnv({ NODE_ENV: "production", AUTH_SECRET: "dev-only-shadow-secret-change-me" }, () => {
+    try { authSecret(); return { pass: false, got: "accepted the public default" }; }
+    catch (e) { return { pass: e instanceof SecurityError, got: "refused" }; }
+  })});
+
+add({ id: "S03", dimension: SEC, what: "a short secret", expect: "refused (under 16 chars)",
+  run: () => withEnv({ NODE_ENV: "production", AUTH_SECRET: "short" }, () => {
+    try { authSecret(); return { pass: false, got: "accepted 5 chars" }; }
+    catch { return { pass: true, got: "refused" }; }
+  })});
+
+add({ id: "S04", dimension: SEC, what: "a real 32-char secret", expect: "accepted",
+  run: () => withEnv({ NODE_ENV: "production", AUTH_SECRET: "a".repeat(32) }, () => {
+    const v = authSecret();
+    return { pass: v.length === 32, got: `${v.length} chars` };
+  })});
+
+add({ id: "S05", dimension: SEC, what: "dev without a secret", expect: "still works, never the published string",
+  run: () => withEnv({ NODE_ENV: "development", AUTH_SECRET: undefined }, () => {
+    const v = authSecret();
+    return { pass: v.length > 0 && !DEFAULT_SECRETS.includes(v), got: v.slice(0, 8) + "…" };
+  })});
+
+add({ id: "S06", dimension: SEC, what: "production boot check with no DB and no secret", expect: "at least 2 named problems",
+  run: () => withEnv({ NODE_ENV: "production", AUTH_SECRET: undefined, DATABASE_URL: undefined, AUTH_REQUIRED: undefined }, () => {
+    const r = assertProductionEnv();
+    return { pass: !r.ok && r.problems.length >= 2, got: r.problems.length + " problems" };
+  })});
+
+add({ id: "S07", dimension: SEC, what: "AUTH_REQUIRED=false in production", expect: "called out — every request is the owner",
+  run: () => withEnv({ NODE_ENV: "production", AUTH_SECRET: "a".repeat(32), DATABASE_URL: "postgres://x", AUTH_REQUIRED: "false" }, () => {
+    const r = assertProductionEnv();
+    return { pass: r.problems.some((p) => p.includes("AUTH_REQUIRED")), got: r.problems.join(" | ") };
+  })});
+
+add({ id: "S08", dimension: SEC, what: "a cron with no CRON_SECRET in production", expect: "503, not open",
+  run: () => withEnv({ NODE_ENV: "production", CRON_SECRET: undefined }, () => {
+    const r = cronAllowed(new Request("https://x/api/cron/daily-brief"));
+    return { pass: !r.ok && r.response?.status === 503, got: `${r.ok} / ${r.response?.status}` };
+  })});
+
+add({ id: "S09", dimension: SEC, what: "a cron with the wrong bearer token", expect: "401",
+  run: () => withEnv({ NODE_ENV: "production", CRON_SECRET: "s3cret-value" }, () => {
+    const r = cronAllowed(new Request("https://x/api/cron/daily-brief", { headers: { authorization: "Bearer wrong" } }));
+    return { pass: !r.ok && r.response?.status === 401, got: `${r.ok} / ${r.response?.status}` };
+  })});
+
+add({ id: "S10", dimension: SEC, what: "a cron with the right bearer token", expect: "allowed",
+  run: () => withEnv({ NODE_ENV: "production", CRON_SECRET: "s3cret-value" }, () => {
+    const r = cronAllowed(new Request("https://x/api/cron/daily-brief", { headers: { authorization: "Bearer s3cret-value" } }));
+    return { pass: r.ok, got: `${r.ok}` };
+  })});
+
+add({ id: "S11", dimension: SEC, what: "the whop upgrade route still trusts the client", expect: "session + owner check present, no client-supplied tier price",
+  run: () => {
+    const src = readFileSync(join(ROOT, "jarvis-app", "app", "api", "whop", "upgrade", "route.ts"), "utf8");
+    const hasSession = /getSession\(\)/.test(src);
+    const ownerOnly = /role !== "owner"/.test(src);
+    // Match the actual request target, not the file. The comment explaining that it USED to
+    // point at v2 is documentation, not a defect — judging prose was the previous bug.
+    const target = (src.match(/fetch\(\s*["`']([^"`']+)["`']/) ?? [])[1] ?? "none";
+    const v1 = target.includes("api.whop.com/api/v1");
+    return { pass: hasSession && ownerOnly && v1, got: `session=${hasSession} owner=${ownerOnly} v1=${v1}` };
+  }});
+
+add({ id: "S12", dimension: SEC, what: "middleware still ignores /api", expect: "matcher covers /api and the four new pages",
+  run: () => {
+    const src = readFileSync(join(ROOT, "jarvis-app", "middleware.ts"), "utf8");
+    const api = /\/api\/:path\*/.test(src);
+    const pages = ["board", "scale", "reliability", "stickman"].every((p) => src.includes(`/${p}`));
+    return { pass: api && pages, got: `api=${api} pages=${pages}` };
+  }});
+
+/**
+ * Strip comments before looking for a shipped secret.
+ * A comment that says "the old default was X" is a record; a string literal that says it is a
+ * master key. The scanner must tell them apart — this is now the third time a check has been
+ * fooled by prose (the 70-char excerpt, the api/v2 history note, and this).
+ */
+function stripComments(src: string) {
+  return src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
+}
+
+add({ id: "S13", dimension: SEC, what: "no source file ships a usable default secret in CODE", expect: "only lib/security.ts names them",
+  run: () => {
+    const LIB = join(ROOT, "jarvis-app", "lib");
+    const hits: string[] = [];
+    for (const f of readdirSync(LIB)) {
+      if (!f.endsWith(".ts") || f === "security.ts") continue;
+      const t = stripComments(readFileSync(join(LIB, f), "utf8"));
+      for (const d of DEFAULT_SECRETS) if (t.includes(`"${d}"`)) hits.push(`${f}: ${d}`);
+    }
+    return { pass: hits.length === 0, got: hits.join(" | ") || "none" };
+  }});
+
+add({ id: "S14", dimension: SEC, what: "the comment-stripper itself can be fooled", expect: "it removes comments and keeps literals",
+  run: () => {
+    const sample = 'const a = "keep-me"; // "drop-me"\n/* "also-drop" */';
+    const out = stripComments(sample);
+    return { pass: out.includes("keep-me") && !out.includes("drop-me") && !out.includes("also-drop"), got: out.replace(/\n/g, " ") };
+  }});
+
+/* ---------------- WEBHOOK: the revenue path ---------------- */
+
+const sign = (body: string, secret: string) => createHmac("sha256", secret).update(body).digest("hex");
+
+add({ id: "W01", dimension: SEC, what: "a webhook with no secret configured", expect: "refused with a reason, never trusted",
+  run: () => {
+    const r = verifySignature("{}", new Headers(), undefined);
+    return { pass: !r.ok && r.reason.includes("not configured"), got: r.reason };
+  }});
+
+add({ id: "W02", dimension: SEC, what: "a valid signature", expect: "verified",
+  run: () => {
+    const body = JSON.stringify({ type: "membership_created" });
+    const r = verifySignature(body, new Headers({ "whop-signature": sign(body, "s3cret") }), "s3cret");
+    return { pass: r.ok, got: r.reason };
+  }});
+
+add({ id: "W03", dimension: SEC, what: "a tampered body", expect: "rejected",
+  run: () => {
+    const body = JSON.stringify({ type: "membership_created" });
+    const sig = sign(body, "s3cret");
+    const r = verifySignature(body.replace("created", "cancelled"), new Headers({ "whop-signature": sig }), "s3cret");
+    return { pass: !r.ok, got: r.reason };
+  }});
+
+add({ id: "W04", dimension: SEC, what: "a signature for a different secret", expect: "rejected",
+  run: () => {
+    const body = "{}";
+    const r = verifySignature(body, new Headers({ "whop-signature": sign(body, "wrong") }), "s3cret");
+    return { pass: !r.ok, got: r.reason };
+  }});
+
+add({ id: "W05", dimension: SEC, what: "cancellation", expect: "revokes access AND oauth grants — the one-hour law finally has a caller",
+  run: () => {
+    const p = planFor("membership_cancelled", {});
+    return { pass: p.action === "revoke_access" && p.revoke_oauth === true, got: `${p.action} revoke_oauth=${p.revoke_oauth}` };
+  }});
+
+add({ id: "W06", dimension: SEC, what: "a failed payment", expect: "flagged, NOT revoked — a failed card is a retry, not a churn",
+  run: () => {
+    const p = planFor("payment_failed", {});
+    return { pass: p.action === "mark_payment_failed", got: p.action };
+  }});
+
+add({ id: "W07", dimension: SEC, what: "an unknown product id", expect: "free, never a guessed tier",
+  run: () => {
+    const t = tierFromProduct("prod_unknown", {} as any);
+    return { pass: t === "free", got: t };
+  }});
+
+add({ id: "W08", dimension: SEC, what: "the configured pro product", expect: "pro",
+  run: () => {
+    const t = tierFromProduct("prod_pro", { WHOP_PRODUCT_PRO_ID: "prod_pro" } as any);
+    return { pass: t === "pro", got: t };
+  }});
+
+/* ---------------- RENDER: can the agent actually make a video ---------------- */
+
+add({ id: "P01", dimension: D.EXE, what: "no engine configured", expect: "refuses and says why — never a fake asset",
+  run: () => {
+    const r = pickEngine({} as any);
+    return { pass: r === null, got: String(r) };
+  }});
+
+add({ id: "P02", dimension: D.EXE, what: "stickman configured", expect: "picked first, ahead of the paid engine",
+  run: () => {
+    const e = pickEngine({ STICKMAN_REPO_URL: "https://x", TUBEGEN_API_KEY: "k" } as any);
+    return { pass: e === "stickman_free", got: String(e) };
+  }});
+
+add({ id: "P03", dimension: D.EXE, what: "only the paid engine configured", expect: "tubegen, last resort",
+  run: () => {
+    const e = pickEngine({ TUBEGEN_API_KEY: "k" } as any);
+    return { pass: e === "tubegen", got: String(e) };
+  }});
+
+add({ id: "P04", dimension: D.EXE, what: "a render attempt on a blocked script", expect: "refused before spending anything",
+  run: () => {
+    const p = preflight({ script: "x".repeat(300), niche: "Stickman", format: "longform", characterLock: "lock", tier: "pro" }, false, true);
+    return { pass: !p.ok && p.problems[0].includes("blocked"), got: p.problems.join("; ") };
+  }});
+
+add({ id: "P05", dimension: D.EXE, what: "a longform with no character lock", expect: "refused — the page would drift",
+  run: () => {
+    const p = preflight({ script: "x".repeat(300), niche: "Stickman", format: "longform", tier: "pro" }, true, true);
+    return { pass: !p.ok && p.problems.some((x) => x.includes("character lock")), got: p.problems.join("; ") };
+  }});
+
+add({ id: "P06", dimension: D.EXE, what: "render with no engine", expect: "ok=false, no asset_url, explicit reason",
+  async run() {
+    const r = await render({ script: "x".repeat(300), niche: "S", format: "short", tier: "free" }, { rulesPassed: true, policyPassed: true });
+    return { pass: !r.ok && !r.asset_url && !!r.reason, got: r.reason ?? "no reason" };
   }});
 
 /* ---------------- MEMORY: does the code still match the locks ---------------- */
@@ -323,21 +551,34 @@ add({ id: "E03", dimension: D.EXE, what: "worst-case cost if everyone maxes thei
   }});
 
 /* ---------------- run ---------------- */
-let pass = 0;
-const failed: string[] = [];
-const byDim: Record<string, { p: number; n: number }> = {};
-for (const c of results) {
-  let r: { pass: boolean; got: string };
-  try { r = c.run(); } catch (e) { r = { pass: false, got: `THREW: ${(e as Error).message}` }; }
-  byDim[c.dimension] ??= { p: 0, n: 0 };
-  byDim[c.dimension].n++;
-  if (r.pass) { byDim[c.dimension].p++; pass++; }
-  else failed.push(`${c.id} [${c.dimension}] ${c.what} -> expected ${c.expect}, got ${r.got}`);
-  const mark = r.pass ? "PASS" : "FAIL";
-  console.log(`${mark} ${c.id} ${c.dimension.padEnd(11)} ${c.what}`.padEnd(96) + `| ${r.got}`.slice(0, 110));
+async function main() {
+  let pass = 0;
+  const failed: string[] = [];
+  const byDim: Record<string, { p: number; n: number }> = {};
+  for (const c of results) {
+    let r: { pass: boolean; got: string };
+    try {
+      r = await c.run();
+    } catch (e) {
+      r = { pass: false, got: `THREW: ${(e as Error).message}` };
+    }
+    byDim[c.dimension] ??= { p: 0, n: 0 };
+    byDim[c.dimension].n++;
+    if (r.pass) {
+      byDim[c.dimension].p++;
+      pass++;
+    } else failed.push(`${c.id} [${c.dimension}] ${c.what} -> expected ${c.expect}, got ${r.got}`);
+    const mark = r.pass ? "PASS" : "FAIL";
+    console.log(`${mark} ${c.id} ${c.dimension.padEnd(11)} ${c.what}`.padEnd(96) + `| ${r.got}`.slice(0, 110));
+  }
+  console.log("\n=== SCORECARD ===");
+  for (const [d, v] of Object.entries(byDim)) console.log(`${d.padEnd(12)} ${v.p}/${v.n}  ${Math.round((v.p / v.n) * 100)}%`);
+  console.log(`TOTAL        ${pass}/${results.length}  ${Math.round((pass / results.length) * 100)}%`);
+  if (failed.length) {
+    console.log("\n=== DEFECTS ===");
+    failed.forEach((f) => console.log(" - " + f));
+  }
+  process.exit(failed.length ? 1 : 0);
 }
-console.log("\n=== SCORECARD ===");
-for (const [d, v] of Object.entries(byDim)) console.log(`${d.padEnd(12)} ${v.p}/${v.n}  ${Math.round((v.p / v.n) * 100)}%`);
-console.log(`TOTAL        ${pass}/${results.length}  ${Math.round((pass / results.length) * 100)}%`);
-if (failed.length) { console.log("\n=== DEFECTS ==="); failed.forEach((f) => console.log(" - " + f)); }
-process.exit(failed.length ? 1 : 0);
+
+main();

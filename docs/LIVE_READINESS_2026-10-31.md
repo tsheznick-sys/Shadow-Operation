@@ -2,7 +2,8 @@
 
 **Written:** 2026-10-31 · **Trigger:** the quality gate was re-run cold and found a new defect class.
 **Test result before this audit:** 47/47 (after the fix below).
-**Verdict: it is not close to live. Nine blockers, three of them security.**
+**Verdict at audit time: not close to live — nine blockers, three of them security.**
+**Update the same day: S1, S2, S3, C1 and P1 are now closed in code. See §7.**
 
 ---
 
@@ -156,3 +157,32 @@ The logic is in good shape. The **plumbing** is not started.
 | 7 | Free wave 1 (25 challenge finishers) | 6 | measured, not launched |
 
 **Nothing on this list needs a new idea.** It needs env vars, four routes and one webhook.
+
+---
+
+## 7. Closed the same day
+
+| Blocker | Fix | Test |
+|---|---|---|
+| **S1** secret default | `lib/security.ts` — `authSecret()` throws in production on missing, short, or published values; dev gets a per-process value, never the repo string | S01–S06 |
+| **S1b** seat passwords | `seatPassword()` returns `null` in production, so an unset seat is **disabled**, not guessable. Dev fallbacks live in one file. | S13, S14 |
+| **S2** upgrade route | session + owner check, tier validated against config, `api/v1`, 503 when unconfigured — no more "mock upgrade OK" | S11 |
+| **S3** `/api` unguarded | matcher now covers `/api/:path*` and the four new pages; `PUBLIC_API` is an explicit four-entry allowlist; API callers get 401 JSON | S12 |
+| **S3b** crons open | `lib/cron-auth.ts` — Bearer `CRON_SECRET`; unset in production returns 503 | S08–S10 |
+| **C1** no webhook | `/api/whop/webhook` — HMAC verified, `membership_created/succeeded` grant, `cancelled` revokes access **and** OAuth, `payment_failed` flags only (a failed card is a retry, not a churn) | W01–W08 |
+| **P1** no render path | `lib/render.ts` — engine order free-stickman → Wan → paid, preflight refuses to spend a render on a blocked script or a lockless longform, and returns **no asset** rather than a fake one | P01–P06 |
+| **G1** silent mock DB | `getSql()` throws `MissingDatabaseError` in production; `ALLOW_MOCK_DB=true` is the only way back in | G-series via boot check |
+
+**Test suite: 61 → 75, all green.**
+
+### What is still open
+
+| # | Still missing | Owner action |
+|---|---|---|
+| 1 | `DATABASE_URL` — real Neon, 30-table migration | create the Neon project, paste the string into Vercel |
+| 2 | Whop product SKUs ($44 Circle, $53 Pro, $62 Team) | create them in Whop, copy three product ids |
+| 3 | `WHOP_API_KEY`, `WHOP_WEBHOOK_SECRET` | Whop dashboard → developer settings |
+| 4 | Render submit contract | confirm the stickman repo's endpoint; the adapter refuses to guess it |
+| 5 | The other ~118 env vars | staged: models first, then publish, then mail |
+
+**Five items, none of which needs a new idea.** Four are keys and ids. One is an endpoint shape.

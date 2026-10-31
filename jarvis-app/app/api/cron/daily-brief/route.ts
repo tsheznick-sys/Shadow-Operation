@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-export async function GET() {
+import { cronAllowed } from "@/lib/cron-auth";
+
+export async function GET(req: Request) {
+  const gate = cronAllowed(req);
+  if (!gate.ok) return gate.response!;
   return NextResponse.json({
     time: new Date().toISOString(),
     briefing: "Sir, 6 drafts await swipe. Omar Story 1 due Thu 19:00 EAT. 1,462 GREEN pool. 200/200 LIVE. Cloud only, Forever memory, Strict 0%550.",

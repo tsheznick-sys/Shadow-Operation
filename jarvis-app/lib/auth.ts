@@ -2,6 +2,7 @@
 // HMAC-signed session cookie. Edge-safe verify lives in middleware.ts.
 import { cookies } from "next/headers";
 import { createHmac, timingSafeEqual } from "crypto";
+import { authSecret as secureAuthSecret, seatPassword } from "./security";
 
 export type Role = "owner" | "content" | "social";
 
@@ -32,31 +33,40 @@ function pick(env: string | undefined, fallback: string) {
 }
 
 /** Seeded team — every value env-overridable, no code change to rotate. */
+/**
+ * Seats with an empty password cannot authenticate: the login check refuses an empty string.
+ * In production an unset seat password disables that seat rather than making it guessable.
+ */
 export function teamUsers(): SeedUser[] {
   return [
     {
       email: pick(process.env.TEAM_OWNER_EMAIL, "scott.abuya@gmail.com").toLowerCase(),
-      password: pick(process.env.TEAM_OWNER_PASSWORD, "shadow-owner-2026"),
+      password: seatPassword("TEAM_OWNER_PASSWORD") ?? "",
       name: pick(process.env.TEAM_OWNER_NAME, "Scott"),
       role: "owner",
     },
     {
       email: pick(process.env.TEAM_CONTENT_EMAIL, "content@shadow.local").toLowerCase(),
-      password: pick(process.env.TEAM_CONTENT_PASSWORD, "shadow-content-2026"),
+      password: seatPassword("TEAM_CONTENT_PASSWORD") ?? "",
       name: pick(process.env.TEAM_CONTENT_NAME, "Content Guy"),
       role: "content",
     },
     {
       email: pick(process.env.TEAM_SOCIAL_EMAIL, "info.wolf@gmail.com").toLowerCase(),
-      password: pick(process.env.TEAM_SOCIAL_PASSWORD, "shadow-social-2026"),
+      password: seatPassword("TEAM_SOCIAL_PASSWORD") ?? "",
       name: pick(process.env.TEAM_SOCIAL_NAME, "Social Manager"),
       role: "social",
     },
   ];
 }
 
+/**
+ * The signing secret. Delegated to lib/security.ts, which refuses to hand back a public default
+ * in production. The old version of this function returned "dev-only-shadow-secret-change-me"
+ * whenever the env was missing — a master key published in this repo.
+ */
 export function authSecret(): string {
-  return pick(process.env.AUTH_SECRET, "dev-only-shadow-secret-change-me");
+  return secureAuthSecret();
 }
 
 export function authRequired(): boolean {

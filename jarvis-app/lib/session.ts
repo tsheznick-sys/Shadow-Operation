@@ -66,5 +66,8 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "dev-only-shadow-secret-change-me",
+  // No literal fallback. Undefined here makes NextAuth fail closed at runtime rather than
+  // accept a secret that is published in this repository. Setting it at module scope would
+  // break `next build` (which runs with NODE_ENV=production), so this stays a plain env read.
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
 };

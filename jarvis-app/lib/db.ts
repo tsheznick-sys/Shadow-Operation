@@ -2,10 +2,33 @@
 // Tables: creators (1,462 GREEN), drafts, replies, bros, pipeline, snapshots + retention (pods, user_vault, retention_events)
 // Connection via DATABASE_URL in Vercel env — uses postgres.js
 import postgres from "postgres";
+import { isProduction } from "./security";
 let sql: any = null;
+
+export class MissingDatabaseError extends Error {
+  constructor() {
+    super(
+      "DATABASE_URL is not set. In production this is fatal: every route would return 200 while " +
+        "recording nothing — a store that takes money and forgets. Set DATABASE_URL or set " +
+        "ALLOW_MOCK_DB=true for a deliberate demo.",
+    );
+    this.name = "MissingDatabaseError";
+  }
+}
+
+/**
+ * The connection. Returns null ONLY in a deliberate demo.
+ *
+ * Before 2026-10-31 this returned null whenever DATABASE_URL was missing, silently, in every
+ * environment. Routes caught the null and answered 200 with mock data. That is fine for a
+ * screenshot and catastrophic for a customer: the payment goes through and nothing is written.
+ */
 export function getSql() {
-  if (!process.env.DATABASE_URL) return null; // local dev without DB — mock mode
-  if (!sql) sql = postgres(process.env.DATABASE_URL, { ssl: "require" });
+  if (!process.env.DATABASE_URL) {
+    if (isProduction() && process.env.ALLOW_MOCK_DB !== "true") throw new MissingDatabaseError();
+    return null; // local dev, or an explicit demo
+  }
+  if (!sql) sql = postgres(process.env.DATABASE_URL, { ssl: "require", max: 5 });
   return sql;
 }
 // Schema (run once): see jarvis-app/scripts/migrate.sql

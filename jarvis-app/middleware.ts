@@ -2,9 +2,25 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // Edge-safe HMAC verify (WebCrypto) — mirrors lib/auth.ts without node:crypto.
-const OWNER_ONLY = ["/admin", "/control"];
+const OWNER_ONLY = ["/admin", "/control", "/board", "/scale"];
 
-const PROTECTED = ["/team", "/money", "/onboarding", "/content", "/social", "/admin", "/retention", "/pods", "/drafts", "/autonomy", "/control"];
+// Every internal surface. Added 2026-10-31: /board, /scale, /reliability and /stickman were
+// public — any member could read the pricing strategy, the graduation plan and the reliability
+// numbers. /bros, /challenge, /ledger and /login stay public on purpose: they are the shop front.
+const PROTECTED = [
+  "/team", "/money", "/onboarding", "/content", "/social", "/admin", "/retention",
+  "/pods", "/drafts", "/autonomy", "/control", "/board", "/scale", "/reliability",
+  "/stickman", "/improve", "/jarvis", "/n8n",
+];
+
+/**
+ * API routes reachable without a session, and why each one is safe:
+ *   /api/auth/*        — the login flow itself
+ *   /api/whop/webhook  — verified by Whop's signature inside the handler, not by cookie
+ *   /api/cron/*        — verified by CRON_SECRET inside the handler (added 2026-10-31)
+ * Everything else under /api requires a session. Before this, NINE handlers had no check at all.
+ */
+const PUBLIC_API = ["/api/auth", "/api/whop/webhook", "/api/cron", "/api/health"];
 
 const ROLE_ROUTES: Record<string, string[]> = {
   owner: ["*"],
@@ -25,7 +41,10 @@ async function verifyEdge(token: string | undefined): Promise<{ email: string; r
   if (!token || !token.includes(".")) return null;
   const [body, sig] = token.split(".");
   if (!body || !sig) return null;
-  const secret = process.env.AUTH_SECRET || "dev-only-shadow-secret-change-me";
+  // No default secret. A forged cookie is not a degraded session, it is a takeover — so an
+  // unset secret in production fails closed (every check returns null) instead of open.
+  const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
+  if (!secret || secret.length < 16) return null;
   const key = await crypto.subtle.importKey(
     "raw",
     new TextEncoder().encode(secret),
@@ -50,6 +69,16 @@ export async function middleware(req: NextRequest) {
 
   if (process.env.AUTH_REQUIRED === "false") return NextResponse.next();
   if (pathname.startsWith("/login") || pathname.startsWith("/api/auth")) return NextResponse.next();
+
+  // API guard: a machine caller gets 401 JSON, never a redirect to HTML.
+  if (pathname.startsWith("/api")) {
+    if (PUBLIC_API.some((p) => pathname === p || pathname.startsWith(`${p}/`))) return NextResponse.next();
+    const session = await verifyEdge(req.cookies.get("shadow_session")?.value);
+    if (!session) {
+      return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
+    }
+    return NextResponse.next();
+  }
 
   const needsAuth = PROTECTED.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   if (!needsAuth) return NextResponse.next();
@@ -81,5 +110,12 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/team/:path*", "/money/:path*", "/onboarding/:path*", "/content/:path*", "/social/:path*", "/admin/:path*", "/retention/:path*", "/pods/:path*", "/drafts/:path*", "/autonomy/:path*"],
+  matcher: [
+    "/team/:path*", "/money/:path*", "/onboarding/:path*", "/content/:path*", "/social/:path*",
+    "/admin/:path*", "/retention/:path*", "/pods/:path*", "/drafts/:path*", "/autonomy/:path*",
+    "/control/:path*", "/board/:path*", "/scale/:path*", "/reliability/:path*",
+    "/stickman/:path*", "/stickman", "/improve/:path*", "/jarvis/:path*", "/n8n/:path*",
+    // the API surface was previously outside the matcher entirely
+    "/api/:path*",
+  ],
 };
