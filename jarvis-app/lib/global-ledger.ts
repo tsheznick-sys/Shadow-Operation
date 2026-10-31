@@ -36,7 +36,57 @@ export function ledgerLayers() {
     public: (process.env.PROOF_PUBLIC || "true").toLowerCase() !== "false",
     show_failures: (process.env.PROOF_INCLUDE_FAILURES || "true").toLowerCase() !== "false",
     refresh_seconds: Number(process.env.LEDGER_REFRESH_SECONDS || 60),
+    // Live totals, audited daily rows: cumulative counters cannot be gamed by picking a good hour.
+    totals_refresh_seconds: Number(process.env.LEDGER_TOTALS_REFRESH_SECONDS || 900),
+    show_revenue: (process.env.LEDGER_SHOW_REVENUE || "false").toLowerCase() === "true",
+    allow_opt_in: (process.env.LEDGER_ALLOW_OPT_IN || "true").toLowerCase() !== "false",
   };
+}
+
+/**
+ * Revenue per brand. Public ONLY for brands that opted themselves in.
+ * `viewer` decides: "public" filters to opt-ins, "admin" sees everything.
+ */
+export async function readRevenue(viewer: "public" | "admin" = "public"): Promise<{
+  rows: { brand: string; revenue: number; buyers: number; shared: boolean }[];
+  hidden: number;
+}> {
+  try {
+    const { getSql } = await import("./db");
+    const sql = getSql();
+    if (!sql) return { rows: [], hidden: 0 };
+
+    if (viewer === "admin") {
+      const rows = (await sql`
+        SELECT b.brand,
+               COALESCE(SUM(r.amount), 0)::numeric(12,2) AS revenue,
+               COUNT(DISTINCT r.user_id)::int            AS buyers,
+               COALESCE(s.share_revenue, false)          AS shared
+        FROM (SELECT DISTINCT UNNEST(ARRAY[]::text[]) AS brand) b
+        LEFT JOIN revenue_log r ON r.brand = b.brand
+        LEFT JOIN ledger_brand_settings s ON s.brand = b.brand
+        GROUP BY b.brand, s.share_revenue
+      `) as unknown as { brand: string; revenue: number; buyers: number; shared: boolean }[];
+      return { rows: rows || [], hidden: 0 };
+    }
+
+    const rows = (await sql`
+      SELECT r.brand,
+             COALESCE(SUM(r.amount), 0)::numeric(12,2) AS revenue,
+             COUNT(DISTINCT r.user_id)::int            AS buyers,
+             true                                      AS shared
+      FROM revenue_log r
+      JOIN ledger_brand_settings s ON s.brand = r.brand AND s.share_revenue = true
+      GROUP BY r.brand
+    `) as unknown as { brand: string; revenue: number; buyers: number; shared: boolean }[];
+
+    const [{ hidden }]: any = await sql`
+      SELECT COUNT(*)::int AS hidden FROM ledger_brand_settings WHERE share_revenue = false
+    `;
+    return { rows: rows || [], hidden: hidden || 0 };
+  } catch {
+    return { rows: [], hidden: 0 };
+  }
 }
 
 /** Per-brand line: cumulative numbers plus the last recorded day and its trend. */
@@ -86,6 +136,7 @@ export async function readGlobal(): Promise<{
       ORDER BY views DESC
     `) as unknown as BrandLine[];
 
+    // LIVE totals: cumulative counters, no lag (a total cannot be cherry-picked).
     const t = (await sql`
       SELECT
         COUNT(DISTINCT brand)::int      AS brands,
@@ -98,7 +149,6 @@ export async function readGlobal(): Promise<{
         0::int                          AS revenue,
         COALESCE(MAX(day), 0)::int      AS days_live
       FROM public_ledger
-      WHERE recorded_at <= now() - (${lag} || ' hours')::interval
     `) as unknown as GlobalTotals[];
 
     const latest = (await sql`

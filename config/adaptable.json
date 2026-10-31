@@ -5,7 +5,7 @@
     "created": "2026-10-30",
     "branch": "arena/6c47af3d-shadow-operation",
     "status": "pr_open",
-    "updated": "2026-10-31 CHALLENGE + GLOBAL LEDGER: WF14 runs a 53-member 14-day challenge (completion 60%+, 10/14 + day-13 verdict = finisher); /challenge + /api/challenge. WF9 writes the public_ledger -> /ledger global live + /proof + GET /api/ledger, 24h lag, failures kept."
+    "updated": "2026-10-31 CHALLENGE v2: operators-only, gated to 14 days paid tenure with NO entry fee, API-verified numbers (reject >20% mismatch), non-finishers -> Lite \\$17. LEDGER v2: live totals (15 min) + audited daily rows (24h lag), revenue admin-only with per-brand opt-in."
   },
   "niches": {
     "strategy": "Grok weekly re-rank via WF1, not hardcoded",
@@ -374,23 +374,37 @@
     "first_week": "all 5 pages live \u00b7 30 clips out \u00b7 first 3 Circle members",
     "challenge": {
       "workflow": "WF14",
+      "audience": "operators \u2014 community members only",
+      "gate": "14 days paid tenure \u00b7 entry fee \\$0 (membership is the ticket)",
       "daily_send": "06:00",
       "cohort": "monthly, cap 53",
       "completion_target": "60%+ of active",
       "finisher_rule": "10 of 14 days + day-13 verdict",
-      "invite": "PASS -> \\$28 First Shot -> Circle \\$26; AMBER -> free re-cycle; RED -> new niche",
+      "verify": "api_numbers \u2014 claimed vs real, reject >20% mismatch",
+      "finisher": "PASS -> First Shot \\$28 -> Circle \\$26 -> operator seat",
+      "non_finisher": "day 15 -> Lite \\$17",
       "autonomy": "AUTONOMY_SEQUENCE 85% \u2014 may send/score/rank; may NOT admit to paid tier without owner",
-      "env": "CHALLENGE_COHORT_SIZE / CHALLENGE_MIN_COMPLETION / CHALLENGE_VERIFY_LINKS"
+      "env": "CHALLENGE_COHORT_SIZE / CHALLENGE_MIN_COMPLETION / CHALLENGE_MIN_TENURE_DAYS / CHALLENGE_MISMATCH_LIMIT"
     },
     "ledger": {
       "workflow": "WF9",
-      "write": "06:00 daily",
-      "lag_hours": 24,
-      "public": true,
+      "write": "06:00 daily (audited rows)",
+      "daily_lag_hours": 24,
+      "totals_refresh_seconds": 900,
+      "public": [
+        "views",
+        "er",
+        "comments",
+        "replies",
+        "posts",
+        "churn",
+        "days"
+      ],
+      "revenue": "admin only \u00b7 per-brand opt-in to publish",
       "failures_shown": true,
       "surfaces": [
-        "/ledger global",
-        "/proof per-brand",
+        "/ledger",
+        "/proof",
         "GET /api/ledger"
       ],
       "env": "PROOF_PUBLIC / PROOF_LAG_HOURS / PROOF_INCLUDE_FAILURES / LEDGER_REFRESH_SECONDS"
@@ -427,10 +441,33 @@
         "competitor_status": "nobody in the niche does this \u2014 every competitor shows screenshots",
         "env": "PROOF_PUBLIC=true \u00b7 PROOF_LAG_HOURS=24 \u00b7 PROOF_INCLUDE_FAILURES=true",
         "built": {
-          "page": "/ledger",
+          "page": "/ledger (global live) + /proof (per brand)",
           "api": "/api/ledger",
           "table": "public_ledger",
           "writer": "WF9 06:00"
+        },
+        "exposure": {
+          "public": [
+            "views",
+            "er_pct",
+            "comments",
+            "replies",
+            "posts",
+            "churn_pct",
+            "days_live"
+          ],
+          "revenue": "admin only by default \u2014 every brand or member chooses OPTIONALLY whether to publish their own results and revenue",
+          "opt_in": "share_revenue flag per brand; default OFF. Nothing is published on someone's behalf without them turning it on.",
+          "why": "publishing someone else's revenue without consent is not transparency, it is a leak. Opt-in keeps the ledger honest AND safe.",
+          "owner_view": "owner sees exact revenue for all brands on /money and /ledger?owner=1",
+          "env": "LEDGER_SHOW_REVENUE=false \u00b7 LEDGER_ALLOW_OPT_IN=true"
+        },
+        "cadence": {
+          "model": "live totals, audited daily rows",
+          "totals_refresh_seconds": 900,
+          "totals_lag": "none \u2014 cumulative counters only, never a single day",
+          "daily_rows_lag_hours": 24,
+          "why": "a cumulative total cannot be gamed by picking a good hour; a single day can. So totals feel live and the audited rows stay sealed for 24h."
         }
       },
       "do": {
@@ -459,7 +496,7 @@
             "penalty": "-1 for a checked-in day with no link when one is required",
             "finisher": "10 of 14 days + the day-13 result logged = finisher"
           },
-          "upgrade_trigger": "finisher + PASS on the day-13 demand test -> invited to the \\$28 First Shot, then Circle \\$26",
+          "upgrade_trigger": "finisher + PASS on the day-13 demand test -> First Shot $28 -> Circle $26, and offered an operator seat running their own page",
           "no_upgrade": "AMBER -> another cycle at no cost. RED -> a different niche, not a discount",
           "jarvis_role": "creates the cohort, sends the daily action at 06:00, verifies links, ranks, flags quitters at day 5, writes the ledger, invites finishers",
           "autonomy": "runs at AUTONOMY_SEQUENCE (85%) \u2014 it may send, score and rank unsupervised; it may NOT admit a finisher to the paid tier without the owner until autonomy lifts",
@@ -563,7 +600,36 @@
               "why": "the decision is the deliverable, not the revenue"
             }
           ],
-          "env": "CHALLENGE_COHORT_SIZE=53 \u00b7 CHALLENGE_MIN_COMPLETION=60 \u00b7 CHALLENGE_DAILY_SEND=06:00 \u00b7 CHALLENGE_VERIFY_LINKS=true"
+          "env": "CHALLENGE_COHORT_SIZE=53 \u00b7 CHALLENGE_MIN_COMPLETION=60 \u00b7 CHALLENGE_MIN_TENURE_DAYS=14 \u00b7 CHALLENGE_ENTRY_FEE=0 \u00b7 CHALLENGE_MISMATCH_LIMIT=20",
+          "audience": "OPERATORS \u2014 people who want to run a page like ours using this system. The challenge is a recruitment and activation funnel, not a product funnel.",
+          "audience_note": "A finisher does not just buy a subscription \u2014 they become a Shadow Operator running their own page on this stack. That is Phase 2 funding itself.",
+          "gate": {
+            "who": "community members only \u2014 no public sign-ups",
+            "tenure_days": 14,
+            "why_tenure": "14 days of membership is the filter money cannot buy: tourists do not stay two weeks and pay for it",
+            "entry_fee": 0,
+            "entry_note": "NO extra charge. The membership IS the ticket. Asking a $26 member for a $28 deposit to join a task would make entry $54 and empty the room.",
+            "qualifies": [
+              "First Shot $28 (14-day all-access pass \u2014 those 14 days ARE the tenure)",
+              "Circle $26/mo after 14 days"
+            ],
+            "not_eligible": "anyone who is not a paying member, regardless of how badly they want in"
+          },
+          "verification": {
+            "level": "api_numbers",
+            "method": "Jarvis opens the submitted link AND pulls the post's real view/comment count from the platform API",
+            "reconcile": "compare claimed vs verified; a mismatch above 20% is rejected and the day does not count until corrected",
+            "mismatch_limit_pct": 20,
+            "missing_api": "if a platform key is absent, the day is marked unverified_api_missing \u2014 counted, but flagged and excluded from the leaderboard top 3",
+            "never": "never silently accept a number. A member who inflates once is warned; twice is removed from the cohort."
+          },
+          "non_finishers": {
+            "path": "downgrade",
+            "what": "day 15: offered Lite $17/mo instead of the First Shot",
+            "why": "they failed the completion standard, so they do not get the premium door \u2014 but they are still a paying member, and Lite $17 is 1+7=8",
+            "copy": "'You did not finish, so I will not pretend you did. Here is the cheaper door \u2014 same tools, one domain, 3/day.'",
+            "never": "no guilt copy, no third message, no shaming on the board"
+          }
         },
         "built": {
           "page": "/challenge",

@@ -205,3 +205,44 @@ CREATE TABLE IF NOT EXISTS challenge_scores (
 
 COMMENT ON TABLE challenge_scores IS
   'Completion rate is the only predictor of upgrade. 10/14 days + a day-13 verdict = finisher.';
+
+-- ── CHALLENGE v2: operator gate + verified numbers ───────────────────────────
+-- Operators only. The gate is 14 days of PAID tenure, not eagerness. Entry fee $0.
+ALTER TABLE challenge_members ADD COLUMN IF NOT EXISTS tier             TEXT NOT NULL DEFAULT 'none';
+ALTER TABLE challenge_members ADD COLUMN IF NOT EXISTS paid_since       TIMESTAMPTZ;
+ALTER TABLE challenge_members ADD COLUMN IF NOT EXISTS share_results    BOOLEAN NOT NULL DEFAULT false;
+
+-- claimed vs verified, so a member cannot inflate a number and win the board
+ALTER TABLE challenge_checkins ADD COLUMN IF NOT EXISTS claimed         INT;
+ALTER TABLE challenge_checkins ADD COLUMN IF NOT EXISTS actual          INT;
+ALTER TABLE challenge_checkins ADD COLUMN IF NOT EXISTS mismatch_pct    INT NOT NULL DEFAULT 0;
+ALTER TABLE challenge_checkins ADD COLUMN IF NOT EXISTS verify_status   TEXT NOT NULL DEFAULT 'api_missing';
+  -- verified | mismatch | api_missing | unreachable
+ALTER TABLE challenge_checkins ADD COLUMN IF NOT EXISTS counted         BOOLEAN NOT NULL DEFAULT true;
+
+CREATE INDEX IF NOT EXISTS idx_checkins_unverified ON challenge_checkins (verify_status)
+  WHERE verify_status <> 'verified';
+
+COMMENT ON COLUMN challenge_checkins.verify_status IS
+  'api_missing days still count but are excluded from the leaderboard top 3. mismatch days do not count until corrected.';
+
+-- Gate helper: days of paid tenure for a handle.
+CREATE OR REPLACE VIEW challenge_eligibility AS
+SELECT m.id, m.handle, m.tier,
+       COALESCE(EXTRACT(DAY FROM now() - m.paid_since), 0)::int AS paid_tenure_days,
+       (m.tier <> 'none' AND COALESCE(EXTRACT(DAY FROM now() - m.paid_since), 0) >= 14) AS eligible
+FROM challenge_members m;
+
+-- ── LEDGER v2: opt-in revenue sharing ────────────────────────────────────────
+-- Public by default: views, ER, comments, replies, posts.
+-- Revenue is ADMIN ONLY unless that brand turns sharing on themselves.
+CREATE TABLE IF NOT EXISTS ledger_brand_settings (
+  brand           TEXT PRIMARY KEY,
+  share_revenue   BOOLEAN NOT NULL DEFAULT false,   -- opt-in, never assumed
+  share_buyers    BOOLEAN NOT NULL DEFAULT false,
+  opted_in_at     TIMESTAMPTZ,
+  opted_in_by     TEXT
+);
+
+COMMENT ON TABLE ledger_brand_settings IS
+  'Nobody publishes someone else''s revenue. A brand opts itself in, or it stays admin-only.';

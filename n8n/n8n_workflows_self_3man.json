@@ -154,7 +154,9 @@
         "Cron 05:45 daily -> Buffer analytics top 3 views -> Postgres leaderboard -> Telegram + Whop Chat all pods: Top today @psych_mind 12k #2 you 4k Pod Red 28 vs Blue 22 keep streak?",
         "Webhook member win submit -> Verify via Whop API + screen -> Neon wins table -> Queue Fri proof clip -> Leaderboard +1",
         "Pod auto-assign on join: ManyChat assigns 5-pod via Whop Chat app -> Postgres pods(pod_id,user_id,streak)",
-        "Thu 19:00 teardown Zoom Whop Event -> Vapi Vesper transcribes -> Neon vault -> Clip 32s teaser -> Buffer next day"
+        "Thu 19:00 teardown Zoom Whop Event -> Vapi Vesper transcribes -> Neon vault -> Clip 32s teaser -> Buffer next day",
+        "LEDGER v2 exposure: publish views/ER/comments/replies/posts/days/churn publicly. Revenue stays ADMIN ONLY unless that brand sets ledger_brand_settings.share_revenue = true itself. Never publish someone else's revenue.",
+        "LEDGER v2 cadence: cumulative totals refresh every LEDGER_TOTALS_REFRESH_SECONDS (900) — a total cannot be cherry-picked; audited daily rows keep the 24h lag."
       ],
       "metrics": "WWS replay target 40% base, activation 85% in 7d, DAU 60%, save 45% — alerts if churn >2.0% 7d rolling"
     },
@@ -214,22 +216,23 @@
     },
     {
       "id": "wf14_challenge_engine",
-      "name": "WF14 - 14-Day Challenge Engine (daily action 06:00 + verify + rank + invite)",
+      "name": "WF14 - 14-Day Operator Challenge (gate 14d tenure, API-verified, 06:00 daily)",
       "trigger": "cron 0 6 * * * daily + webhook challenge_join + webhook challenge_checkin + cron 0 20 * * 0 weekly cohort report",
       "nodes": [
-        "Cron 06:00 -> Postgres SELECT challenge_members WHERE cohort = current 'YYYY-MM' -> for each: send TODAY'S action from config trust.engines.do.challenge.days (one action, one deliverable, no essay) via Chatfuel IG/TK + ManyChat YT + email -> log send",
-        "Cron 06:10 -> Postgres challenge_checkins -> recompute challenge_scores server-side ONLY (never trust a client number): checked_in count, streak from consecutive days, score, status active/quiet/finisher",
-        "Verify links: HTTP GET each submitted link -> confirm it resolves and carries the member's handle -> +2 score; 404/private -> flag 'link could not be opened', do not delete the check-in, ask once",
-        "Quiet detector: 2 days with no check-in -> ONE nudge, then leave them alone (no third message, no guilt copy) -> status quiet",
-        "Day 5 early-cohort read -> Telegram the owner: X of 53 joined, Y active, Z at risk + which day is losing the most people",
-        "Day 13 -> DM the member their own verdict template: 50+ PASS / 25-49 AMBER / <25 RED -> they log the number themselves, Jarvis never decides it for them",
-        "Finisher rule: 10 of 14 days + day-13 verdict logged -> status finisher -> invite to the $28 First Shot. PASS -> paid tier invite. AMBER -> another cycle free. RED -> a different niche, not a discount.",
-        "Weekly Sun 20:00 -> Postgres completion rate (checked_in / (active x 14)) -> Neon + /challenge -> Telegram + Telegram owner. Target 60%+. Below 40% = the challenge is failing, not the members.",
-        "Cohort rollover: new month -> archive last cohort to challenge_archive, open a fresh room capped at CHALLENGE_COHORT_SIZE (53), announce to the pages",
-        "Every action gated by WF13 global pause + mayActOutbound() before any DM or email"
+        "Gate check: cohort members must have tier <> none AND paid_tenure_days >= CHALLENGE_MIN_TENURE_DAYS (14). Entry fee $0 — the membership is the ticket. No public sign-ups, no exceptions.",
+        "Cron 06:00 -> Postgres SELECT eligible challenge_members (cohort = current 'YYYY-MM') -> send TODAY'S action from config trust.engines.do.challenge.days (one action, one deliverable, no essay) via Chatfuel IG/TK + ManyChat YT + email -> log send",
+        "Cron 06:10 -> recompute challenge_scores server-side ONLY: checked_in = COUNT(counted = true), streak, score, status. A client-submitted number is never trusted.",
+        "VERIFY (api_numbers): for each check-in open the link AND pull the real view/comment count from the platform API -> reconcile claimed vs actual -> mismatch > CHALLENGE_MISMATCH_LIMIT (20%) => counted = false, day does not count until corrected. Missing API key => verify_status api_missing, counted, but excluded from the leaderboard top 3.",
+        "Quiet detector: 2 days with no counted check-in -> ONE nudge, then leave them alone. No third message, no guilt copy, no public shaming.",
+        "Day 5 read -> Telegram owner: joined / active / at-risk + which day is shedding the most operators",
+        "Day 13 -> DM the verdict template. The member logs their OWN number: 50+ PASS / 25-49 AMBER / <25 RED. Jarvis reconciles it, never decides it.",
+        "Day 15 two doors: finisher + PASS -> First Shot $28 -> Circle $26 -> operator seat running their own page. AMBER -> another cycle free. Everyone else -> Lite $17 ('you did not finish, so I will not pretend you did').",
+        "Weekly Sun 20:00 -> completion rate (counted check-ins / (active x 14)) -> Neon + /challenge -> Telegram. Target 60%+. Below 40% by day 7 = the challenge is failing, not the operators.",
+        "Monthly rollover -> archive cohort -> open a fresh room capped at CHALLENGE_COHORT_SIZE (53) -> announce to the pages",
+        "Every send gated by WF13 global pause + mayActOutbound() before any DM or email"
       ],
-      "metrics": "completion target 60%+ of active cohort · finisher->First Shot invite 100% · finisher->paid 8-15% (market benchmark) · alert if <40% completion by day 7 · churn >2.0% 7d rolling",
-      "notes": "Free to join, expensive to finish. The work is the qualification. Jarvis may send, score and rank unsupervised at AUTONOMY_SEQUENCE=85%; it may NOT admit a finisher to a paid tier without the owner."
+      "metrics": "completion 60%+ of active · verified-day rate · finisher->First Shot 100% invited · finisher->paid 8-15% · unverified days excluded from top 3 · alert <40% completion by day 7",
+      "notes": "Operators only. The gate is 14 days of paid tenure — the one filter money cannot shortcut, because tourists do not pay for two weeks."
     }
   ],
   "creds_needed": [

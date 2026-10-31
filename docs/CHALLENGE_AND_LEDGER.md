@@ -13,6 +13,21 @@ Two engines, both live in the app, both run by Jarvis, both public.
 
 **Free to join. Expensive to finish.** The work is the qualification — that is the entire design.
 
+### Who it is for — and the gate
+
+**This is for operators**, not spectators: people who want to run a page on this system. Finishing it does not earn a certificate — it earns an **operator seat running their own page**.
+
+| | |
+|---|---|
+| **Eligibility** | paying community members only — no public sign-ups |
+| **Tenure required** | **14 days paid** before the room opens |
+| **Entry fee** | **$0 — the membership is the ticket** |
+| **Qualifies** | First Shot $28 (its 14-day pass *is* the tenure) · Circle $26/mo after 14 days |
+
+**Why no extra charge:** asking a $26 member for a $28 deposit to join a task makes entry $54 and empties the room. The 14-day wait does the filtering money would do — and tourists do not pay for two weeks to get in. Tenure is the one filter that cannot be bought.
+
+The gate also does a second job: a member with a 14-day task list at day 14 has a reason to stay past the churn cliff, which is where your 1–2% target is won or lost.
+
 ### Why this converts
 
 Market data: a structured challenge converts **8–15%** of active members. A direct pitch converts **0.3–0.8%**. A typical free community converts **2–5%**. The difference isn't generosity — it's that the member produces their **own** result, so trust comes from evidence rather than from a claim.
@@ -55,11 +70,25 @@ Completion is the metric. **60%+ completion beats member count every time.** A 5
 
 | Their own number | What happens |
 |---|---|
-| **PASS (50+ comments)** | Invited to the **$28 First Shot**, then **Circle $26**. They already proved it. |
+| **PASS (50+ comments)** | **$28 First Shot → Circle $26 → an operator seat** running their own page. They already proved it. |
 | **AMBER (25–49)** | Another cycle, **free**. |
 | **RED (<25)** | **A different niche** — never a discount. |
+| **Did not finish** | **Lite $17/mo.** "You did not finish, so I will not pretend you did." |
 
 This is the rule that keeps it honest: RED does not become a sale. If the market said no, the answer is a new niche, not a cheaper price.
+
+### Verification — claimed vs real
+
+Jarvis does not take a number on trust. For every check-in it **opens the link and pulls the real count from the platform API**, then reconciles:
+
+| Result | What happens |
+|---|---|
+| Within 20% | ✅ counted as verified |
+| **Over 20% off** | ❌ **the day does not count** until corrected |
+| Platform key missing | ⚠️ counted, but flagged `api_missing` and **excluded from the leaderboard top 3** |
+| Link dead / private | ❌ rejected, asked once |
+
+A member who inflates once is warned. Twice removes them from the cohort. Silence about a fake number is the fastest way to make a public leaderboard worthless.
 
 ### What Jarvis does (WF14)
 
@@ -142,7 +171,7 @@ The challenge is the **DO**. The ledger is the **SHOW**. Neither works alone: pr
 | Workflows | **WF14** (challenge) · **WF9** (ledger) |
 | Env | `CHALLENGE_*` · `PROOF_*` · `LEDGER_REFRESH_SECONDS` |
 
-**16 tables · 15 workflows · 34 pages.**
+**17 tables · 15 workflows · 34 pages.**
 
 ---
 
