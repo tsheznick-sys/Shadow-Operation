@@ -2,7 +2,7 @@
 
 ![JARVIS n8n workflow map — 5 lanes: content factory, demand + money, ops loops, app + data + autopay, approval + failover](./n8n_workflow_map.png)
 
-*Direct image: [github blob](https://github.com/tsheznick-sys/Shadow-Operation/blob/arena/6c47af3d-shadow-operation/docs/n8n_workflow_map.png) · [raw png](https://github.com/tsheznick-sys/Shadow-Operation/raw/arena/6c47af3d-shadow-operation/docs/n8n_workflow_map.png)*
+*Direct image: [github blob](https://github.com/tsheznick-sys/Shadow-Operation/blob/arena/6c47af3d-shadow-operation/docs/n8n_workflow_map.png) · [raw png](https://github.com/tsheznick-sys/Shadow-Operation/raw/arena/6c47af3d-shadow-operation/docs/n8n_workflow_map.png) · [Drive copy](https://drive.google.com/file/d/1I8vVE58o7vCzLJHVbHjCNFprlzgfKRNp/view) · embed URL `https://drive.google.com/thumbnail?id=1I8vVE58o7vCzLJHVbHjCNFprlzgfKRNp&sz=w3000`*
 
 **Branch:** `arena/6c47af3d-shadow-operation` · **Status:** `pr_open`
 **Poster:** `docs/n8n_workflow_map.png` (3000px, 5 lanes + engine rail) · **ASCII map:** §1b · **Node tables:** §4

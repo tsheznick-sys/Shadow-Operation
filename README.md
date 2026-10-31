@@ -79,4 +79,4 @@ disabled, no draft fallback, an enforced suppression list and a 25/day ceiling.
 
 ![JARVIS n8n workflow map](./docs/n8n_workflow_map.png)
 
-Canvas: [open full size](https://github.com/tsheznick-sys/Shadow-Operation/blob/arena/6c47af3d-shadow-operation/docs/n8n_workflow_map.png) · Raw PNG: [raw link](https://github.com/tsheznick-sys/Shadow-Operation/raw/arena/6c47af3d-shadow-operation/docs/n8n_workflow_map.png) · Node-level detail: [`docs/N8N_WORKFLOW_DIAGRAM_FULL.md`](docs/N8N_WORKFLOW_DIAGRAM_FULL.md)
+Canvas: [open full size](https://github.com/tsheznick-sys/Shadow-Operation/blob/arena/6c47af3d-shadow-operation/docs/n8n_workflow_map.png) · Raw PNG: [raw link](https://github.com/tsheznick-sys/Shadow-Operation/raw/arena/6c47af3d-shadow-operation/docs/n8n_workflow_map.png) · Drive copy: [Drive](https://drive.google.com/file/d/1I8vVE58o7vCzLJHVbHjCNFprlzgfKRNp/view) · Node-level detail: [`docs/N8N_WORKFLOW_DIAGRAM_FULL.md`](docs/N8N_WORKFLOW_DIAGRAM_FULL.md)
