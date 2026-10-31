@@ -8,7 +8,7 @@
       "nodes": [
         "Postgres SELECT 50 creators: SELECT handle,platform,followers,avg_comments,buyer_pool_x3,ratio,er,gate FROM creators WHERE gate='GREEN' ORDER BY buyer_pool_x3*er DESC LIMIT 50 (1,462 GREEN)",
         "HTTP Request Social Blade + HypeAuditor + NotJustAnalytics/Picuki + Grok X trending (xAI GROK_API_KEY) - buyer_pool_x3,ratio,ER live",
-        "IF ER>{{$env.THRESHOLD_ER_GREEN || 3}}% && ratio<{{$env.THRESHOLD_RATIO_GREEN || 50}} && buyer_pool_x3>{{$env.THRESHOLD_BUYER_POOL_MIN || 3000}} => GREEN (8-Gate) \u2014 thresholds from config/adaptable.json env THRESHOLD_*",
+        "IF ER>{{$env.THRESHOLD_ER_GREEN || 5}}% && ratio<{{$env.THRESHOLD_RATIO_GREEN || 50}} && buyer_pool_x3>{{$env.THRESHOLD_BUYER_POOL_MIN || 3000}} => GREEN (8-Gate) \u2014 thresholds from config/adaptable.json env THRESHOLD_*",
         "Claude Code node (Claude Pro/Max CLAUDE_API_KEY): prompt 'Rank top5 most monetizable for self content vault $27'",
         "Telegram + Gmail nodes: Sir top5 monetizable domains 1) Psych Hack 8.2K pool 5.1% ER...",
         "Postgres UPDATE solo_domains SET top5=[...]"
@@ -164,7 +164,7 @@
     "R2 $5/mo backup",
     "LINEAR_API_KEY SHA"
   ],
-  "total_cost": "MVP 1 domain WWS+Retention+Entitlement: Vercel $0 + Neon $0 + n8n $20 + Claude $20 + Grok $16 + Wan T4 free + OpusClip free + Buffer Free 3ch = $56/mo \u2014 direct publish no LUT \u2192 scale 5 domains: +TubeGen $29 + OpusClip $15 + Buffer Team $60 = $189/mo \u2014 3 Whop sales $81 covers MVP, 7 sales $189 covers scale",
+  "total_cost": "MVP 1 domain WWS+Retention+Entitlement: Vercel $0 + Neon $0 + n8n $20 + Claude $20 + Grok $16 + Wan T4 free + OpusClip free + Buffer Free 3ch = $56/mo \u2014 direct publish + Higgsfield short-form polish \u2192 scale 5 domains: +TubeGen $29 + OpusClip $15 + Buffer Team $60 = $189/mo incl Higgsfield $29 short-form polish \u2014 3 Whop sales $81 covers MVP, 7 sales $189 covers scale",
   "next_step": "n8n Cloud Import this JSON -> add WHOP_API_KEY + WHOP_PRODUCT_LITE_ID/PRO_ID + WISE_API_KEY -> Vercel env same + set Whop webhooks membership_cancelled/payment_failed -> test /api/entitlement?whop_user_id=xxx -> WF8 retention save",
   "self_only": "3-man core self-only scalable 5 domains \u2014 Page1 Stickman Finance (stickman-video-director free Shorts) + Other niches (TubeGen/Wan longform) \u2014 OpusClip virality + Higgsfield short-form final polish + character lock (one prompt/one frame) \u2014 cloud free GitHub+Vercel Hobby+Neon free"
 }
