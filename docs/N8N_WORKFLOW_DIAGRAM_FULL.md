@@ -1,5 +1,9 @@
 # JARVIS — FULL n8n WORKFLOW MAP (DETAILED)
 
+![JARVIS n8n workflow map — 5 lanes: content factory, demand + money, ops loops, app + data + autopay, approval + failover](./n8n_workflow_map.png)
+
+*Direct image: [github blob](https://github.com/tsheznick-sys/Shadow-Operation/blob/arena/6c47af3d-shadow-operation/docs/n8n_workflow_map.png) · [raw png](https://github.com/tsheznick-sys/Shadow-Operation/raw/arena/6c47af3d-shadow-operation/docs/n8n_workflow_map.png)*
+
 **Branch:** `arena/6c47af3d-shadow-operation` · **Status:** `pr_open`
 **Poster:** `docs/n8n_workflow_map.png` (3000px, 5 lanes + engine rail) · **ASCII map:** §1b · **Node tables:** §4
 **Source of truth:** `n8n/n8n_workflows_self_3man.json` · **App:** `jarvis-app` (11 pages, 9 API routes)

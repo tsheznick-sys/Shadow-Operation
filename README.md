@@ -74,3 +74,9 @@ list against the tracker, sent-mail exports, Gate G8 declines, live conversation
 banned Motivation/Wealth niche and the daily cap, and exits non-zero when anything is
 blocked. The hardened sender lives at `gas/wave_autopilot_safe.gs` — it ships with sending
 disabled, no draft fallback, an enforced suppression list and a 25/day ceiling.
+
+## n8n workflow map
+
+![JARVIS n8n workflow map](./docs/n8n_workflow_map.png)
+
+Canvas: [open full size](https://github.com/tsheznick-sys/Shadow-Operation/blob/arena/6c47af3d-shadow-operation/docs/n8n_workflow_map.png) · Raw PNG: [raw link](https://github.com/tsheznick-sys/Shadow-Operation/raw/arena/6c47af3d-shadow-operation/docs/n8n_workflow_map.png) · Node-level detail: [`docs/N8N_WORKFLOW_DIAGRAM_FULL.md`](docs/N8N_WORKFLOW_DIAGRAM_FULL.md)
