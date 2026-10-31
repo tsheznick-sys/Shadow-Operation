@@ -148,7 +148,7 @@
       "trigger": "cron 0 9 * * 0 WWS (Sun 09:00 EAT) + cron 45 5 * * * leaderboard + webhook new win + cron 0 19 * * 4 teardown Thu 19:00",
       "nodes": [
         "Cron Sun 09:00 -> Postgres SELECT Whop memberships new, Buffer analytics top views, Neon streaks, user_vault wins -> Claude summary WWS deck: 12 wins $340 new, @wolf_ke $90 with Agent",
-        "Cron 06:00 daily -> THE OPEN LEDGER: pull real Buffer/IG/TikTok/YT analytics for all 5 brands +10 YT channels -> Postgres public_ledger (views, ER, comments, replies, posted, note) -> /proof publishes with a 24h lag. Failures stay in. Nothing hand-typed.",
+        "Cron 06:00 daily -> GLOBAL LIVE LEDGER: pull real Buffer/IG/TikTok/YT analytics for all 5 brands + 10 YT channels -> Postgres public_ledger (brand, platform, day, views, er_pct, comments, replies, posted, note) -> /ledger + /proof publish with a 24h lag + GET /api/ledger JSON for embedding. Failures stay in. Nothing hand-typed.",
         "HTTP OpusClip per-clip auto fine-tune proof screenshot -> Drive HQ proofs/ + Postgres proof_queue — uses finish only, needs OpusClip virality source",
         "Vercel /social read-only -> Buffer auto queue proof clip Tue/Fri 18:00 -> Chatfuel DM proof to inactive 3d -> ManyChat 8ch WWS announcement Whop Announcements",
         "Cron 05:45 daily -> Buffer analytics top 3 views -> Postgres leaderboard -> Telegram + Whop Chat all pods: Top today @psych_mind 12k #2 you 4k Pod Red 28 vs Blue 22 keep streak?",
@@ -211,6 +211,25 @@
         "Telegram + email all 3: Jarvis paused by <seat> at <time> — nothing ships until resume"
       ],
       "rule": "Global pause is absolute and owner-only to undo (2026-10-31) — no partial resume paths"
+    },
+    {
+      "id": "wf14_challenge_engine",
+      "name": "WF14 - 14-Day Challenge Engine (daily action 06:00 + verify + rank + invite)",
+      "trigger": "cron 0 6 * * * daily + webhook challenge_join + webhook challenge_checkin + cron 0 20 * * 0 weekly cohort report",
+      "nodes": [
+        "Cron 06:00 -> Postgres SELECT challenge_members WHERE cohort = current 'YYYY-MM' -> for each: send TODAY'S action from config trust.engines.do.challenge.days (one action, one deliverable, no essay) via Chatfuel IG/TK + ManyChat YT + email -> log send",
+        "Cron 06:10 -> Postgres challenge_checkins -> recompute challenge_scores server-side ONLY (never trust a client number): checked_in count, streak from consecutive days, score, status active/quiet/finisher",
+        "Verify links: HTTP GET each submitted link -> confirm it resolves and carries the member's handle -> +2 score; 404/private -> flag 'link could not be opened', do not delete the check-in, ask once",
+        "Quiet detector: 2 days with no check-in -> ONE nudge, then leave them alone (no third message, no guilt copy) -> status quiet",
+        "Day 5 early-cohort read -> Telegram the owner: X of 53 joined, Y active, Z at risk + which day is losing the most people",
+        "Day 13 -> DM the member their own verdict template: 50+ PASS / 25-49 AMBER / <25 RED -> they log the number themselves, Jarvis never decides it for them",
+        "Finisher rule: 10 of 14 days + day-13 verdict logged -> status finisher -> invite to the $28 First Shot. PASS -> paid tier invite. AMBER -> another cycle free. RED -> a different niche, not a discount.",
+        "Weekly Sun 20:00 -> Postgres completion rate (checked_in / (active x 14)) -> Neon + /challenge -> Telegram + Telegram owner. Target 60%+. Below 40% = the challenge is failing, not the members.",
+        "Cohort rollover: new month -> archive last cohort to challenge_archive, open a fresh room capped at CHALLENGE_COHORT_SIZE (53), announce to the pages",
+        "Every action gated by WF13 global pause + mayActOutbound() before any DM or email"
+      ],
+      "metrics": "completion target 60%+ of active cohort · finisher->First Shot invite 100% · finisher->paid 8-15% (market benchmark) · alert if <40% completion by day 7 · churn >2.0% 7d rolling",
+      "notes": "Free to join, expensive to finish. The work is the qualification. Jarvis may send, score and rank unsupervised at AUTONOMY_SEQUENCE=85%; it may NOT admit a finisher to a paid tier without the owner."
     }
   ],
   "creds_needed": [

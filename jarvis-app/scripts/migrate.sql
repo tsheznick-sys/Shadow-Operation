@@ -167,3 +167,41 @@ CREATE INDEX IF NOT EXISTS idx_public_ledger_day ON public_ledger (day DESC);
 
 COMMENT ON TABLE public_ledger IS
   'Public proof ledger — shown on /proof. Never delete a bad day: hiding a failure destroys the only trust signal we have.';
+
+-- ── THE 14-DAY CHALLENGE (trust engine: "DO") ────────────────────────────────
+-- Free to join, expensive to finish. Cohorts run monthly (cohort = 'YYYY-MM').
+-- Jarvis sends the daily action at 06:00, verifies links, scores, and invites finishers.
+CREATE TABLE IF NOT EXISTS challenge_members (
+  id          TEXT PRIMARY KEY,
+  handle      TEXT        NOT NULL,
+  niche       TEXT        NOT NULL,
+  email       TEXT        DEFAULT '',
+  joined_day  INT         NOT NULL DEFAULT 1,
+  cohort      TEXT        NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (cohort, handle)
+);
+CREATE INDEX IF NOT EXISTS idx_challenge_members_cohort ON challenge_members (cohort);
+
+CREATE TABLE IF NOT EXISTS challenge_checkins (
+  member_id   TEXT        NOT NULL REFERENCES challenge_members(id) ON DELETE CASCADE,
+  day         INT         NOT NULL CHECK (day BETWEEN 1 AND 14),
+  link        TEXT        DEFAULT '',
+  note        TEXT        DEFAULT '',
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (member_id, day)
+);
+
+-- One row per member: the number the cohort board and the upgrade decision read.
+CREATE TABLE IF NOT EXISTS challenge_scores (
+  member_id   TEXT PRIMARY KEY REFERENCES challenge_members(id) ON DELETE CASCADE,
+  checked_in  INT         NOT NULL DEFAULT 0,
+  streak      INT         NOT NULL DEFAULT 0,
+  score       INT         NOT NULL DEFAULT 0,
+  status      TEXT        NOT NULL DEFAULT 'active',  -- active | quiet | finisher | dropped
+  verdict     TEXT,                                    -- PASS | AMBER | RED (day 13)
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+COMMENT ON TABLE challenge_scores IS
+  'Completion rate is the only predictor of upgrade. 10/14 days + a day-13 verdict = finisher.';

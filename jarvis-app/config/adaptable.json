@@ -5,7 +5,7 @@
     "created": "2026-10-30",
     "branch": "arena/6c47af3d-shadow-operation",
     "status": "pr_open",
-    "updated": "2026-10-31 TRUST ENGINE: free value is table stakes in this niche \u2014 the defensible ground is verifiable proof (Open Ledger), own-result activation (14-day challenge) and risk transfer ($28 guarantee). Free 1:1 work stays banned (R2)."
+    "updated": "2026-10-31 CHALLENGE + GLOBAL LEDGER: WF14 runs a 53-member 14-day challenge (completion 60%+, 10/14 + day-13 verdict = finisher); /challenge + /api/challenge. WF9 writes the public_ledger -> /ledger global live + /proof + GET /api/ledger, 24h lag, failures kept."
   },
   "niches": {
     "strategy": "Grok weekly re-rank via WF1, not hardcoded",
@@ -371,7 +371,30 @@
     "offline_mode": "keep running at full autonomy when the owner is away; daily SMS feedback to all 3 seats",
     "golive": "all 5 pages at once \u2014 import 13 workflows, start every page",
     "phase2": "after the Shadow Operation role converts clients to the required number, build the whole backend and give it the full pipeline to run, monetise the pages and make sales",
-    "first_week": "all 5 pages live \u00b7 30 clips out \u00b7 first 3 Circle members"
+    "first_week": "all 5 pages live \u00b7 30 clips out \u00b7 first 3 Circle members",
+    "challenge": {
+      "workflow": "WF14",
+      "daily_send": "06:00",
+      "cohort": "monthly, cap 53",
+      "completion_target": "60%+ of active",
+      "finisher_rule": "10 of 14 days + day-13 verdict",
+      "invite": "PASS -> \\$28 First Shot -> Circle \\$26; AMBER -> free re-cycle; RED -> new niche",
+      "autonomy": "AUTONOMY_SEQUENCE 85% \u2014 may send/score/rank; may NOT admit to paid tier without owner",
+      "env": "CHALLENGE_COHORT_SIZE / CHALLENGE_MIN_COMPLETION / CHALLENGE_VERIFY_LINKS"
+    },
+    "ledger": {
+      "workflow": "WF9",
+      "write": "06:00 daily",
+      "lag_hours": 24,
+      "public": true,
+      "failures_shown": true,
+      "surfaces": [
+        "/ledger global",
+        "/proof per-brand",
+        "GET /api/ledger"
+      ],
+      "env": "PROOF_PUBLIC / PROOF_LAG_HOURS / PROOF_INCLUDE_FAILURES / LEDGER_REFRESH_SECONDS"
+    }
   },
   "trust": {
     "model": "trust is removed, not given \u2014 each engine kills one specific belief that blocks the buy",
@@ -402,7 +425,13 @@
         "mechanic": "Publish the real numbers of all 5 pages every day \u2014 views, ER, comments, replies, revenue, churn, and the failures \u2014 on a public /proof page fed straight from Neon. 24h lag, nothing hand-edited, no cherry-picking.",
         "why_it_wins": "An audit can be invented. A channel can be checked. When a prospect can verify the claim before talking to us, the case-study objection (Anu) dies before it is raised.",
         "competitor_status": "nobody in the niche does this \u2014 every competitor shows screenshots",
-        "env": "PROOF_PUBLIC=true \u00b7 PROOF_LAG_HOURS=24 \u00b7 PROOF_INCLUDE_FAILURES=true"
+        "env": "PROOF_PUBLIC=true \u00b7 PROOF_LAG_HOURS=24 \u00b7 PROOF_INCLUDE_FAILURES=true",
+        "built": {
+          "page": "/ledger",
+          "api": "/api/ledger",
+          "table": "public_ledger",
+          "writer": "WF9 06:00"
+        }
       },
       "do": {
         "name": "THE 14-DAY CHALLENGE",
@@ -410,7 +439,142 @@
         "mechanic": "The existing monthly 14-day sequence becomes a cohort challenge: free to join, one action per day (Warm-Up 1-3 / Value 4-9 / Money 10-14), ending in THEIR OWN 72h demand test. Completion is tracked and ranked.",
         "why_it_wins": "8-15% conversion vs 0.3-0.8% for a direct pitch. They trust it because they produced their own result \u2014 not because we handed them a PDF. 'Free to join, expensive to finish.'",
         "success_metric": "completion rate 60%+ is the strongest predictor of upgrade",
-        "env": "CHALLENGE_COHORT_SIZE=53 \u00b7 CHALLENGE_MIN_COMPLETION=60"
+        "env": "CHALLENGE_COHORT_SIZE=53 \u00b7 CHALLENGE_MIN_COMPLETION=60",
+        "challenge": {
+          "name": "THE 14-DAY CHALLENGE",
+          "status": "LIVE \u2014 free to join, one action per day, ends in the member's own 72h demand test",
+          "why_it_converts": "8-15% of active members vs 0.3-0.8% for a direct pitch. They trust it because they produced their own number, not because we explained ours.",
+          "doctrine": "free to join, expensive to finish \u2014 the work is the qualification",
+          "cohort_size": 53,
+          "min_completion": 60,
+          "phases": {
+            "warm-up": "days 1-3 \u00b7 pick the niche, audit a rival, write 3 hooks",
+            "value": "days 4-9 \u00b7 post daily, reply within 15 min, run the comment audit",
+            "money": "days 10-14 \u00b7 3-slide Stories, 72h clock, read it, decide"
+          },
+          "scoring": {
+            "checkin": "+1 per day completed with a deliverable",
+            "streak": "+1 per consecutive day \u2014 breaks at midnight local",
+            "verify": "+2 when Jarvis can open the link and confirm the post exists",
+            "penalty": "-1 for a checked-in day with no link when one is required",
+            "finisher": "10 of 14 days + the day-13 result logged = finisher"
+          },
+          "upgrade_trigger": "finisher + PASS on the day-13 demand test -> invited to the \\$28 First Shot, then Circle \\$26",
+          "no_upgrade": "AMBER -> another cycle at no cost. RED -> a different niche, not a discount",
+          "jarvis_role": "creates the cohort, sends the daily action at 06:00, verifies links, ranks, flags quitters at day 5, writes the ledger, invites finishers",
+          "autonomy": "runs at AUTONOMY_SEQUENCE (85%) \u2014 it may send, score and rank unsupervised; it may NOT admit a finisher to the paid tier without the owner until autonomy lifts",
+          "days": [
+            {
+              "day": 1,
+              "phase": "warm-up",
+              "action": "Pick your niche and name the buyer",
+              "deliverable": "one sentence: who buys, what they already comment",
+              "why": "a niche you cannot describe in one line cannot be monetised"
+            },
+            {
+              "day": 2,
+              "phase": "warm-up",
+              "action": "Audit one rival page in your niche",
+              "deliverable": "3 numbers: followers, avg comments, like:comment ratio",
+              "why": "comments are the only trusted metric \u2014 likes lie"
+            },
+            {
+              "day": 3,
+              "phase": "warm-up",
+              "action": "Write 3 hooks in your own voice",
+              "deliverable": "3 hooks, 1 line each",
+              "why": "the hook is the whole product; the video is packaging"
+            },
+            {
+              "day": 4,
+              "phase": "value",
+              "action": "Post 1 piece of value \u2014 no ask",
+              "deliverable": "post URL",
+              "why": "warm-up exists so day 10 does not feel like a jump-scare"
+            },
+            {
+              "day": 5,
+              "phase": "value",
+              "action": "Post again and reply to every comment within 15 min",
+              "deliverable": "post URL + reply count",
+              "why": "the reply is where the buyer is revealed"
+            },
+            {
+              "day": 6,
+              "phase": "value",
+              "action": "Run the comment audit on your own post",
+              "deliverable": "comments, replies, buyer pool x3",
+              "why": "you must be able to read your own signal before you sell"
+            },
+            {
+              "day": 7,
+              "phase": "value",
+              "action": "Post the teardown: what worked, what flopped",
+              "deliverable": "post URL + 1 lesson",
+              "why": "public honesty is the cheapest trust you will ever buy"
+            },
+            {
+              "day": 8,
+              "phase": "value",
+              "action": "Ask your audience one question they answer in one word",
+              "deliverable": "the question + top answers",
+              "why": "their words become your sales copy verbatim"
+            },
+            {
+              "day": 9,
+              "phase": "value",
+              "action": "Post the best answer back to them as content",
+              "deliverable": "post URL",
+              "why": "proof you listen, which is rarer than proof you know"
+            },
+            {
+              "day": 10,
+              "phase": "money",
+              "action": "Build the 3-slide Stories demand test",
+              "deliverable": "3 slides + the CTA word",
+              "why": "Stories only \u2014 a feed post poisons the test"
+            },
+            {
+              "day": 11,
+              "phase": "money",
+              "action": "Publish the Stories and start the 72h clock",
+              "deliverable": "publish time + CTA word",
+              "why": "72h is the honest window; longer is a wish"
+            },
+            {
+              "day": 12,
+              "phase": "money",
+              "action": "Reply to every response, log objections",
+              "deliverable": "objection list",
+              "why": "objections are the product roadmap"
+            },
+            {
+              "day": 13,
+              "phase": "money",
+              "action": "Read the 72h result at the same hour you posted",
+              "deliverable": "comments count + PASS/AMBER/RED",
+              "why": "50+ PASS \u00b7 25\u201349 AMBER \u00b7 <25 RED \u2014 no reinterpretation"
+            },
+            {
+              "day": 14,
+              "phase": "money",
+              "action": "Decide: build the offer, or fix the niche",
+              "deliverable": "your decision + what you will do next",
+              "why": "the decision is the deliverable, not the revenue"
+            }
+          ],
+          "env": "CHALLENGE_COHORT_SIZE=53 \u00b7 CHALLENGE_MIN_COMPLETION=60 \u00b7 CHALLENGE_DAILY_SEND=06:00 \u00b7 CHALLENGE_VERIFY_LINKS=true"
+        },
+        "built": {
+          "page": "/challenge",
+          "api": "/api/challenge",
+          "tables": [
+            "challenge_members",
+            "challenge_checkins",
+            "challenge_scores"
+          ],
+          "writer": "WF14 06:00"
+        }
       },
       "bet": {
         "name": "SKIN IN THE GAME",
