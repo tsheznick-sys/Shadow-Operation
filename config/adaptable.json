@@ -5,7 +5,7 @@
     "created": "2026-10-30",
     "branch": "arena/6c47af3d-shadow-operation",
     "status": "pr_open",
-    "updated": "2026-10-31 PRICING: numerology_8 ladder \u2014 $28 first shot then every price reduces to 8 ($17/$35/$89/$44/$26/$62); prizes $710; break-even 35, recommended 44; saves $8 + 35% off $17"
+    "updated": "2026-10-31 TRUST ENGINE: free value is table stakes in this niche \u2014 the defensible ground is verifiable proof (Open Ledger), own-result activation (14-day challenge) and risk transfer ($28 guarantee). Free 1:1 work stays banned (R2)."
   },
   "niches": {
     "strategy": "Grok weekly re-rank via WF1, not hardcoded",
@@ -372,5 +372,63 @@
     "golive": "all 5 pages at once \u2014 import 13 workflows, start every page",
     "phase2": "after the Shadow Operation role converts clients to the required number, build the whole backend and give it the full pipeline to run, monetise the pages and make sales",
     "first_week": "all 5 pages live \u00b7 30 clips out \u00b7 first 3 Circle members"
+  },
+  "trust": {
+    "model": "trust is removed, not given \u2014 each engine kills one specific belief that blocks the buy",
+    "doctrine": "free at SCALE (1-to-many broadcast content, costs nothing extra). NEVER free at 1:1 (audits, decks, strategy calls) \u2014 that is where extraction happens",
+    "hard_rule_kept": "R2 \u2014 no free audit before YES. Validated by the Omar thread, not by preference",
+    "why_free_is_not_enough": "In 2026 free value is not scarce. Every competitor in this niche gives away 100+ niches, 300+ prompts, full AI stacks and workflows for free. AI made information worthless, so free information no longer signals anything. What is scarce is a verifiable outcome.",
+    "evidence": {
+      "own_funnel": "371 cold emails -> 4 replies (1.1%) -> 3 active (0.8%) -> 0 signed",
+      "own_free_audit": "Omar (@premiereprotutos, 164K): a full free 6-part audit was delivered Oct 20 (Transition Pack, revenue model, 14-day launch, 3 story scripts). Result: he stalled, then asked for a strategy deck 'for research purposes'. Free work produced extraction, not conversion.",
+      "own_proof_request": "Anu (@its.anu.sharma, 222K) asked 'can you show case studies?' \u2014 she did not want more free value, she wanted verifiable proof. Proof was the blocker, not generosity.",
+      "skool_freemium": "2-5% free->paid typical on Skool, 8-10% only when highly engaged",
+      "skool_challenge": "8-15% of active members convert via a structured challenge vs 0.3-0.8% via a direct pitch \u2014 a 4-6x difference",
+      "hormszi_reference": "4.5% free->paid at 100,000 free members (Hormozi model) \u2014 free scales by volume, not by conversion rate",
+      "free_audit_market": "free audits attract tire-kickers, are valued less, and devalue execution; a small PAID tripwire credited toward the build converts far better"
+    },
+    "competitors": {
+      "youtube_automation_hub": "FREE: 'Ultimate Faceless YouTube OS' \u2014 100+ high-RPM niches, full AI stack (research/script/voice/edit/thumb), viral title frameworks, 300+ prompts, automation workflows, monetization playbook. Gated by follow + like + repost + comment 'YT'.",
+      "virovate_academy": "FREE: 7-day trial of exact niches, scripts and faceless workflow.",
+      "uploados": "$116/week with a 1-day trial \u2014 upload automation, templates, weekly Q&A.",
+      "wheellsverse": "$47/mo with a 3-day trial \u2014 faceless frameworks, AI tools, monthly challenges with prizes.",
+      "benjamin_hubner": "FREE Quickstart PDF + referral unlocks, then a low-ticket suite from $17.",
+      "the_gap": "All five give away TEMPLATES, PROMPTS or TIME-BOXED ACCESS. Not one of them gives away PROOF. Screenshots are fakeable; a live channel with a public ledger is not. That is the only defensible ground in the niche."
+    },
+    "engines": {
+      "show": {
+        "name": "THE OPEN LEDGER",
+        "kills": "'I don't believe your numbers'",
+        "mechanic": "Publish the real numbers of all 5 pages every day \u2014 views, ER, comments, replies, revenue, churn, and the failures \u2014 on a public /proof page fed straight from Neon. 24h lag, nothing hand-edited, no cherry-picking.",
+        "why_it_wins": "An audit can be invented. A channel can be checked. When a prospect can verify the claim before talking to us, the case-study objection (Anu) dies before it is raised.",
+        "competitor_status": "nobody in the niche does this \u2014 every competitor shows screenshots",
+        "env": "PROOF_PUBLIC=true \u00b7 PROOF_LAG_HOURS=24 \u00b7 PROOF_INCLUDE_FAILURES=true"
+      },
+      "do": {
+        "name": "THE 14-DAY CHALLENGE",
+        "kills": "'I don't believe it works in MY niche'",
+        "mechanic": "The existing monthly 14-day sequence becomes a cohort challenge: free to join, one action per day (Warm-Up 1-3 / Value 4-9 / Money 10-14), ending in THEIR OWN 72h demand test. Completion is tracked and ranked.",
+        "why_it_wins": "8-15% conversion vs 0.3-0.8% for a direct pitch. They trust it because they produced their own result \u2014 not because we handed them a PDF. 'Free to join, expensive to finish.'",
+        "success_metric": "completion rate 60%+ is the strongest predictor of upgrade",
+        "env": "CHALLENGE_COHORT_SIZE=53 \u00b7 CHALLENGE_MIN_COMPLETION=60"
+      },
+      "bet": {
+        "name": "SKIN IN THE GAME",
+        "kills": "'I don't believe I'll get my money's worth'",
+        "mechanic": "The $28 First Shot carries a written guarantee: if the 72h demand test does not reach 50 comments, $28 comes back AND they keep every asset built. The operator carries the risk, not the buyer.",
+        "why_it_wins": "Risk transfer is the strongest trust signal available and it fits the Life Path 8 posture \u2014 confidence, never discounting. It also keeps the paid tripwire (which the market data says beats free) instead of collapsing to a free trial.",
+        "cap": "guarantee capped at the 72h demand test only \u2014 never a satisfaction guarantee on revenue",
+        "env": "FIRST_SHOT_GUARANTEE=true \u00b7 GUARANTEE_THRESHOLD=50"
+      }
+    },
+    "sequence": "SHOW before DO, DO before BET \u2014 a stranger must be able to verify before being asked to act, and must have acted before being asked to pay.",
+    "never": [
+      "never a free 1:1 audit, deck or strategy call",
+      "never a keyword-comment gate (follow/like/repost/comment 'YT') \u2014 it inflates comments and poisons the trusted metric",
+      "never a free trial longer than 7 days",
+      "never fake or borrowed case studies \u2014 niche results do not transfer"
+    ],
+    "docs": "docs/TRUST_ENGINE.md",
+    "env_summary": "PROOF_PUBLIC / PROOF_LAG_HOURS / PROOF_INCLUDE_FAILURES / CHALLENGE_COHORT_SIZE / CHALLENGE_MIN_COMPLETION / FIRST_SHOT_GUARANTEE / GUARANTEE_THRESHOLD"
   }
 }

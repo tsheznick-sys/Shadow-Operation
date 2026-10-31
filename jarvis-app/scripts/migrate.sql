@@ -144,3 +144,26 @@ INSERT INTO app_config (key, value) VALUES ('churn_alert_pct','2.0') ON CONFLICT
 INSERT INTO app_config (key, value) VALUES ('niches_pool','Stickman Finance,Psychology,Dark Psychology,Marketing History,Mindset,Wolf Mindset,Consumerism,Self-Improvement,Finance Behavior') ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW();
 
 INSERT INTO follower_gate (platform, followers, unlocked) VALUES ('instagram',0,false),('tiktok',0,false) ON CONFLICT DO NOTHING;
+
+-- ── THE OPEN LEDGER (public proof) ────────────────────────────────────────────
+-- Every real day of every real channel, including the failures.
+-- Written by WF9 from Buffer/IG/TikTok/YT analytics. Read by the public /proof page
+-- with a 24h lag so nothing can be edited after the fact.
+CREATE TABLE IF NOT EXISTS public_ledger (
+  id           BIGSERIAL PRIMARY KEY,
+  brand        TEXT        NOT NULL,
+  platform     TEXT        NOT NULL,
+  day          INT         NOT NULL,
+  views        BIGINT      NOT NULL DEFAULT 0,
+  er_pct       NUMERIC(5,2) NOT NULL DEFAULT 0,
+  comments     INT         NOT NULL DEFAULT 0,
+  replies      INT         NOT NULL DEFAULT 0,
+  posted       INT         NOT NULL DEFAULT 0,
+  note         TEXT        DEFAULT '',
+  recorded_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (brand, platform, day)
+);
+CREATE INDEX IF NOT EXISTS idx_public_ledger_day ON public_ledger (day DESC);
+
+COMMENT ON TABLE public_ledger IS
+  'Public proof ledger — shown on /proof. Never delete a bad day: hiding a failure destroys the only trust signal we have.';

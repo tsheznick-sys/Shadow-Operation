@@ -56,6 +56,28 @@ WF4 buffer       → 6 Shorts/day serious + longform Mon/Wed/Fri + X 1–2 disco
 
 ---
 
+## C2 — Trust: why free value is not the answer
+
+**The trap:** every competitor already gives away more than you do — 100+ niches, 300+ prompts, the whole AI stack, or a 3–7 day trial. Free information signals nothing in 2026. Your own funnel proved it: **371 emails → 4 replies → 0 signed**, and the one prospect who got a **free 6-part audit** (Omar, 164K) asked for more free work instead of signing. Meanwhile Anu (222K) never asked for free anything — she asked **"can you show case studies?"**
+
+**Trust is removed, not given.** Three engines, in this order:
+
+| # | Engine | Kills the belief | Mechanic | Conversion |
+|---|---|---|---|---|
+| 1 | **OPEN LEDGER** (`/proof`) | "I don't believe your numbers" | Every real day of every channel published with a 24h lag — including failures. Nothing hand-typed. | Makes case studies unnecessary |
+| 2 | **14-DAY CHALLENGE** | "I don't believe it works in MY niche" | WF10 run as a cohort of 53: one action/day, ends in *their own* 72h demand test | **8–15%** vs 0.3–0.8% for a direct pitch |
+| 3 | **SKIN IN THE GAME** | "I don't believe I'll get my money's worth" | $28 First Shot guaranteed: no 50 comments in 72h → refund **and they keep the assets** | risk on us, not them |
+
+**Doctrine:** *free at scale, never free at 1:1, paid and guaranteed at the door.*
+
+- Free **broadcast** content (30 clips/day across 5 pages) = top of funnel. Keep it.
+- Free **1:1** work (audits, decks, strategy calls) = the worst move available. Banned as **R2**.
+- **Never** a keyword-comment gate — it inflates the one metric this system trusts.
+
+Full argument + competitor table: `docs/TRUST_ENGINE.md`
+
+---
+
 ## D — The 14 workflows
 
 | WF | When | What |

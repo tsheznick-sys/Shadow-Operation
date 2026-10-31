@@ -27,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <a href="/pods" className="px-3 py-1.5 rounded-full bg-teal-500 text-black font-bold">Pods 1.1%</a>
               <a href="/bros" className="px-3 py-1.5 rounded-full bg-zinc-800">Bros 3</a>
               <a href="/n8n" className="px-3 py-1.5 rounded-full bg-teal-500 text-black font-bold">n8n 6/day</a>
+              <a href="/proof" className="px-3 py-1.5 rounded-full bg-teal-400 text-black font-bold">Proof</a>
               <a href="/team" className="px-3 py-1.5 rounded-full bg-zinc-800">Team 3</a>
               <a href="/money" className="px-3 py-1.5 rounded-full bg-zinc-800">Funding</a>
               <a href="/autonomy" className="px-3 py-1.5 rounded-full bg-zinc-800">Autonomy</a>
