@@ -155,4 +155,4 @@ Everything is env-overridable. Change `TIER_CIRCLE_PRICE`, redeploy, done. But r
 
 ---
 
-*Answers applied from the 2026-10-31 pricing round: 28 kept as the Leader opening, ladder = same-money 8s ($17/$35/$89/$44/$26), scope = products + prizes + break-even, saves converted ($8 pause / 35%→$17), floor $17 with a hidden $9 A/B control.*
+*Answers applied from the 2026-10-31 pricing round: 28 kept as the Leader opening, ladder = same-money 8s ($17/$35/$89/$53/$44), scope = products + prizes + break-even, saves converted ($8 pause / $17 downgrade; no percentage discount at $44 — every clean rate lands off-pattern), floor $17 with a hidden $9 A/B control.*

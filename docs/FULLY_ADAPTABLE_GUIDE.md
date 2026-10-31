@@ -14,7 +14,7 @@ Branch `arena/6c47af3d-shadow-operation` `pr_open` | 2026-10-30 EAT | Stack: Ver
 | GREEN/AMBER thresholds | `<50+5%+`, `50-70+3-5%` in `lib/jarvis.ts` | `THRESHOLD_*` in `lib/config.ts` | `THRESHOLD_RATIO_GREEN=50` `THRESHOLD_ER_GREEN=5` etc |
 | Platforms & X serious | X discovery 1-2, IG/TT/YT 6/day in pages | `PLATFORMS` + `BUFFER_X_DAILY` + `BUFFER_SERIOUS_DAILY` + `X_MODE` | `PLATFORMS=X,IG,TikTok,YT` |
 | ChatFuel / ManyChat | IG&TikTok ChatFuel only, YT ManyChat | `CHATFUEL_SCOPE` + `MANYCHAT_API_KEY` presence | `CHATFUEL_TOKEN=...` `MANYCHAT_API_KEY=...` |
-| Pricing ladder | $28 first shot → $17/$35/$89/$44/$26 (all 8-aligned) | `WHOP_LADDER_*` + `TIER_*` tiers | `TIER_LITE_PRICE=17` `TIER_PRO_PRICE=44` etc |
+| Pricing ladder | $28 first shot → $17/$35/$89/$53/$44 (all 8-aligned) | `WHOP_LADDER_*` + `TIER_*` tiers | `TIER_LITE_PRICE=17` `TIER_PRO_PRICE=53` `TIER_CIRCLE_PRICE=44` etc |
 | Pages count | 5 pages hardcoded in `app/page.tsx` `app/retention` | `PAGES_COUNT` drives dashboard + pods + n8n loops | `PAGES_COUNT=5` (any N) |
 | Brand voice | Wolf consumerism copy | `JARVIS_BRAND_VOICE` prompts override + Neon `brand_voice` row | `JARVIS_BRAND_VOICE=...` |
 | Buffer cadence | 6/day serious + X 1-2 stated in pages | `BUFFER_DAILY_LIMIT` style via `lib/config.ts` content.serious_daily | `BUFFER_SERIOUS_DAILY=6` |

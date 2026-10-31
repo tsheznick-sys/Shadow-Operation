@@ -171,7 +171,7 @@ Every clone publishes the honesty line: *"This page is new. It starts at zero an
 
 - **Revenue per page, never an aggregate.** An average hides a dead page.
 - **Reinvest from graduated pages**, never the owner's pocket.
-- **The ceiling is 10 pages** — 10 pages × 10 channels is the most one owner can supervise at 80% autonomy.
+- **The ceiling is 10 pages** — 10 pages × 6 channels (60 channels) is the most one owner can supervise at 80% autonomy. Pages are capped by *distinct readers*, not by appetite: today's pool supports 5, and slot 6 stays held until the daily scan proves a sixth reader (docs/PAGE_LAW_ONE_NICHE.md).
 
 ---
 
@@ -189,7 +189,7 @@ Every clone publishes the honesty line: *"This page is new. It starts at zero an
 | Workflows | **WF15** self-improvement · **WF16** duplicator |
 | Config | `learning` · `scaleout` (+ fixed `community_funding`) |
 
-**21 tables · 17 workflows · 36 pages.**
+**24 tables · 17 workflows · 37 pages.**
 
 ---
 

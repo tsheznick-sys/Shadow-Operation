@@ -63,10 +63,35 @@ export function parallelAllowance(graduatedCount: number, livePages: number): { 
   return { cap, canClone, reason };
 }
 
-/** A clone starts at zero and must be told so. */
-export function cloneBrief(template: { page: string; niche: string; version: string }) {
+/**
+ * A clone starts at zero and must be told so.
+ *
+ * 2026-10-31: this function used to hand back the template's niche untouched, which is
+ * exactly how six pages ended up running one niche. Copying the system is legal;
+ * copying the market is a policy violation and a waste of a page. So the niche is now
+ * checked against every niche already taken, and the clone is refused outright.
+ */
+export function cloneBrief(
+  template: { page: string; niche: string; version: string },
+  takenNiches: string[] = [],
+) {
+  const key = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const taken = takenNiches.some((n) => key(n) === key(template.niche));
+  const banned = ["finance", "investing", "credit", "debt", "health", "medical", "legal", "crypto", "trading"].some((b) =>
+    key(template.niche).includes(b),
+  );
+  const blocked = taken || banned;
   return {
+    allowed: !blocked,
+    blocked_reason: banned
+      ? `"${template.niche}" is in YouTube's permanent-removal bucket — no page, ever`
+      : taken
+        ? `"${template.niche}" is already live. A clone copies the system, never the niche — pick a reader nobody on the roster serves yet`
+        : null,
+    // what travels with the system
     copies: ["master prompt", "character lock", "hook bank", "cadence", "playbook slice", "template version"],
+    // what the clone must invent for itself
+    must_originate: ["niche", "audience", "angle", "visual world"],
     never_copies: ["the audience", "the comments", "the credibility"],
     honesty_line: `This page is new. ${template.page} earned its numbers over time — this one starts at zero and we will publish that too.`,
     version: template.version,

@@ -14,3 +14,7 @@ templates/backups/
 .venv/
 venv/
 .env
+
+# Node
+node_modules/
+.next/

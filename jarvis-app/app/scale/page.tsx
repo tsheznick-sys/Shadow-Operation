@@ -7,7 +7,7 @@ export default async function ScalePage() {
   const live = source === "neon" && lanes.length > 0;
   const p = portfolio(lanes);
   const allowance = parallelAllowance(p.graduated, p.live);
-  const brief = cloneBrief({ page: "Page A", niche: "Finance behaviour", version: "v1" });
+  const brief = cloneBrief({ page: "Page A", niche: "Psychology", version: "v1" }, ["Psychology", "Consumerism", "Marketing History"]);
 
   const gates: [string, string][] = [
     ["Demand test", "50+ comments at 72h"],
@@ -112,6 +112,13 @@ export default async function ScalePage() {
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
           <div className="font-bold text-sm text-zinc-100 mb-2">What a clone copies — and what it cannot</div>
           <div className="text-[10px] uppercase tracking-wide text-teal-400 mb-1">Copies</div>
+          {!brief.allowed && (
+            <div className="mb-3 rounded-lg border border-red-800 bg-red-950/40 p-3">
+              <div className="text-[11px] font-bold uppercase tracking-widest text-red-400">Clone refused</div>
+              <p className="mt-1 text-xs text-red-200">{brief.blocked_reason}</p>
+              <p className="mt-1 text-[11px] text-zinc-400">A clone must originate: {brief.must_originate.join(" · ")}</p>
+            </div>
+          )}
           <p className="text-xs text-zinc-400 mb-2">{brief.copies.join(" · ")}</p>
           <div className="text-[10px] uppercase tracking-wide text-red-400 mb-1">Never copies</div>
           <p className="text-xs text-zinc-400 mb-2">{brief.never_copies.join(" · ")}</p>

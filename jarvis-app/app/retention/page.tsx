@@ -79,7 +79,7 @@ export default function Retention() {
       </div>
       <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-5">
         <h2 className="font-bold text-sm">{s.pages_count} pages = {s.pages_count} brands, not per platform • adaptable PAGES_COUNT={s.pages_count}</h2>
-        <p className="text-xs text-zinc-400 mt-1">1 Page = 1 YT longform (30m) → its own TT+IG+Shorts via same Buffer queue. So {s.pages_count} pages = {s.pages_count} YouTube channels = {s.pages_count*3} platform endpoints but {s.pages_count} content engines. Change via env PAGES_COUNT without code.</p>
+        <p className="text-xs text-zinc-400 mt-1">1 Page = 1 niche = 6 channels: 2 YouTube (Longform is page 1) + TikTok + IG + FB + X. So {s.pages_count} pages = {s.pages_count*2} YouTube channels = {s.pages_count*6} channels, but only {s.pages_count} content engines — one scan, one script, two cuts, six surfaces. A page never shares a niche with another page; the 6th slot is held until a sixth reader is proven.</p>
         <div className="mt-3 grid grid-cols-5 gap-2 text-center text-xs">
           {pool.slice(0,5).map(n => <div key={n} className="rounded-xl bg-[#13131a] p-3 border border-zinc-800">{n.slice(0,12)}<div className="text-zinc-600">YT+TT+IG</div></div>)}
         </div>

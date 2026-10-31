@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shadow Operation — Publisher • HD 6 Queue</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--obs:#060608;--line:#1E1E22;--gold:#D4AF37;--gold2:#C19B2E;--muted:#9AA0A6;--card:#101012;--card2:#141416}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:'Inter',system-ui,sans-serif;background:var(--obs);color:#f2f2f5}
+a{color:var(--gold);text-decoration:none}
+.wrap{max-width:1240px;margin:0 auto;padding:0 20px}
+@media(min-width:1000px){.wrap{padding:0 28px}}
+/* shell */
+.top{position:sticky;top:0;z-index:30;backdrop-filter:blur(14px) saturate(150%);background:rgba(6,6,8,.82);border-bottom:1px solid var(--line)}
+.top .row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0}
+.brand{display:flex;gap:12px;align-items:center}
+.mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:grid;place-items:center;color:#060608;font-family:'JetBrains Mono',monospace;font-weight:900}
+.brand b{font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+.brand span{font-size:11px;color:var(--muted)}
+.actions{display:flex;gap:8px;align-items:center}
+.btn{appearance:none;border:1px solid var(--line);background:#111114;color:#fff;padding:9px 13px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer}
+.btn.gold{background:var(--gold);color:#060608;border-color:var(--gold)}
+.pill{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(212,175,55,.28);background:rgba(212,175,55,.08);padding:7px 10px;border-radius:999px;font-family:'JetBrains Mono',monospace}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:16px auto}
+@media(min-width:860px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+.stat b{font-family:'JetBrains Mono',monospace;font-size:18px}
+.stat span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;display:block;margin-top:4px}
+.note{max-width:1240px;margin:10px auto;padding:0 28px;color:var(--muted);font-size:12px;line-height:1.6}
+.grid{max-width:1240px;margin:18px auto;padding:0 28px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:.2s;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.card:hover{border-color:rgba(212,175,55,.22);transform:translateY(-2px)}
+.card .head{display:flex;justify-content:space-between;align-items:center;padding:11px 12px;background:var(--card2);border-bottom:1px solid var(--line)}
+.page{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:800}
+.time{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.thumb{position:relative;background:#000}
+.thumb video{width:100%;aspect-ratio:9/16;object-fit:cover;display:block;background:#000}
+.thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%, rgba(6,6,8,.6))}
+.overlay{position:absolute;left:10px;bottom:10px;right:10px;display:flex;justify-content:space-between;align-items:center;z-index:2}
+.tag{font-size:11px;padding:6px 9px;border-radius:999px;background:rgba(6,6,8,.6);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12);color:#fff}
+.play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:999px;background:rgba(6,6,8,.6);backdrop-filter:blur(8px);border:1px solid rgba(212,175,55,.35);display:grid;place-items:center;z-index:2;cursor:pointer}
+.meta{padding:14px}
+.meta h3{margin:0 0 6px;font-size:15px;font-weight:800}
+.meta p{margin:0 0 10px;font-size:12px;color:var(--muted);line-height:1.5;min-height:32px}
+.meta .line{font-family:'JetBrains Mono',monospace;font-size:11px;color:#BFC3C8;background:#0B0B0D;border:1px solid var(--line);padding:8px 10px;border-radius:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.actions2{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.actions2 a{flex:1;text-align:center;font-size:12px;padding:9px 10px;border-radius:10px;border:1px solid var(--line);background:#0A0A0C;color:#fff;font-weight:600}
+.actions2 a.primary{background:var(--gold);color:#060608;border-color:var(--gold)}
+.bar{height:3px;background:var(--line);border-radius:999px;overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;width:68%;background:linear-gradient(90deg,var(--gold),var(--gold2))}
+.footer{border-top:1px solid var(--line);padding:18px 0;color:var(--muted);font-size:12px;margin-top:18px;background:rgba(16,16,18,.6)}
+pre{white-space:pre-wrap;word-break:break-all;background:#0B0B0D;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:11px;color:#CBD5E1}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="wrap row">
+    <div class="brand"><div class="mark">S·O</div><div><b>Shadow Publisher</b><span>HD • 6 queued • 1080×1920 30fps</span></div></div>
+    <div class="actions"><span class="pill">G4 queued • drip 3+3 ET</span><a class="btn gold" href="store/index.html">Store →</a></div>
+  </div>
+</div>
+
+<div class="wrap stats">
+  <div class="stat"><b>6 / 6</b><span>Reels HD ready</span></div>
+  <div class="stat"><b>2 accounts</b><span>@shadow.cinema.ai · @shadow.edits.ai</span></div>
+  <div class="stat"><b>71 kbps</b><span>VO + bed audio</span></div>
+  <div class="stat"><b>8.00s</b><span>Keep 8s Veo Lite</span></div>
+</div>
+
+<div class="note">
+  Spec 1080×1920 30fps h264 high4.2 yuv420p • Katana #060608 / #D4AF37 • 5 transitions • captions 26px • Drive <a href="https://drive.google.com/drive/folders/105PQnlNsEf16aC29sq3saCWUW33wIGfV" target="_blank">inbound/shadow-cinema-ai</a> • <code>POST /api/publish/publish/{id}</code> → IG/TT/YT
+</div>
+
+<div class="grid">
+  <div class="card">
+    <div class="head"><span class="page">@shadow.cinema.ai</span><span class="time">07:00 ET • p01</span></div>
+    <div class="thumb"><video controls playsinline poster="app/outbound/publish-ready/@shadow.cinema.ai/p01_20h_to_20m_HD.jpg" src="app/outbound/publish-ready/@shadow.cinema.ai/p01_20h_to_20m_HD.mp4"></video><div class="overlay"><span class="tag">20h → 20m</span><span class="tag">SRT • HD • 71kbps</span></div><button class="play">▶</button></div>
+    <div class="meta"><h3>Twenty hours collapsed</h3><p>Twenty hours of editing collapsed into twenty minutes. The same story, finally breathing.</p><div class="line">p01_20h_to_20m_HD.mp4 — 242K • 8.00s • faststart • #060608/#D4AF37</div><div class="bar"><i></i></div><div class="actions2"><a class="primary" href="app/outbound/publish-ready/@shadow.cinema.ai/p01_20h_to_20m_HD.mp4" download>HD MP4</a><a href="app/outbound/publish-ready/@shadow.cinema.ai/p01_20h_to_20m_HD.srt" download>SRT</a><a href="app/outbound/publish-ready/@shadow.cinema.ai/p01_20h_to_20m_HD.jpg" target="_blank">Poster</a></div></div>
+  </div>
+
+  <div class="card">
+    <div class="head"><span class="page">@shadow.cinema.ai</span><span class="time">11:00 ET • p02</span></div>
+    <div class="thumb"><video controls playsinline poster="app/outbound/publish-ready/@shadow.cinema.ai/p02_client_250_HD.jpg" src="app/outbound/publish-ready/@shadow.cinema.ai/p02_client_250_HD.mp4"></video><div class="overlay"><span class="tag">$0 → $250</span><span class="tag">PROOF • HD</span></div><button class="play">▶</button></div>
+    <div class="meta"><h3>First payment</h3><p>From nothing to two hundred and fifty. The first payment that proves the loop is real.</p><div class="line">p02_client_250_HD.mp4 — 308K • 8.00s • burned captions</div><div class="bar"><i style="width:74%"></i></div><div class="actions2"><a class="primary" href="app/outbound/publish-ready/@shadow.cinema.ai/p02_client_250_HD.mp4" download>HD MP4</a><a href="app/outbound/publish-ready/@shadow.cinema.ai/p02_client_250_HD.srt" download>SRT</a><a href="app/outbound/publish-ready/@shadow.cinema.ai/p02_client_250_HD.jpg" target="_blank">Poster</a></div></div>
+  </div>
+
+  <div class="card">
+    <div class="head"><span class="page">@shadow.cinema.ai</span><span class="time">14:00 ET • p03</span></div>
+    <div class="thumb"><video controls playsinline poster="app/outbound/publish-ready/@shadow.cinema.ai/p03_5_transitions_HD.jpg" src="app/outbound/publish-ready/@shadow.cinema.ai/p03_5_transitions_HD.mp4"></video><div class="overlay"><span class="tag">5 transitions</span><span class="tag">EDIT • HD</span></div><button class="play">▶</button></div>
+    <div class="meta"><h3>The cut that sells</h3><p>Five transitions, one timeline, no cuts wasted. The cut that sells is the cut you feel.</p><div class="line">p03_5_transitions_HD.mp4 — 264K • 8.00s • whip/glitch/zoom/spin/leak</div><div class="bar"><i style="width:66%"></i></div><div class="actions2"><a class="primary" href="app/outbound/publish-ready/@shadow.cinema.ai/p03_5_transitions_HD.mp4" download>HD MP4</a><a href="app/outbound/publish-ready/@shadow.cinema.ai/p03_5_transitions_HD.srt" download>SRT</a><a href="app/outbound/publish-ready/@shadow.cinema.ai/p03_5_transitions_HD.jpg" target="_blank">Poster</a></div></div>
+  </div>
+
+  <div class="card">
+    <div class="head"><span class="page">@shadow.edits.ai</span><span class="time">17:00 ET • p04</span></div>
+    <div class="thumb"><video controls playsinline poster="app/outbound/publish-ready/@shadow.edits.ai/p04_9min_edit_HD.jpg" src="app/outbound/publish-ready/@shadow.edits.ai/p04_9min_edit_HD.mp4"></video><div class="overlay"><span class="tag">4h → 9min</span><span class="tag">STORY • HD</span></div><button class="play">▶</button></div>
+    <div class="meta"><h3>Time folded</h3><p>Four hours became nine minutes. Time folded, not stolen, and the story stayed whole.</p><div class="line">p04_9min_edit_HD.mp4 — 268K • 8.00s • vignette • gold curve</div><div class="bar"><i style="width:62%"></i></div><div class="actions2"><a class="primary" href="app/outbound/publish-ready/@shadow.edits.ai/p04_9min_edit_HD.mp4" download>HD MP4</a><a href="app/outbound/publish-ready/@shadow.edits.ai/p04_9min_edit_HD.srt" download>SRT</a><a href="app/outbound/publish-ready/@shadow.edits.ai/p04_9min_edit_HD.jpg" target="_blank">Poster</a></div></div>
+  </div>
+
+  <div class="card">
+    <div class="head"><span class="page">@shadow.cinema.ai</span><span class="time">19:00 ET • aura</span></div>
+    <div class="thumb"><video controls playsinline poster="app/outbound/publish-ready/@shadow.cinema.ai/katana_aura_farming_6364_HD.jpg" src="app/outbound/publish-ready/@shadow.cinema.ai/katana_aura_farming_6364_HD.mp4"></video><div class="overlay"><span class="tag">Aura farmed</span><span class="tag">KATANA • HD</span></div><button class="play">▶</button></div>
+    <div class="meta"><h3>Signal holds</h3><p>The aura is not found. It is farmed, frame by frame, until the signal holds.</p><div class="line">katana_aura_farming_6364_HD.mp4 — 220K • 8.00s • grain • Numinous</div><div class="bar"><i style="width:58%"></i></div><div class="actions2"><a class="primary" href="app/outbound/publish-ready/@shadow.cinema.ai/katana_aura_farming_6364_HD.mp4" download>HD MP4</a><a href="app/outbound/publish-ready/@shadow.cinema.ai/katana_aura_farming_6364_HD.srt" download>SRT</a><a href="app/outbound/publish-ready/@shadow.cinema.ai/katana_aura_farming_6364_HD.jpg" target="_blank">Poster</a></div></div>
+  </div>
+
+  <div class="card">
+    <div class="head"><span class="page">@shadow.cinema.ai</span><span class="time">21:00 ET • motion</span></div>
+    <div class="thumb"><video controls playsinline poster="app/outbound/publish-ready/@shadow.cinema.ai/katana_motion_6421_HD.jpg" src="app/outbound/publish-ready/@shadow.cinema.ai/katana_motion_6421_HD.mp4"></video><div class="overlay"><span class="tag">Motion kept</span><span class="tag">5.97s • HD</span></div><button class="play">▶</button></div>
+    <div class="meta"><h3>Every frame answers</h3><p>Motion is a promise kept. Every frame answers the one before it.</p><div class="line">katana_motion_6421_HD.mp4 — 232K • 5.97s • motion • 302kbps</div><div class="bar"><i style="width:52%"></i></div><div class="actions2"><a class="primary" href="app/outbound/publish-ready/@shadow.cinema.ai/katana_motion_6421_HD.mp4" download>HD MP4</a><a href="app/outbound/publish-ready/@shadow.cinema.ai/katana_motion_6421_HD.srt" download>SRT</a><a href="app/outbound/publish-ready/@shadow.cinema.ai/katana_motion_6421_HD.jpg" target="_blank">Poster</a></div></div>
+  </div>
+</div>
+
+<div class="note">
+  <pre>publish-ready/manifest.json • store/preview/ • Publisher API: POST /api/production/voiceover/{id} → POST /api/publish/publish/{id}
+Verify: 1080×1920 30fps h264 high4.2 • -crf 18 medium • burned captions #D4AF37 • faststart 8.00s • 71kbps VO+bed
+Whop:   https://whop.com/checkout/plan_saveo_founder_27?ref=saveo — bump $9 → OTO $79 → Lab $19/mo</pre>
+</div>
+
+<footer class="footer"><div class="wrap" style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><span>Shadow Operation — Publisher + Whop + ManyChat · branch arena/6c47af3d-shadow-operation</span><span><a href="store/index.html">Store →</a> · <a href="app/outbound/publish-ready/manifest.json">Manifest</a> · <a href="https://drive.google.com/drive/folders/105PQnlNsEf16aC29sq3saCWUW33wIGfV" target="_blank">Drive</a></span></div></footer>
+
+<script>
+document.querySelectorAll('.play').forEach(b=>b.addEventListener('click',()=>{const v=b.closest('.thumb').querySelector('video'); if(v.paused) v.play(); else v.pause();}));
+</script>
+</body>
+</html>

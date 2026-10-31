@@ -1,0 +1,24 @@
+{
+  "timestamp": "2026-10-28T22:50:00Z",
+  "thread": "1a15281d992fe8e7",
+  "sent_id": "1a184b7c6235cb18",
+  "in_reply_to": "CAPTpB6P0EB0TsxO-KhK9z-daXTi4siv4k__VOqtNvJBYv4gUWA@mail.gmail.com",
+  "personalization": "instructional, reputation-safe, audience-research framing, no product push until PASS",
+  "stories": {
+    "story1_poll": "Would a full transition/LUT/SFX vault save you real time? YES/NO",
+    "story2_style": "Clean whip vs dark moody YES/NO",
+    "story3_handraiser": "Reply VAULT — 1% of Story 3 views AND 25 raw VAULT replies = PASS"
+  },
+  "dates": {
+    "send": "2026-10-28T22:50Z",
+    "story1": "2026-10-29T19:00EAT",
+    "story2": "2026-10-30T19:00EAT",
+    "story3": "2026-10-31T19:00EAT",
+    "measure": "2026-11-01T09:00EAT"
+  },
+  "operator_instruction": "Personalise Now & send immediately — no excuse",
+  "branch": "arena/6c47af3d-shadow-operation",
+  "pr": 6,
+  "pr_state": "OPEN",
+  "linear_SHA15": "AWAITING_SCREENSHOT Thu 29 Oct"
+}

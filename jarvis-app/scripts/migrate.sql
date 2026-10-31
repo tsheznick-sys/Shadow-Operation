@@ -337,3 +337,45 @@ CREATE INDEX IF NOT EXISTS idx_asset_cuts_blocked ON asset_cuts (blocked) WHERE 
 
 COMMENT ON TABLE asset_cuts IS
   'One script, two cuts. If the public cut fails the policy gate the asset does not ship — the raw cut still reaches the community.';
+
+-- ============================================================
+-- PAGE LAW (2026-10-31) — one niche per page, enforced by the database.
+-- The 6 channels are surfaces of one page. They are not 6 pages.
+-- ============================================================
+ALTER TABLE solo_domains ADD COLUMN IF NOT EXISTS cluster      TEXT;
+ALTER TABLE solo_domains ADD COLUMN IF NOT EXISTS angle        TEXT;
+ALTER TABLE solo_domains ADD COLUMN IF NOT EXISTS audience     TEXT;
+ALTER TABLE solo_domains ADD COLUMN IF NOT EXISTS visual_world TEXT;
+ALTER TABLE solo_domains ADD COLUMN IF NOT EXISTS slot_status  TEXT NOT NULL DEFAULT 'assigned';
+
+-- The actual fix: two pages can no longer share a niche.
+-- Before this index, cloning 6 pages produced 6 identical niches and nothing objected.
+CREATE UNIQUE INDEX IF NOT EXISTS solo_domains_niche_uniq
+  ON solo_domains (lower(regexp_replace(coalesce(niche,''), '[^a-zA-Z0-9]', '', 'g')));
+
+-- Policy is not taste: these niches have no row, ever.
+ALTER TABLE solo_domains DROP CONSTRAINT IF EXISTS solo_domains_no_banned_niche;
+ALTER TABLE solo_domains ADD CONSTRAINT solo_domains_no_banned_niche CHECK (
+  lower(coalesce(niche,'')) NOT SIMILAR TO '%(finance|investing|credit|debt|health|medical|legal|crypto|trading)%'
+);
+
+-- 6 channels per page, 2 of them YouTube, longform is page 1.
+CREATE TABLE IF NOT EXISTS page_channels (
+  id          SERIAL PRIMARY KEY,
+  page_id     TEXT NOT NULL REFERENCES solo_domains(id) ON DELETE CASCADE,
+  platform    TEXT NOT NULL,
+  kind        TEXT NOT NULL,
+  is_page_one BOOLEAN NOT NULL DEFAULT false,
+  status      TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','paused','killed')),
+  -- every public surface carries the edited cut; raw lives on Whop only
+  cut         TEXT NOT NULL DEFAULT 'edited' CHECK (cut IN ('edited')),
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE (page_id, platform, kind)
+);
+
+-- Longform YouTube is the main page, and there is exactly one of it per page.
+CREATE UNIQUE INDEX IF NOT EXISTS page_channels_one_page_one
+  ON page_channels (page_id) WHERE is_page_one;
+
+COMMENT ON TABLE page_channels IS
+  '6 surfaces per page: 2 YouTube (longform = page one) + TikTok + IG + FB + X. Raw cuts never appear here.';

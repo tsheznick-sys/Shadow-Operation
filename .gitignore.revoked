@@ -1,0 +1,3 @@
+# keep archive but ignore heavy next cache
+archive/jarvis_revoked_2026-10-29/jarvis-app/.next/
+archive/jarvis_revoked_2026-10-29/jarvis-app/node_modules/

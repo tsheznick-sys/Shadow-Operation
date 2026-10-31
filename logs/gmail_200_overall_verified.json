@@ -1,0 +1,31 @@
+{
+  "total": 200,
+  "target": 200,
+  "verified_via": "gmail__list_drafts",
+  "gmail_result_size_estimate": 201,
+  "gmail_account": "scott.abuya@gmail.com",
+  "batches": {
+    "1-100": {
+      "created": 100,
+      "status": "complete_live",
+      "method": "gmail__create_draft DRAFT+INBOX",
+      "pool": "633\u2192402"
+    },
+    "101-200": {
+      "created": 100,
+      "status": "complete_live",
+      "method": "gmail__create_draft wise batch 117\u2192200 (84 queue) + 101\u2192116 (16 earlier)",
+      "pool": "450\u2192354"
+    }
+  },
+  "overall_created": 200,
+  "live_verified": 201,
+  "status": "200/200 LIVE VERIFIED",
+  "branch": "arena/6c47af3d-shadow-operation",
+  "pr": 6,
+  "pr_state": "OPEN",
+  "linear_SHA16": "Done",
+  "verified_at": "2026-10-28T12:47Z",
+  "closing_system": "docs/CLOSING_SYSTEM.md (5 scripts \u2192 FINAL TERMS \u2192 demand test \u22651%+25)",
+  "self_pipeline": "docs/SELF_CONTENT_PRODUCTION_PIPELINE.md (6/day Publisher queue38, ManyChat 8ch, Whop $27/$9/$79/$19/mo)"
+}

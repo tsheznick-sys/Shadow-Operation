@@ -1,0 +1,18 @@
+{
+  "total": 200,
+  "batches": {
+    "1-100": {
+      "created": 100,
+      "status": "complete_live"
+    },
+    "101-200": {
+      "created": 100,
+      "status": "complete_live"
+    }
+  },
+  "overall_created": 200,
+  "status": "200/200 LIVE",
+  "branch": "arena/6c47af3d-shadow-operation",
+  "pr": 6,
+  "pr_state": "OPEN"
+}

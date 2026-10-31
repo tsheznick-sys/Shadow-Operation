@@ -1,0 +1,39 @@
+{
+  "timestamp": "2026-10-28T22:45:00Z",
+  "thread": "1a15281d992fe8e7",
+  "last_inbound": "1a18325a0685d0de",
+  "resend": "1a18497c2c8cde7b",
+  "operator_locks_batch_1": {
+    "tweak": "Where did he say 65/35? I see it nowhere. Nothing changes for all the operators here and the future - hard rules locked",
+    "start": "hold_thu_29",
+    "demand_gate": "strict_1_25",
+    "store_timing": "draft_now_admin_later",
+    "ghost": "one_bump"
+  },
+  "operator_locks_batch_2": {
+    "store_draft_details": "no_store_until_pass - screenshot only, no Whop draft until PASS",
+    "toolkit_followup": "no_check_direct_stories - skip toolkit check, go straight to Stories",
+    "story_copy": "personalize_voice - rewrite 3 Stories in his exact caption style before sending",
+    "follower_cap": "treat_as_exception - 164K over 100K cap but 4.85% ER justifies exception"
+  },
+  "dates": {
+    "today": "2026-10-28",
+    "story_1": "2026-10-29T19:00:00+03:00",
+    "story_2": "2026-10-30T19:00:00+03:00",
+    "story_3": "2026-10-31T19:00:00+03:00",
+    "measure": "2026-11-01T09:00:00+03:00",
+    "build_start": "2026-11-02T09:00:00+03:00",
+    "live": "2026-11-03"
+  },
+  "resources_resent": {
+    "master_kit": "https://drive.google.com/drive/folders/17KpzZCmxxz13vJfkKv96EZZ5e7KTft8G",
+    "toolkit": "https://drive.google.com/file/d/1g6CvwqsZjyOshBklxGwI8tAVOGDhs4D1/view?usp=drivesdk",
+    "blueprint": "https://drive.google.com/file/d/1hSqfpeHjXNGMgxDI8_2hQxfqY_l71pVD/view?usp=drivesdk",
+    "spec_doc": "https://docs.google.com/document/d/1JkZy1fsUyTMOBzIOS_3Bd78GXOTMDsEk4zLenrGehtw/edit?usp=drivesdk"
+  },
+  "hard_rules_verified": "8 Hard Rules unchanged, no 65/35 in thread, Omar 164K exception due to 4.85% ER + 273 Whop video products underdeveloped",
+  "next_action": "Await 'I'm in' → personalize 3 Stories in his voice → send within hour → measure Thu-Sat",
+  "branch": "arena/6c47af3d-shadow-operation",
+  "pr": 6,
+  "pr_state": "OPEN"
+}
