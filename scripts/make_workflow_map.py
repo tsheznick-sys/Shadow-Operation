@@ -1,6 +1,17 @@
 #!/usr/bin/env python3
 """JARVIS n8n workflow map — deterministic poster generator.
 
+*** STALE AS OF 2026-10-31 — DO NOT PUBLISH ITS OUTPUT UNTIL THIS IS FIXED. ***
+
+The lanes below still describe the pre-rebuild numbering: WF4 as "G4 swipe -> Buffer", WF5 as the
+09:00 demand gate, WF6 as the leak finder. What actually exists in n8n/ is:
+
+    WF1 research · WF2 content · WF3 demand · WF4 brief · WF5 publish (15-min bell) · WF6 chatfuel
+
+Running this script therefore produces a poster that contradicts the six workflow JSONs in `n8n/`,
+and the folder in Drive already has three copies of the old one. Rewriting LANES/RAIL to match is a
+task of its own; until it is done the source of truth is `n8n/README.md`, not this image.
+
 Run:  python3 scripts/make_workflow_map.py
 Out:  docs/n8n_workflow_map.png
 
