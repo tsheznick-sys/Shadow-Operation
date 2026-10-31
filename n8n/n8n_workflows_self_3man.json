@@ -1,5 +1,5 @@
 {
-  "name": "Jarvis SELF 3-Man Content Jarvis - 12 Workflows (WF1-WF9 + WF10 monthly 14-day sequence + WF11 follower gate 1K)",
+  "name": "Jarvis SELF 3-Man Content Jarvis - 13 Workflows (content + demand + 3-seat auth/interview + monthly sequence + funding)",
   "workflows": [
     {
       "id": "wf1_research_grok",
@@ -112,7 +112,8 @@
         "Vapi voice = Vesper 20yo playful witty joke - custom per role intro: Owner Hey Sir it's Vesper! Social Hey love! Content Hey star! - ElevenLabs voice-00 via Vapi",
         "Whisper transcribe each leg -> Neon save transcript + Drive HQ 17KpzZCm/calls/ recording + Linear SHA + /admin log",
         "Claude Pro generates 3 fixes -> Voiceflow presents via Vesper 20yo",
-        "Vapi feedback call to Owner ONLY via same Jive permanent number - Vesper reads fixes: Say Apply or press 1 -> Admin Big Red Button optional double-confirm -> Execute via n8n"
+        "Vapi feedback call to Owner ONLY via same Jive permanent number - Vesper reads fixes: Say Apply or press 1 -> Admin Big Red Button optional double-confirm -> Execute via n8n",
+        "Legs = 3 (owner all / content only / social only) \u2014 kept 2026-10-31; advice from the interview decides fixes, not guesses"
       ],
       "cost": "Vapi $0 free WebRTC + PSTN $0.06-0.22/min emergency only",
       "security": "JIVE_JARVIS_NUMBER env only not in docs/commit"
@@ -129,9 +130,11 @@
         "Claude Code: personalized save copy via Vesper 20yo tone: Sir you have 47 scripts + Day 4 streak + pod Red needs you \u2014 Pause $5 keeps all vs Cancel deletes in 7d",
         "Telegram + Chatfuel DM + ManyChat 8ch push save offer card: [Pause $5 keep vault] [50% off ${{($env.TIER_CIRCLE_PRICE||19)/2}} next mo] [Downgrade ${{$env.TIER_LITE_PRICE||9}} Lite] \u2014 one-click via Whop API \u2014 TIER_* env adaptable",
         "Webhook user choice -> HTTP Whop API POST \u2014 IF pause/discount/downgrade -> Postgres INSERT retention_events saved, Neon saved_rate++, Telegram Sir saved + Linear SHA + Jive Vesper voice note optional",
-        "ELSE cancel confirmed -> Postgres churn increment, IF churn7d>2.5% -> WF7 Jive broadcast emergency Sir churn 3.1% trigger win clip + office hour",
+        "ELSE cancel confirmed -> Postgres churn increment, IF churn7d>2.0% (tightened 2026-10-31) -> WF7 Jive broadcast emergency Sir churn 3.1% trigger win clip + office hour",
         "Entitlement sync: Whop active -> update Neon entitlements tier=pro/lite for jarvis-app/lib/entitlement.ts has_access",
-        "ALIAS PAY: Cron 0 8 1 * * * (1st 08:00) -> HTTP YouTube Analytics + TikTok + Whop revenue_last_month -> Neon revenue_log -> Wise API POST /v1/batch-transfers alias with Social Manager: propose pay Jarvis $108 + community $500 from Wise USD, Social approves in /retention -> Wise executes"
+        "ALIAS PAY: Cron 0 8 1 * * * (1st 08:00) -> HTTP YouTube Analytics + TikTok + Whop revenue_last_month -> Neon revenue_log -> Wise API POST /v1/batch-transfers alias with Social Manager: propose pay Jarvis $108 + community $500 from Wise USD, Social approves in /retention -> Wise executes",
+        "Funding ledger: monthly Circle revenue -> tools first -> prizes (cap $500, pro-rata) -> annual fund $133 -> reserve; write funding_ledger",
+        "Autopay HELD: read app_config autopay_authority \u2014 if not_granted, send proposal only, never transfer (owner 2026-10-31)"
       ],
       "cost": "Whop API $0 + Wise batch $0.43% + Neon $0 \u2014 saves 40% cancels, recovers 30% failed payments",
       "rule": "Whop pause_membership first option, churn only counts if all 3 offers declined \u2014 paused = active 0% churn. Entitlement wired: lib/entitlement.ts mirrors Whop state"
@@ -178,6 +181,18 @@
         "Postgres UPDATE follower_gate (platform, followers, unlocked_at) + daily headroom line in 05:45 brief"
       ],
       "rule": "TikTok and IG start only after 1K followers on both (owner 2026-10-31) \u2014 triggers all 3 the moment it lands"
+    },
+    {
+      "id": "wf12_team_interview",
+      "name": "WF12 - Team interview digest (3 seats, completeness, gaps) - Mon 07:30",
+      "trigger": "cron 30 7 * * 1 (Mon 07:30 EAT)",
+      "nodes": [
+        "Postgres SELECT email, role, answers, completeness, updated_at FROM team_profiles",
+        "Claude Code: per seat summarise what changed, what is missing, 3 questions to close the gap \u2014 inject Content answers into WF3/WF4 prompts, Social into WF5/WF5A, Owner into WF8/WF10",
+        "IF any seat completeness < 60% -> Telegram Owner 'seat X cannot run unsupervised yet'",
+        "Vercel /team card + audit_log row (interview_digest)"
+      ],
+      "rule": "A seat under 60% does not get unsupervised authority over its lane \u2014 docs/TEAM_ONBOARDING_AUTH.md"
     }
   ],
   "creds_needed": [
@@ -199,7 +214,10 @@
     "Drive OAuth2 HQ 17KpzZCm",
     "R2 $5/mo \u2014 CANONICAL content storage (longform masters, shorts, sequence slides) \u2014 Drive keeps deliverables only (2026-10-31)",
     "LINEAR_API_KEY SHA",
-    "HIGGSFIELD_API_KEY also renders the monthly 14-day sequence slides (stickman lock) \u2014 $0.08/slide"
+    "HIGGSFIELD_API_KEY also renders the monthly 14-day sequence slides (stickman lock) \u2014 $0.08/slide",
+    "AUTH_SECRET 32+ chars \u2014 signs the 3 team sessions (shadow_session cookie)",
+    "TEAM_OWNER_PASSWORD + TEAM_CONTENT_PASSWORD + TEAM_SOCIAL_PASSWORD \u2014 rotate from dev defaults before live",
+    "AUTOPAY_AUTHORITY not_granted | granted \u2014 Jarvis only transfers after the owner flips this in /money"
   ],
   "total_cost": "MVP 1 page: Vercel $0 + Neon $0 + n8n $20 + Claude $20 + Grok $16 + stickman free + OpusClip free + Buffer Free + R2 $5 = $61/mo -> SCALE 5 pages: +OpusClip $15 + Higgsfield $29 (longform+shorts+sequence slides) + Buffer Team $60 = $165/mo (TubeGen $29 fallback only) \u2014 3 sales $81 covers MVP, 7 sales $189 covers scale",
   "next_step": "n8n Cloud Import this JSON -> add WHOP_API_KEY + WHOP_PRODUCT_LITE_ID/PRO_ID + WISE_API_KEY -> Vercel env same + set Whop webhooks membership_cancelled/payment_failed -> test /api/entitlement?whop_user_id=xxx -> WF8 retention save",

@@ -5,7 +5,7 @@
     "created": "2026-10-30",
     "branch": "arena/6c47af3d-shadow-operation",
     "status": "pr_open",
-    "updated": "2026-10-31 Round2: longform publish 3/wk (render daily) \u00b7 R2 canonical storage off Drive \u00b7 monthly 14-day sequence per Growth Operator book (Higgsfield slides \u2192 Buffer) \u00b7 IG/TikTok gate at 1K"
+    "updated": "2026-10-31 Round3: churn alert 2.0% \u00b7 3 seats with auth + deep interview \u00b7 autopay HELD until owner grants \u00b7 community self-funding at 40 members \u00b7 pods 5 \u00b7 daily leak / weekly expand kept"
   },
   "niches": {
     "strategy": "Grok weekly re-rank via WF1, not hardcoded",
@@ -143,7 +143,8 @@
       "A/B Hook/CTA via Higgsfield/OpusClip virality 9.2 ranked",
       "Daily ER check Social Blade alternatives + weekly Grok re-rank 1000 faceless via WF1",
       "Whop ladder $27+$9+$79+$19/mo ladder A/B + DM script variants via GMAIL_G4_SEND_200_VERIFIED.gs"
-    ]
+    ],
+    "leak_expand": "keep daily leak finder + weekly Monday expand (owner 2026-10-31)"
   },
   "paywalls": {
     "ladder": "$27 + $9 bump + $79 Pro + $19/mo Circle (env WHOP_LADDER_PRICES)",
@@ -159,9 +160,15 @@
   "retention": {
     "target": "1.1-1.4% churn \u2192 1-2% lock",
     "save": "WF8 Pause $5 / 50% off $9.50 / Downgrade $9 Lite \u2014 44% save, 1 save/30d max, paused=0% churn",
-    "pods": "WF9 \u22645 auto smallest pod via /api/pods ManyChat\u2192Whop Chat \u2014 Pod Red 28 vs Blue 22 daily 05:45, Vesper DM 3d inactive Hey love it's Vesper \u2014 Pod Red misses you via Jive +25418XXXX710 voice-00",
+    "pods": 5,
     "proof": "WWS Sun 09:00 + Tue/Fri proof clips + Leaderboard + Thu 19:00 teardown \u2192 Neon vault \u2192 32s teaser",
-    "upgrade": "all_three triggers Day3 win + Day7 streak + Leaderboard Top3 \u2192 Lite $9\u2192Pro $29 POST /api/whop/upgrade Whop change_plan"
+    "upgrade": "all_three triggers Day3 win + Day7 streak + Leaderboard Top3 \u2192 Lite $9\u2192Pro $29 POST /api/whop/upgrade Whop change_plan",
+    "churn_alert_weekly_pct": 2.0,
+    "save_offers": [
+      "pause $5 (counts active)",
+      "50% off next month",
+      "downgrade Lite $9"
+    ]
   },
   "shadow_pattern": "leak_expand: Daily 05:45 leak finder biggest leak in operator_context via /api/cron/daily-brief + weekly Grok re-rank top5 expand \u2192 auto-expand to 5 pages template big_run_1000.py + WF9 pods \u2014 superfast to Whop",
   "scale": {
@@ -179,7 +186,77 @@
   "voice": {
     "vesper": "Vapi SIP Jive One +25418XXXX710 secure env only 3 legs parallel not conference \u2014 voice-00 Vesper 20yo playful witty adaptive per role intro + ElevenLabs + Africa's Talking $0.06 \u2192 Twilio $0.22 fallback + Whisper transcribe \u2192 Neon/Drive 17KpzZCm/calls + Linear",
     "jarvis": "ElevenLabs briefing 08:45 + PWA mic Whisper via Grok",
-    "bundle": "audio/vesper_voice_*.mp3 + audio/jarvis_voice_* + jarvis-app/lib/voice.ts + docs/JARVIS_VESPER_VOICE_WIRED.md"
+    "bundle": "audio/vesper_voice_*.mp3 + audio/jarvis_voice_* + jarvis-app/lib/voice.ts + docs/JARVIS_VESPER_VOICE_WIRED.md",
+    "jive_legs": [
+      "owner all",
+      "content only",
+      "social only"
+    ]
   },
-  "live_links": "docs/LIVE_LINKS_SETUP.md \u2014 all https:// live (console.anthropic.com, console.x.ai, vercel.com/new, neon.tech, n8n.cloud, whop.com/dashboard, buffer.com, chatfuel.com, vapi.ai, elevenlabs.io, console.cloud.google.com)"
+  "live_links": "docs/LIVE_LINKS_SETUP.md \u2014 all https:// live (console.anthropic.com, console.x.ai, vercel.com/new, neon.tech, n8n.cloud, whop.com/dashboard, buffer.com, chatfuel.com, vapi.ai, elevenlabs.io, console.cloud.google.com)",
+  "team": {
+    "seats": 3,
+    "roles": {
+      "owner": "scott.abuya@gmail.com \u2014 admin, money, approvals",
+      "content": "content@shadow.local \u2014 G4, scripts, character lock",
+      "social": "info.wolf@gmail.com \u2014 DMs, Buffer, sequences"
+    },
+    "auth": "HMAC-SHA256 signed cookie (shadow_session, 7d, httpOnly) \u2014 env-seeded seats, edge middleware gate, timing-safe compare",
+    "permissions": {
+      "owner": "*",
+      "content": [
+        "/content",
+        "/pods",
+        "/onboarding",
+        "/team",
+        "/money",
+        "/drafts",
+        "/jarvis",
+        "/n8n"
+      ],
+      "social": [
+        "/social",
+        "/pods",
+        "/onboarding",
+        "/team",
+        "/money",
+        "/drafts",
+        "/jarvis",
+        "/n8n",
+        "/retention"
+      ]
+    },
+    "interview": "role-specific deep interview \u2014 12 questions owner / 12 content / 12 social, each with a 'why', min-length enforced, saves to Neon team_profiles",
+    "digest": "WF12 weekly Mon 07:30 \u2014 completeness per seat; a seat under 60% does not get unsupervised authority",
+    "docs": "docs/TEAM_ONBOARDING_AUTH.md"
+  },
+  "community_funding": {
+    "model": "self-funding \u2014 Circle carries tools first, then prizes, then annual fund, then reserve",
+    "circle_price": 19,
+    "tools_monthly": 165,
+    "prize_target": 500,
+    "annual_bills": 1596,
+    "annual_fund_per_month": 133,
+    "break_even_members": 35,
+    "recommended_members": 40,
+    "order": [
+      "tools",
+      "prizes",
+      "annual_fund",
+      "reserve"
+    ],
+    "prize_rule": "prize pool = max(0, circle revenue - tools), cap 500 \u2014 scales with members, never a fixed promise",
+    "ledger": "Neon funding_ledger",
+    "docs": "docs/COMMUNITY_FUNDING_MODEL.md"
+  },
+  "autopay": {
+    "state_default": "not_granted",
+    "rule": "Jarvis proposes only until the owner grants authority in /money; granting writes audit_log and starts next cycle, never retroactive",
+    "annual_resubscribe": "annual renewal fund accumulates $133/mo, converts TubeGen/Higgsfield/Buffer/OpusClip to annual once funded",
+    "env": [
+      "AUTOPAY_AUTHORITY",
+      "WISE_API_KEY",
+      "AUTOPAY_HOLD_UNTIL"
+    ]
+  }
 }

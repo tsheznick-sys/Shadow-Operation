@@ -74,3 +74,73 @@ INSERT INTO app_config (key, value) VALUES ('threshold_er_green','5') ON CONFLIC
 INSERT INTO app_config (key, value) VALUES ('whop_ladder','27+9+79+19') ON CONFLICT DO NOTHING;
 -- Seed 6 pods Red..Purple max 5 each for pod accountability next (Good-Better-Best)
 INSERT INTO pods (pod_id, name) VALUES ('pod_red','Pod Red'),('pod_blue','Pod Blue'),('pod_green','Pod Green'),('pod_yellow','Pod Yellow'),('pod_purple','Pod Purple'),('pod_teal','Pod Teal') ON CONFLICT DO NOTHING;
+
+-- ============ 2026-10-31 · TEAM AUTH + INTERVIEW + FUNDING ============
+-- 3 seats (owner / content / social). Passwords live in env, not here.
+CREATE TABLE IF NOT EXISTS team_profiles (
+  email TEXT PRIMARY KEY,
+  name TEXT,
+  role TEXT CHECK (role IN ('owner','content','social')),
+  answers JSONB DEFAULT '{}'::jsonb,
+  completeness INT DEFAULT 0,
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS team_profiles_role_idx ON team_profiles (role);
+
+-- Every privileged action gets a row: who, what, when.
+CREATE TABLE IF NOT EXISTS audit_log (
+  id BIGSERIAL PRIMARY KEY,
+  actor TEXT,
+  action TEXT,
+  detail JSONB DEFAULT '{}'::jsonb,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS audit_log_created_idx ON audit_log (created_at DESC);
+
+-- Monthly 14-day sequence assets (Growth Operator book). Content bodies live in R2; this is the index.
+CREATE TABLE IF NOT EXISTS sequence_assets (
+  id BIGSERIAL PRIMARY KEY,
+  cycle TEXT,                     -- e.g. 2026-11
+  day INT,                        -- 1..14
+  phase TEXT CHECK (phase IN ('warm_up','value_delivery','money_days')),
+  slide_no INT,
+  headline TEXT,
+  body TEXT,
+  cta TEXT,
+  asset_url TEXT,                 -- R2 object key
+  prompt_hash TEXT,
+  approved BOOL DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS sequence_assets_cycle_idx ON sequence_assets (cycle, day, slide_no);
+
+-- Follower gate: TikTok + IG only start the sequence after 1,000 each.
+CREATE TABLE IF NOT EXISTS follower_gate (
+  platform TEXT PRIMARY KEY,
+  followers INT DEFAULT 0,
+  unlocked BOOL DEFAULT FALSE,
+  unlocked_at TIMESTAMP,
+  checked_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Funding ledger: what the community pot did each month.
+CREATE TABLE IF NOT EXISTS funding_ledger (
+  id BIGSERIAL PRIMARY KEY,
+  period TEXT,                    -- 2026-11
+  circle_revenue NUMERIC DEFAULT 0,
+  tools_paid NUMERIC DEFAULT 0,
+  prizes_paid NUMERIC DEFAULT 0,
+  annual_fund NUMERIC DEFAULT 0,
+  reserve NUMERIC DEFAULT 0,
+  note TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+INSERT INTO app_config (key, value) VALUES ('autopay_authority','not_granted') ON CONFLICT DO NOTHING;
+INSERT INTO app_config (key, value) VALUES ('follower_gate_ig','1000') ON CONFLICT DO NOTHING;
+INSERT INTO app_config (key, value) VALUES ('follower_gate_tiktok','1000') ON CONFLICT DO NOTHING;
+INSERT INTO app_config (key, value) VALUES ('sequence_cadence','monthly') ON CONFLICT DO NOTHING;
+INSERT INTO app_config (key, value) VALUES ('churn_alert_pct','2.0') ON CONFLICT DO NOTHING;
+INSERT INTO app_config (key, value) VALUES ('niches_pool','Stickman Finance,Psychology,Dark Psychology,Marketing History,Mindset,Wolf Mindset,Consumerism,Self-Improvement,Finance Behavior') ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW();
+
+INSERT INTO follower_gate (platform, followers, unlocked) VALUES ('instagram',0,false),('tiktok',0,false) ON CONFLICT DO NOTHING;
