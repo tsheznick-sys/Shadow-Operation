@@ -1013,20 +1013,17 @@
     "tiers": {
       "free": 0,
       "circle": 44,
-      "pro": 53,
-      "max": 71
+      "pro": 53
     },
     "windows": {
       "free": 20,
       "circle": 40,
-      "pro": 80,
-      "max": 200
+      "pro": 80
     },
     "monthly": {
       "free": 300,
       "circle": 600,
-      "pro": 1200,
-      "max": 2400
+      "pro": 1200
     },
     "cost_per_run": 0.008,
     "publish_gate": {
@@ -1043,6 +1040,43 @@
       "why": "a supporter who already trusts us should not be walked through a funnel built to create trust",
       "cold_traffic": "still starts at the $28 First Shot"
     },
-    "implementation": "jarvis-app/lib/stickman-agent.ts + /stickman + 3 tables (agent_members, agent_runs, agent_schedule)"
+    "implementation": "jarvis-app/lib/stickman-agent.ts + /stickman + 3 tables (agent_members, agent_runs, agent_schedule)",
+    "tiers_dropped": {
+      "max": 71,
+      "why": "sat above the $62 Team tier — the same error as two tiers at $44. Team is SEATS, not a bigger agent."
+    },
+    "publish_paths": {
+      "free": {
+        "path": "manual_download",
+        "review": "none — they post it",
+        "why": "keeps the watermark; the download is the advert"
+      },
+      "circle": {
+        "path": "buffer_scheduled",
+        "review": "machine gate only",
+        "why": "scheduled through our publisher, so we never hold member platform tokens"
+      },
+      "pro": {
+        "path": "oauth_direct",
+        "review": "G4 human review, 2-hour SLA",
+        "until": "auto-publish earned after 3 clean publishes",
+        "why": "the SLA exists only where the risk is"
+      },
+      "rule": "the more access we take on, the more we must be paid to carry it"
+    },
+    "panel": {
+      "shape": "Whop-AI style single column: quota on top, next action always visible, nothing that needs a manual",
+      "screens": [
+        "home",
+        "create",
+        "performance",
+        "vault"
+      ],
+      "home": "quota, queue, next action — never a wall of numbers with no action",
+      "create": "7 steps, 6 of them gates; a blocked asset does not advance",
+      "performance": "six metrics ordered by how badly they can hurt; views last; never aggregated across pages",
+      "vault": "raw cuts, scripts, policy log, pods, community ledger",
+      "implementation": "jarvis-app/lib/panel.ts + /stickman, /stickman/create, /stickman/performance, /stickman/vault"
+    }
   }
 }

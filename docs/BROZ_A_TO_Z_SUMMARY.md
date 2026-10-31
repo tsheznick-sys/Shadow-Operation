@@ -16,6 +16,10 @@
 
 **Two ledgers.** One for the community (views, ER, comments, revenue opt-in) and one for the team (plus policy strikes, demonetisation risk, raw-vs-edited gap, margin). The team needs the wound; the prospect does not.
 
+**Agent tiers (Max dropped 2026-10-31).** Free 0 · Circle $44 (40 runs, scheduled through our publisher) · Pro $53 (80 runs, **direct publishing to their own accounts + a 2-hour review SLA** until auto-publish is earned). $71 Max was killed because it sat **above the $62 Team tier** — Team is seats, not a bigger agent. The rule: **the more access we take on, the more we must be paid to carry it.**
+
+**Four panel screens, all built:** Home (quota, queue, next action) · Create (7 steps, 6 gates) · Performance (six metrics ordered by how badly they hurt, views last) · Vault (raw cuts, scripts, policy log, pods).
+
 **Stickman Agent is the product.** Members do not buy a library, they buy a staff member: script, render, cut, schedule, audit. Free tier gets **20 runs per 5-hour window** (300/month cap) and **our content to clip**, with **our watermark on every export** — free users distribute our brand at their cost. Paid tiers are clean. Supporters may skip the funnel and join the community directly at $44; the discount is **0%**, only the path is shorter. Nobody publishes freely until rules, policy and disclosure pass; the first 3 publishes get G4 review, then auto-publish is earned.
 
 **`stickman_all` on every page.** `kaomei/stickman-video-director` (git clone, **free**) renders the **30-minute longform AND the Shorts** — one master prompt + one reference frame locks the character across both.

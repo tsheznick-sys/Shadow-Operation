@@ -1,26 +1,27 @@
+import { PanelTabs } from "./_tabs";
 import {
   COST_PER_RUN, FUNNEL_SHORTCUT, MONTHLY_RUNS, TIER_RULES, WINDOW_HOURS, WINDOW_RUNS,
-  WHAT_THE_AGENT_DOES, gateBeforePublish, quotaCheck, tierCost, watermarkFor, worstCase,
+  WHAT_THE_AGENT_DOES, gateBeforePublish, publishPath, quotaCheck, tierCost, watermarkFor, worstCase,
 } from "@/lib/stickman-agent";
 
 export const dynamic = "force-dynamic";
 
-const TIERS = ["free", "circle", "pro", "max"] as const;
+const TIERS = ["free", "circle", "pro"] as const;
 
 export default function StickmanAgentPage() {
   const demoGate = gateBeforePublish({
-    tier: "free", member_id: "demo", passes: 1,
+    tier: "pro", member_id: "demo", passes: 1,
     rules_ok: true, policy_ok: true, disclosure_ok: true, flagged: false,
   });
   const demoBlock = gateBeforePublish({
-    tier: "free", member_id: "demo", passes: 4,
+    tier: "pro", member_id: "demo", passes: 4,
     rules_ok: true, policy_ok: false, disclosure_ok: true, flagged: false,
   });
   const demoQuota = quotaCheck("free", {
     used_in_window: 20, used_this_month: 40,
     window_started: new Date(Date.now() - 60 * 60 * 1000).toISOString(), month: "2026-10",
   });
-  const wc = worstCase({ free: 100, circle: 26, pro: 6, max: 2 });
+  const wc = worstCase({ free: 100, circle: 26, pro: 6 });
   const wm = watermarkFor("free");
 
   return (
@@ -33,6 +34,7 @@ export default function StickmanAgentPage() {
         clip, and our watermark on everything they export.
       </p>
 
+      <PanelTabs active="home" />
       <div className="grid gap-3 sm:grid-cols-4 mb-6">
         {[
           ["Free window", `${WINDOW_RUNS.free} runs / ${WINDOW_HOURS}h`],
@@ -79,8 +81,34 @@ export default function StickmanAgentPage() {
           </table>
         </div>
         <p className="mt-2 text-[11px] text-zinc-500">
-          Worst case at 100 free · 26 Circle · 6 Pro · 2 Max: ${wc.cost}/mo against ${wc.revenue}/mo net —{" "}
+          Worst case at 100 free · 26 Circle · 6 Pro: ${wc.cost}/mo against ${wc.revenue}/mo net —{" "}
           <b className="text-zinc-300">{wc.verdict}</b>. Windows pace a member; the monthly cap keeps us solvent.
+        </p>
+      </section>
+
+      <section className="mb-6 rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+        <h2 className="text-sm font-bold mb-2">Who can publish, and how</h2>
+        <table className="w-full text-xs">
+          <thead className="text-left text-[11px] uppercase tracking-widest text-zinc-500">
+            <tr><th className="py-1">Tier</th><th>Path</th><th>Human review</th><th>Why</th></tr>
+          </thead>
+          <tbody className="text-zinc-300">
+            {TIERS.map((t) => {
+              const pp = publishPath(t, 0);
+              return (
+                <tr key={t} className="border-t border-zinc-800">
+                  <td className="py-1 font-bold uppercase">{t}</td>
+                  <td className="text-orange-400">{pp.path.replace(/_/g, " ")}</td>
+                  <td>{pp.review}</td>
+                  <td className="text-zinc-500">{pp.why}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        <p className="mt-2 text-[11px] text-zinc-500">
+          The 2-hour SLA is a Pro entitlement, and it only exists until auto-publish is earned. Circle is scheduled through our
+          publisher so we never hold a member&apos;s platform tokens. Free posts by hand — the watermark travels with it.
         </p>
       </section>
 

@@ -15,7 +15,15 @@
 //   3. Nobody publishes freely until they pass rules, policy and disclosure. Machine gate
 //      always; G4 human review for the first three publishes, then earned auto-publish.
 
-export type Tier = "free" | "circle" | "pro" | "max";
+export type Tier = "free" | "circle" | "pro";
+
+// MAX WAS DROPPED 2026-10-31. At $71 it sat ABOVE the $62 Team tier, which is the same
+// class of error as two tiers priced at $44: a member cannot tell which one is better,
+// and the pricing page starts arguing with itself. Three tiers, three different jobs:
+//   free   — proves the tool works, distributes our watermark
+//   circle — the community, the vault, the agent at 40 runs
+//   pro    — the operator: direct publishing, polish, the 2-hour review SLA
+// Team ($62) is SEATS, not a bigger agent: three people, one bill. It does not out-rank Pro.
 
 export const WINDOW_HOURS = 5;
 
@@ -24,7 +32,6 @@ export const WINDOW_RUNS: Record<Tier, number> = {
   free: 20,
   circle: 40,
   pro: 80,
-  max: 200,
 };
 
 /**
@@ -35,7 +42,6 @@ export const MONTHLY_RUNS: Record<Tier, number> = {
   free: 300,
   circle: 600,
   pro: 1200,
-  max: 2400,
 };
 
 /** Blended cost per run: script generation + free stickman render + storage. No paid polish. */
@@ -44,12 +50,50 @@ export const COST_PER_RUN = 0.008;
 /** Higgsfield polish is a real cost, so it is a paid action, not a toggle. */
 export const POLISH_COST = 0.08;
 
-export const TIER_RULES: Record<Tier, { watermark: boolean; polish: boolean; raw_vault: boolean; pod_priority: boolean; price: number | null; includes: string }> = {
-  free: { watermark: true, polish: false, raw_vault: false, pod_priority: false, price: 0, includes: "20 runs/5h · our content to clip · watermark on every export · scheduling to their own pages" },
-  circle: { watermark: false, polish: false, raw_vault: true, pod_priority: true, price: 44, includes: "everything in free, clean exports, raw vault, 40 runs/5h" },
-  pro: { watermark: false, polish: true, raw_vault: true, pod_priority: true, price: 53, includes: "everything in Circle, polish, 80 runs/5h, pod priority" },
-  max: { watermark: false, polish: true, raw_vault: true, pod_priority: true, price: 71, includes: "everything in Pro, 200 runs/5h, the full Jarvis panel" },
+export const TIER_RULES: Record<Tier, { watermark: boolean; polish: boolean; raw_vault: boolean; pod_priority: boolean; direct_publish: boolean; price: number | null; includes: string }> = {
+  free: {
+    watermark: true, polish: false, raw_vault: false, pod_priority: false, direct_publish: false, price: 0,
+    includes: "20 runs/5h · our content to clip · watermark on every export · downloads, no direct publishing",
+  },
+  circle: {
+    watermark: false, polish: false, raw_vault: true, pod_priority: true, direct_publish: false, price: 44,
+    includes: "clean exports, the raw vault, pods, 40 runs/5h, scheduling through our publisher",
+  },
+  pro: {
+    watermark: false, polish: true, raw_vault: true, pod_priority: true, direct_publish: true, price: 53,
+    includes: "everything in Circle, polish, 80 runs/5h, DIRECT publishing to their own accounts, 2-hour review SLA until auto-publish is earned",
+  },
 };
+
+/**
+ * Publishing path by tier (owner-stated 2026-10-31).
+ *   free   — download, post by hand. The watermark travels with it; that is the point.
+ *   circle — scheduled through OUR publisher. We never hold a member's platform tokens.
+ *   pro    — direct OAuth to their own accounts, with the 2-hour human review SLA until
+ *            they have earned auto-publish.
+ * The rule behind it: the more access we take on, the more we must be paid to carry it.
+ */
+export type PublishPath = "manual_download" | "buffer_scheduled" | "oauth_direct";
+
+export function publishPath(tier: Tier, passes = 0): { path: PublishPath; review: string; sla_hours: number | null; why: string } {
+  if (tier === "free") {
+    return { path: "manual_download", review: "none — they post it themselves", sla_hours: null,
+      why: "free keeps the watermark, and the download is the advert" };
+  }
+  if (tier === "circle") {
+    return { path: "buffer_scheduled", review: "machine gate only", sla_hours: null,
+      why: "scheduled through our publisher, so we never hold a member's platform tokens" };
+  }
+  const earned = passes >= 3;
+  return {
+    path: "oauth_direct",
+    review: earned ? "earned auto-publish" : "G4 human review, 2 hours",
+    sla_hours: earned ? null : 2,
+    why: earned
+      ? "three clean publishes — the machine gate is enough now"
+      : "the 2-hour SLA exists only where the risk is: first three publishes",
+  };
+}
 
 /**
  * The shortcut the owner approved: supporters may skip the $28 -> $17 funnel entirely and
@@ -107,15 +151,17 @@ export function gateBeforePublish(a: PublishAttempt): {
   if (!a.policy_ok) return { allow: false, requires_human: false, reason: "failed the policy check — this is the bucket that gets channels removed", watermark: wm };
   if (!a.disclosure_ok) return { allow: false, requires_human: false, reason: "AI disclosure missing — required on every public surface", watermark: wm };
   // Earned auto-publish: three clean publishes, then the machine gate alone.
-  if (a.passes < 3 || a.flagged) {
+  // The 2-hour human SLA is a PRO entitlement, not a universal one. A Circle member is
+  // scheduled through our publisher and needs no human in the loop; a free member posts by hand.
+  if (a.tier === "pro" && (a.passes < 3 || a.flagged)) {
     return {
       allow: true,
       requires_human: true,
-      reason: a.flagged ? "flagged for G4 review" : `publish ${a.passes + 1} of the first 3 — G4 reviews before it goes out`,
+      reason: a.flagged ? "flagged for G4 review, 2-hour SLA" : `publish ${a.passes + 1} of the first 3 — G4 reviews within 2 hours`,
       watermark: wm,
     };
   }
-  return { allow: true, requires_human: false, reason: "earned auto-publish — rules, policy and disclosure passed", watermark: wm };
+  return { allow: true, requires_human: false, reason: "rules, policy and disclosure passed — no human needed on this tier", watermark: wm };
 }
 
 export type Quota = { used_in_window: number; used_this_month: number; window_started: string; month: string };
