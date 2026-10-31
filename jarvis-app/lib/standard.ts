@@ -200,5 +200,5 @@ export const RATIONALE = [
   "Price to performance is the ratio you can defend in a board meeting: dollars out over usable assets in.",
   "Long term is churn, not revenue. A $44 member who leaves in 10 months is worth half a $44 member who stays 50.",
   "Speed only counts after the gate. The fastest way to fail is to ship everything.",
-  "Leverage is the only honest form of speed: one scan, one script, two cuts, six surfaces.",
+  "Leverage is the only honest form of speed: one scan, one script, two cuts, five surfaces.",
 ];

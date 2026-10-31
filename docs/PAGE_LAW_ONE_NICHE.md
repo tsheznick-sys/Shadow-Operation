@@ -9,7 +9,7 @@
 | "5 pages" (38 places) | the operational count |
 | "6 pages" (1 place) | the one that actually described what was being built |
 | "10 channels" (2 places) | true only under the old 2-channels-per-page model |
-| "30 channels" (1 place) | true under the 6-channels-per-page model |
+| "30 channels" (1 place) | out of date — X removed, so it is 25 |
 | `solo_domains.niche` | **no uniqueness constraint, no check, nothing** |
 
 The code did not know the difference between *a page*, *a channel* and *a niche*. `cloneBrief()` handed back the
@@ -29,14 +29,25 @@ That is not a hosting mistake. It is three failures stacked:
 
 ## The roster
 
-| # | Page | Reader (a motive, not a demographic) | The question it answers | Look |
-|---|---|---|---|---|
-| 1 | Consumerism | feels quietly overcharged, wants the receipt | why this costs what it costs | flat vector, catalogue, price tags |
-| 2 | Marketing History | small operator who wants the campaign that worked | how it was really built — brief, budget, mistake | archive collage, newsprint |
-| 3 | Psychology | curious about their own reflexes | why your brain does this — one mechanism | stickman, locked frame, no LUT |
-| 4 | Self-Improvement | already failed at motivation, wants a system | the system, not the willpower | whiteboard, grids, arrows |
-| 5 | Dark Psychology | negotiating power and losing | the influence mechanic being used on you | hard key light, noir |
-| 6 | **HELD** | — | — | — |
+| # | Page | Reader (a motive, not a demographic) | The question it answers | Look | Status |
+|---|---|---|---|---|---|
+| 1 | **Stickman** | wants the mechanism behind their own behaviour, in 60 seconds and again in 30 minutes | why your brain does this — one mechanism per episode | stickman, locked frame, one accent colour | **LIVE** |
+| 2 | Consumerism | feels quietly overcharged, wants the receipt | why this costs what it costs | flat vector, catalogue, price tags | queued |
+| 3 | Marketing History | small operator who wants the campaign that worked | how it was really built — brief, budget, mistake | archive collage, newsprint | queued |
+| 4 | Self-Improvement | already failed at motivation, wants a system | the system, not the willpower | whiteboard, grids, arrows | queued |
+| 5 | Dark Psychology | negotiating power and losing | the influence mechanic being used on you | hard key light, noir | queued |
+| 6 | **HELD** | — | — | — | — |
+
+**Retired 2026-10-31: a standalone Psychology page.** Stickman *is* the psychology page — the format is the
+differentiator. Running both would be one reader, twice, and `distinctness()` refuses it (same cluster: behavior).
+
+## Sequence — one page at a time
+
+This supersedes the earlier "all 5 pages at once" instruction.
+
+- **Page 1 is Stickman and it runs alone** until it posts a GREEN week: earnings, a hook bank, a churn number.
+- The next niche is proposed by the **Content Guy**, evidenced by the **daily scan**, and decided by a **3-of-3 board vote**.
+- **Never** launch page 2 in the same week as page 1. Five channels compounding beats twenty-five guessing.
 
 ### Why slot 6 is empty
 
@@ -62,9 +73,9 @@ anyone fills it with a duplicate.
 
 ## The arithmetic
 
-**5 pages × 6 channels = 30 channels.**
+**1 page live × 5 channels = 5 channels.** Full roster of 5 pages × 5 channels = **25 channels**, launched one at a time.
 
-Per page: YouTube Longform (**page 1**) · YouTube Shorts · TikTok · Instagram · Facebook · X.
+Per page: YouTube Longform (**page 1**, the source) · YouTube Shorts · TikTok · Instagram · Facebook. **X was removed on 2026-10-31** — worst reach per hour of any surface for a faceless animation page.
 
 > Note: the earlier "2 YouTube channels per brand = 10 channels" predates the 6-channel model and is retired.
 

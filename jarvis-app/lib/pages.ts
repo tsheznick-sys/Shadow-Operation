@@ -12,7 +12,7 @@
 // THE FIX:
 //   A page = one niche + one audience + one angle + one visual world.
 //   Its 6 channels are SURFACES of that page — not 6 pages, and not 6 chances to
-//   repost the same cut. 5 pages x 6 channels = 30 channels.
+//   repost the same cut. 5 pages x 5 channels = 25 channels.
 //
 //   And the hard part: you cannot get 6 distinct pages out of this pool, because 4 of
 //   the 7 niches are the same audience wearing different labels. Psychology, Dark
@@ -21,7 +21,7 @@
 //   cannot be explained as a different reader with a different reason to subscribe is
 //   not a page — it is a duplicate with extra hosting costs.
 
-export type Status = "assigned" | "held";
+export type Status = "assigned" | "queued" | "held";
 
 export type PageSlot = {
   id: string;
@@ -37,17 +37,41 @@ export type PageSlot = {
   reason?: string;
 };
 
-/** The six surfaces of ONE page. Two YouTube channels, and Longform is page 1. */
+/**
+ * The five surfaces of ONE page. Longform is the source; everything else is cut from it.
+ *
+ * X was removed 2026-10-31. It is the one surface where a faceless animation page has to
+ * fight for distribution on a timeline built for personalities — worst reach per hour of
+ * any surface we run. Five channels that compound beat six where one is a chore.
+ */
 export const CHANNELS = [
-  { platform: "youtube", kind: "longform", role: "PAGE 1 — the searchable asset, the one that ranks", cut: "edited" },
-  { platform: "youtube", kind: "shorts", role: "discovery engine, feeds the longform page", cut: "edited" },
+  { platform: "youtube", kind: "longform", role: "PAGE 1 — the source. Everything else is cut from this", cut: "edited" },
+  { platform: "youtube", kind: "shorts", role: "clips of the longform — same asset, second life", cut: "edited" },
   { platform: "tiktok", kind: "short", role: "cold discovery, fastest reach decay", cut: "edited" },
   { platform: "instagram", kind: "reel", role: "community + DMs, where the Circle is sold", cut: "edited" },
   { platform: "facebook", kind: "reel", role: "reels + the older buyer, underpriced attention", cut: "edited" },
-  { platform: "x", kind: "thread", role: "discovery + threads, the cheapest idea test", cut: "edited" },
 ] as const;
 
-export const CHANNELS_PER_PAGE = CHANNELS.length; // 6
+export const CHANNELS_PER_PAGE = CHANNELS.length; // 5
+
+// RETIRED 2026-10-31: a standalone "Psychology" page. Stickman IS the psychology page —
+// the format is the differentiator. Running both would be one reader, twice, and the
+// distinctness check now refuses it (same cluster: behavior).
+
+/**
+ * ONE PAGE AT A TIME (2026-10-31 — supersedes "all 5 pages at once").
+ *
+ * Page 1 is Stickman. It runs alone until it has earnings, a hook bank and a churn number.
+ * Then — only then — the next niche is chosen by the Content Guy's read plus the daily
+ * scan's evidence, and decided in a board meeting of all three partners.
+ */
+export const SEQUENCE = {
+  start_with: "Stickman",
+  why_stickman_first: "the format is the moat — one character lock, one frame, free renders, and a reader who clicks for the drawing as much as the idea",
+  rule: "a page must post a GREEN week before the next page is argued for",
+  next_niche_chosen_by: "Content Guy's expertise + WF1 daily market scan, decided by a 3-of-3 board vote",
+  never: "launch page 2 in the same week as page 1",
+} as const;
 
 /**
  * Five pages, five genuinely different readers.
@@ -56,30 +80,30 @@ export const CHANNELS_PER_PAGE = CHANNELS.length; // 6
 export const SLOTS: PageSlot[] = [
   {
     id: "p1",
+    niche: "Stickman",
+    cluster: "behavior",
+    audience: "people who want the mechanism behind their own behaviour, explained in 60 seconds and again in 30 minutes",
+    angle: "why your brain does this — one mechanism per episode, drawn on a stickman",
+    visual: "stickman, locked frame, no LUT, one accent colour per mechanism",
+    status: "assigned",
+  },
+  {
+    id: "p2",
     niche: "Consumerism",
     cluster: "price",
     audience: "people who feel they are being quietly overcharged and want the receipt",
     angle: "why this costs what it costs — unit economics of ordinary things",
     visual: "flat vector, catalogue colours, price tags as a recurring motif",
-    status: "assigned",
+    status: "queued",
   },
   {
-    id: "p2",
+    id: "p3",
     niche: "Marketing History",
     cluster: "case",
     audience: "small operators who want the campaign that actually worked, not theory",
     angle: "how this campaign was really built — the brief, the budget, the mistake",
     visual: "archive collage, newsprint, one red underline",
-    status: "assigned",
-  },
-  {
-    id: "p3",
-    niche: "Psychology",
-    cluster: "behavior",
-    audience: "curious people who want to understand their own reflexes",
-    angle: "why your brain does this — one mechanism per episode",
-    visual: "stickman, locked frame, no LUT",
-    status: "assigned",
+    status: "queued",
   },
   {
     id: "p4",
@@ -88,7 +112,7 @@ export const SLOTS: PageSlot[] = [
     audience: "people who have already failed at motivation and want a system instead",
     angle: "the system, not the willpower — habits treated as engineering",
     visual: "whiteboard, grids, hand-drawn arrows",
-    status: "assigned",
+    status: "queued",
   },
   {
     id: "p5",
@@ -97,7 +121,7 @@ export const SLOTS: PageSlot[] = [
     audience: "people negotiating power at work or in family, and losing",
     angle: "the influence mechanic being used on you right now",
     visual: "single hard key light, deep shadow, noir palette",
-    status: "assigned",
+    status: "queued",
   },
   {
     id: "p6",
@@ -162,9 +186,19 @@ export function canAddPage(candidate: PageSlot, existing: PageSlot[]): { ok: boo
   return { ok: conflicts.length === 0, conflicts };
 }
 
-/** Live pages the operation is actually allowed to run right now. */
+/** Live pages — the only ones spending money today. Right now that is one: Stickman. */
 export function assignedSlots(): PageSlot[] {
   return SLOTS.filter((s) => s.status === "assigned");
+}
+
+/** Pages that have been designed but are waiting their turn in the sequence. */
+export function queuedSlots(): PageSlot[] {
+  return SLOTS.filter((s) => s.status === "queued");
+}
+
+/** Live + queued. Distinctness is audited across both, because a queued page is a promise. */
+export function allDesignedSlots(): PageSlot[] {
+  return SLOTS.filter((s) => s.status !== "held");
 }
 
 export function pageCount() {
@@ -179,7 +213,7 @@ export function channelCount() {
  * The audit. Every page against every other page, and every page against the banned list.
  * An operation that cannot pass this has no business buying hosting.
  */
-export function auditPages(slots: PageSlot[] = assignedSlots()) {
+export function auditPages(slots: PageSlot[] = allDesignedSlots()) {
   const violations: string[] = [];
   for (let i = 0; i < slots.length; i++) {
     for (let j = i + 1; j < slots.length; j++) {
@@ -195,7 +229,10 @@ export function auditPages(slots: PageSlot[] = assignedSlots()) {
     clean: violations.length === 0,
     violations,
     pages: slots.length,
+    live: assignedSlots().length,
+    queued: queuedSlots().length,
     channels: slots.length * CHANNELS_PER_PAGE,
+    channels_live: assignedSlots().length * CHANNELS_PER_PAGE,
     held: SLOTS.filter((s) => s.status === "held").length,
   };
 }

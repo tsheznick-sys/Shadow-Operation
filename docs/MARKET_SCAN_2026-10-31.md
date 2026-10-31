@@ -1,6 +1,6 @@
 # LIVE MARKET SCAN — SHADOW OPERATION
 
-**Date:** 2026-10-31 · **Scope:** the self-operation as built (17 workflows, 5 pages, $44 Circle, 30 channels, 80% autonomy)
+**Date:** 2026-10-31 · **Scope:** the self-operation as built (17 workflows, 1 live page of 5 planned, $44 Circle, 5 channels per page, 80% autonomy)
 **Verdict up front:** the business model survives. **Three things inside it do not** — and one of them I designed myself last turn.
 
 ---

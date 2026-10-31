@@ -40,7 +40,7 @@ WF4 buffer       → 6 Shorts/day serious + longform Mon/Wed/Fri + X 1–2 disco
 | `<Brand> Shorts` | every clip from WF3 | 6/day via Buffer |
 | `<Brand>` longform | the 30-min renders | 3×/week, Mon/Wed/Fri |
 
-**Every niche runs 6 channels:** 2 YouTube (Shorts + **Longform = page 1, the main page**) + 1 TikTok + 1 IG + 1 FB + 1 X. **5 niches = 30 channels.**
+**Every niche runs 5 channels:** 2 YouTube (Shorts + **Longform = page 1, the source**) + 1 TikTok + 1 IG + 1 FB. **X was removed 2026-10-31** — worst reach per hour for a faceless animation page. **One page live (Stickman) = 5 channels now; the full roster of 5 pages = 25 channels**, launched one at a time.
 
 **Why:** Shorts channels earn subscriber velocity from volume; longform channels protect watch-time and RPM. One mixed channel splits the algorithm signal and depresses RPM. `YT_CHANNELS_PER_BRAND=2` (set `1` for legacy).
 

@@ -14,7 +14,7 @@ Not "ships with a warning". The warning is what everyone reads and nobody acts o
 | 2 | **Payback** | ≤ 12 members | The stack is paid back by members, not by hope. |
 | 3 | **LTV / CAC** | ≥ 3.0x | Under 3x you are buying churn and calling it growth. |
 | 4 | **Gated speed** | ≥ 2.0 shipped/hour | Blocked and retried assets score **zero**. Speed that fails the gate is cost. |
-| 5 | **Leverage** | ≥ 3 assets per idea | One script becomes a longform, a batch of shorts, a social cut. Below 3 you pay for ideas and waste them. |
+| 5 | **Leverage** | ≥ 3 assets per idea | One script becomes a longform, a batch of shorts, and three social cuts. Below 3 you pay for ideas and waste them. |
 | 6 | **Stack share of revenue** | ≤ 30% | Past 30% the tools own the upside, not you. |
 
 Plus one value rule that is not a ratio: **the member must get ≥ 3x the price in usable output per month.**

@@ -379,3 +379,38 @@ CREATE UNIQUE INDEX IF NOT EXISTS page_channels_one_page_one
 
 COMMENT ON TABLE page_channels IS
   '6 surfaces per page: 2 YouTube (longform = page one) + TikTok + IG + FB + X. Raw cuts never appear here.';
+
+-- ============================================================
+-- BOARD (2026-10-31) — three partners, and the things one person may not decide alone.
+-- ----------------------------------------------------------------------------
+-- The Content Guy proposes the niche. Jarvis brings the market scan. The owner holds the
+-- key. None of those three is sufficient on its own, which is the entire point of a board.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS board_meetings (
+  id          SERIAL PRIMARY KEY,
+  held_on     DATE NOT NULL DEFAULT CURRENT_DATE,
+  title       TEXT NOT NULL,
+  agenda      JSONB NOT NULL DEFAULT '[]'::jsonb,
+  -- 3 of 3. A meeting without all three partners is a conversation, not a decision.
+  attendees   TEXT[] NOT NULL DEFAULT '{}',
+  quorum_met  BOOLEAN NOT NULL DEFAULT false,
+  notes       TEXT,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS board_motions (
+  id          SERIAL PRIMARY KEY,
+  meeting_id  INT REFERENCES board_meetings(id) ON DELETE CASCADE,
+  kind        TEXT NOT NULL CHECK (kind IN (
+                'launch_page','kill_page','price_change','spend','niche_choice',
+                'policy_override','cadence','angle','other')),
+  motion      TEXT NOT NULL,
+  evidence    JSONB NOT NULL DEFAULT '[]'::jsonb,
+  votes       JSONB NOT NULL DEFAULT '{}'::jsonb,
+  status      TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','passed','rejected','blocked')),
+  decided_at  TIMESTAMPTZ,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+COMMENT ON TABLE board_motions IS
+  'launch_page, kill_page, price_change, spend, niche_choice and policy_override require 3 of 3. Everything else is 2 of 3.';

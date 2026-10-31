@@ -41,42 +41,51 @@
     "page_slots": [
       {
         "id": "p1",
-        "niche": "Consumerism",
-        "cluster": "price",
-        "status": "assigned"
+        "niche": "Stickman",
+        "cluster": "behavior",
+        "status": "assigned",
+        "note": "page 1 — runs alone until it posts a GREEN week"
       },
       {
         "id": "p2",
-        "niche": "Marketing History",
-        "cluster": "case",
-        "status": "assigned"
+        "niche": "Consumerism",
+        "cluster": "price",
+        "status": "queued"
       },
       {
         "id": "p3",
-        "niche": "Psychology",
-        "cluster": "behavior",
-        "status": "assigned"
+        "niche": "Marketing History",
+        "cluster": "case",
+        "status": "queued"
       },
       {
         "id": "p4",
         "niche": "Self-Improvement",
         "cluster": "system",
-        "status": "assigned"
+        "status": "queued"
       },
       {
         "id": "p5",
         "niche": "Dark Psychology",
         "cluster": "power",
-        "status": "assigned"
+        "status": "queued"
       },
       {
         "id": "p6",
         "niche": "—",
         "cluster": "unassigned",
         "status": "held",
-        "reason": "a sixth page needs a sixth reader proven by the daily scan, not a sixth label invented to fill a grid"
+        "reason": "a sixth page needs a sixth reader proven by the daily scan, not a sixth label"
       }
-    ]
+    ],
+    "sequence": {
+      "start_with": "Stickman",
+      "one_page_at_a_time": true,
+      "rule": "a page must post a GREEN week before the next page is argued for",
+      "next_niche_chosen_by": "Content Guy's expertise + WF1 daily market scan + a 3-of-3 board vote",
+      "never": "launch page 2 in the same week as page 1",
+      "supersedes": "the earlier 'all 5 pages at once' lock — revised 2026-10-31"
+    }
   },
   "thresholds": {
     "comment_note": "All thresholds env-overridable via JARVIS_* in .env.example — no code change needed",
@@ -170,12 +179,12 @@
     "channels_per_brand": 6,
     "channels_per_niche": {
       "youtube_longform": {
-        "role": "PAGE 1 — the main page",
+        "role": "PAGE 1 — the source. Everything else is cut from it",
         "posts": "3x/week Mon/Wed/Fri",
         "content": "edited, policy-safe"
       },
       "youtube_shorts": {
-        "role": "volume page",
+        "role": "clips of the longform — same asset, second life",
         "posts": "6/day",
         "content": "edited, policy-safe"
       },
@@ -192,11 +201,6 @@
       "facebook": {
         "role": "reels + older audience",
         "posts": "2/day",
-        "content": "edited"
-      },
-      "x": {
-        "role": "discovery + threads",
-        "posts": "3/day",
         "content": "edited"
       }
     },
@@ -217,7 +221,10 @@
       },
       "split_point": "the edit decision happens in WF3, not WF4 — raw is archived to the community bucket before any platform sees it",
       "env": "DUAL_OUTPUT=true · RAW_DESTINATION=whop · POLICY_GATE=true"
-    }
+    },
+    "channels_per_page": 5,
+    "channels_total_at_5_pages": 25,
+    "x_removed": "2026-10-31 — X dropped: worst reach per hour for a faceless animation page. 5 channels compound; 6 with one chore does not."
   },
   "conversion": {
     "dual": {
@@ -320,10 +327,10 @@
     "mvp": "$61/mo → $732/yr 1 page 6/day (stickman free + OpusClip free + Higgsfield manual + Buffer Free 3ch)",
     "scale_5": "$165/mo → $1,980/yr + ~$60 PSTN (stickman $0 engine + OpusClip $15 + Higgsfield $29 longform+shorts+sequence slides + Buffer Team $60 + R2 $5 + brain $36 + TubeGen $29 fallback only) — 2 BETTER $89 sales cover scale",
     "year1": "Pocket $189/mo×12=$2,268 → Net $1K/mo for 3 bros 30/20/50 → 100K gross before re-tool — docs/YEAR1_POCKET_TO_100K_SCALE.md",
-    "adaptable_pages": "PAGES_COUNT 5 assigned + 1 held (slot 6 needs a proven sixth reader)",
+    "adaptable_pages": "PAGES_COUNT 1 live (Stickman) + 4 queued + 1 held",
     "languages": "English default, extendable via CLAUDE_LOCALE env + Grok X trending locale",
-    "channels_per_page": 6,
-    "channels_total": 30
+    "channels_per_page": 5,
+    "channels_total": 25
   },
   "accounts": {
     "admin_master": "scott.abuya@gmail.com (Vercel/Neon/n8n/Claude/Whop/Wise/Linear/Telegram/Jive env only)",
@@ -943,5 +950,41 @@
     "portfolio_rule": "worst page decides; averages are how a dead page hides behind four alive ones",
     "value_rule": "the member must get >= 3x the price in usable output per month, or $44 becomes resentment",
     "implementation": "jarvis-app/lib/standard.ts (scorecard, worstFirst, netPerMember)"
+  },
+  "board": {
+    "partners": [
+      "Owner",
+      "Content Guy",
+      "Jarvis"
+    ],
+    "quorum": 3,
+    "unanimous_required": [
+      "launch_page",
+      "kill_page",
+      "price_change",
+      "spend",
+      "niche_choice",
+      "policy_override"
+    ],
+    "majority_only": [
+      "cadence",
+      "angle",
+      "other"
+    ],
+    "rules": [
+      "an abstain is not a yes",
+      "silence is not consent",
+      "an absent partner blocks, it does not defer"
+    ],
+    "niche_evidence": [
+      "7 daily scans",
+      "14 days observed",
+      "ER >= 5%",
+      "buyer pool x3 >= 3000",
+      "policy clear",
+      "cost per asset <= $3",
+      "distinct from every live page"
+    ],
+    "implementation": "jarvis-app/lib/board.ts + /board"
   }
 }
