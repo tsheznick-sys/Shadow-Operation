@@ -147,7 +147,7 @@ d.text(
 mx = 2960
 for line in reversed([
     "branch arena/6c47af3d-shadow-operation",
-    "17 workflows · 37 routes",
+    "17 workflows · 42 routes",
     "WF1 daily 08:00 internet scan",
     "6/day serious + X 1-2",
 ]):
@@ -173,7 +173,7 @@ LANES = [
              "writes solo_domains.top5 + action_plan", C_TEAL),
             ("WF2", "Longform Engine", "cron daily 02:00 EAT",
              ["Claude writes 6 scripts/domain = 4,500 words / 30 min",
-              "6 channels/niche: 2 YT + TikTok + IG + FB + X (30 at 5)",
+              "5 channels/page: 2 YT + TikTok + IG + FB (25 at 5, X removed)",
               "ALL pages -> stickman-video-director FREE (git clone $0)",
               "TubeGen $29 / Wan T4 = fallback only if render fails",
               "R2 upload (canonical, off Drive) · 9:16 master",
@@ -342,7 +342,7 @@ LANES = [
             ("SLA", "SLA + volume", "per page / per day",
              ["1 longform 30 min (publish Mon/Wed/Fri) · 6 shorts",
               "6 serious posts · X 1-2 · DMs on every comment <=2 min",
-              "5 pages = 30 shorts + 30 posts + ~15 longform published"],
+              "5 pages x 5 channels = 25 surfaces; 1 page live until GREEN"],
              "night build done by 05:45 EAT", C_GREEN),
         ],
     },
@@ -457,7 +457,7 @@ def rail(bg, bottom):
         ("THRESHOLD_RATIO_AMBER_MAX", "70"),
         ("THRESHOLD_ER_AMBER_MIN/MAX", "3 / 5 %"),
         ("THRESHOLD_BUYER_POOL_MIN", "3000"),
-        ("PAGES_COUNT", "5 pages"),
+        ("PAGES_COUNT", "1 live / 5 designed"),
         ("BUFFER_SERIOUS_DAILY", "6 / day"),
         ("BUFFER_X_DAILY", "2 / day"),
         ("CHURN_ALERT_PCT", "2.0 %"),
