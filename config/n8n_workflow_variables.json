@@ -1,0 +1,20 @@
+{
+  "_comment": "Import after n8n_workflows_self_3man.json — Settings → Variables → paste or POST /rest/variables. Thresholds here make WF5 WF5A WF6 WF4 adaptable without editing workflows.",
+  "variables": [
+    { "key": "THRESHOLD_RATIO_GREEN", "value": "50", "description": "GREEN <50:1 ratio (env THRESHOLD_RATIO_GREEN)" },
+    { "key": "THRESHOLD_RATIO_AMBER_MAX", "value": "70", "description": "AMBER max 70" },
+    { "key": "THRESHOLD_ER_GREEN", "value": "5", "description": "GREEN ER 5%+" },
+    { "key": "THRESHOLD_ER_AMBER_MIN", "value": "3", "description": "AMBER ER 3% min" },
+    { "key": "THRESHOLD_ER_AMBER_MAX", "value": "5", "description": "AMBER ER 5% max" },
+    { "key": "JARVIS_BRAND_VOICE", "value": "adaptive per solo_domains.brand_voice row", "description": "Override via Vercel JARVIS_BRAND_VOICE env, WF2/WF4 inject per domain" },
+    { "key": "PAGES_COUNT", "value": "5", "description": "1 Page=1 YT brand, 5=5 YT channels with Buffer TT/IG/Shorts each" },
+    { "key": "BUFFER_SERIOUS_DAILY", "value": "6", "description": "IG/TikTok/YT serious 6/day" },
+    { "key": "BUFFER_X_DAILY", "value": "2", "description": "X discovery 1-2 filler only" },
+    { "key": "WHOP_LADDER_PRICES", "value": "$27+$9+$79+$19/mo", "description": "Override TIER_* envs" },
+    { "key": "NICHES_POOL", "value": "Psychology,Dark Psychology,Marketing History,Mindset,Wolf Mindset,Consumerism,Self-Improvement,Finance Behavior", "description": "CSV pool, WF1 Grok re-ranks 1000 to top5 solo_domains" },
+    { "key": "JIVE_JARVIS_NUMBER", "value": "+25418XXXX710 (env only, not logged)", "description": "Vesper Vapi Africa's Talking primary via WF7" },
+    { "key": "CHATFUEL_SCOPE", "value": "IG&TikTok only", "description": "IG&TikTok ChatFuel, YT ManyChat per lock" },
+    { "key": "X_MODE", "value": "discovery only", "description": "X 1-2/day filler no gate no DM" }
+  ],
+  "setup": "n8n Cloud → Settings → Variables → Create each, then workflows reference {{$vars.THRESHOLD_RATIO_GREEN}}. Or keep defaults in config/adaptable.json — workflows fallback via env."
+}

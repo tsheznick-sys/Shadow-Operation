@@ -1,0 +1,38 @@
+{
+  "name": "Jarvis Squad Hybrid - n8n Content 6/day for 3 Bros + Vercel Monitor",
+  "workflows": [
+    {
+      "id": "wf1_research_squad",
+      "name": "WF1 Squad - Research Top5 Monetizable Weekly",
+      "trigger": "cron 0 8 * * 1 Mon 08:00 EAT",
+      "crew": "Squad 3 (you+Numinous+Bro3, equal SEND)",
+      "nodes": ["Postgres 1,462 GREEN", "HTTP Social Blade/HypeAuditor Apify", "IF GREEN ER>3% ratio<50", "Claude 3.5 Sonnet primary + Grok-2 secondary rank top5 monetizable $27 vault", "Telegram Squad group + Gmail Shadow Hot Top5 approve?", "Postgres UPDATE solo_domains top5"],
+      "approve": "Any of 3 bros Approve via Telegram button → n8n rotates domains"
+    },
+    {
+      "id": "wf2_make_squad",
+      "name": "WF2 Squad - Make 6/Day Short+Long (n8n Cloud $20)",
+      "trigger": "cron 0 2 * * * 02:00 EAT",
+      "nodes": ["Postgres top5", "Claude 6 scripts 3x8s+2x32s+1x60s Butler formal + hashtags", "HTTP Flow 8s + Pillow 0cr HD + Wan T4 32s → ffmpeg Katana p01→Drive", "Postgres publisher_queue38 pending_G4", "Linear SHA + Vercel /n8n embed + Telegram Squad Sir 6 ready"],
+      "queue": "publisher_queue38 (date, caption, video_url, domain, status pending_G4)"
+    },
+    {
+      "id": "wf3_publish_demand_whop_squad",
+      "name": "WF3 Squad - Publish G4 + Demand 1%+25 → Whop Ladder $27+$9+$79+$19",
+      "trigger": "Vercel /n8n approve (any of 3 equal SEND) → Publisher API 6/day + cron 0 9 * * * demand",
+      "nodes": ["IF approved (any bro) → HTTP Publisher 6/day IG+TikTok+YT", "Cron 09:00 HTTP IG/TikTok/YT analytics views+replies", "IF replies>=max(25,ceil(views*0.01)) PASS → Whop Create Product Squad Vault $27+$9+$79+Circle $19/mo", "ManyChat 8ch push", "Gmail Squad PASS — you decide live (Omar R9-11 reused for squad content)", "ELSE Claude reframe (Grok X check) → queue next 6"],
+      "gate": "R9 no Whop before PASS, R10 strict 1%+25, R11 personalize voice (Butler)"
+    },
+    {
+      "id": "wf4_brand_brief_squad",
+      "name": "WF4 Squad - Brand Gmail + Daily Brief All 3",
+      "trigger": "ManyChat webhook + Gmail IMAP brand + cron 45 5 * * * 05:45 EAT",
+      "nodes": ["ManyChat subscriber → Whop entitlement → Telegram Squad New $27", "Gmail brand → Grok classify X real-time + Claude reframe → Telegram Squad Brand deal", "Cron 05:45 Telegram Squad group + Gmail Shadow Hot + Signal Sir 6 live 2.1K views 18 replies 1 Whop sale $1.20 Claude+Grok burn"],
+      "monitor": "Vercel /n8n embeds n8n executions live (your lock)"
+    }
+  ],
+  "hybrid": "Vercel $20+Neon $19 (Squad dashboard: /, /drafts, /omar, /jarvis chat+mic, /bros 3, /n8n embed) + n8n Cloud $20 (WF1-4 full-time) + Claude $20 + Grok $16 (OpenAI removed) + R2 $5 + ManyChat $15 = $109/mo scaled (MVP $55/mo) — stay n8n Cloud forever, no Beelink",
+  "vercel_pages": ["/ (Pipeline 6/day)", "/drafts (Swipe 6/day equal SEND)", "/omar (Omar V2 tracker 1%+25)", "/jarvis (Chat+mic+08:45 Butler briefing)", "/bros (3 bros per-niche owner)", "/n8n (n8n WF1-4 + queue38 monitor)"],
+  "zip_includes": ["jarvis-app (no node_modules/.next)", "n8n/ 2 workflow JSONs", "docs/ 9 JARVIS docs", "tools/ apparatus_1000", "gas/ GMAIL_G4", "marketing/publisher queue38", "data/ 1,462 GREEN", "images/omar 7M ZIP + previews", "archive/ history", ".env.example"],
+  "delivery": "Workspace jarvis_whole_bundle.zip + GDrive HQ https://drive.google.com/drive/folders/17KpzZCmxxz13vJfkKv96EZZ5e7KTft8G — Zip full with assets (your lock)"
+}

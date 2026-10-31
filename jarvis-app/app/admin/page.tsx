@@ -18,9 +18,9 @@ export default function AdminPipeline() {
       <div className="rounded-2xl bg-[#13131a] border border-zinc-800 p-5">
         <h2 className="font-bold">Whole pipeline A→Z — admin sees all + decides PASS/FAIL • adaptable via env</h2>
         <ol className="list-decimal ml-5 mt-3 space-y-2 text-sm text-zinc-300">
-          <li><b>Stickman 30min longform $0 →</b> Claude Max auto-scripts {c.words_per_longform} words per domain (scalable {s.pages_count} via PAGES_COUNT) → stickman free engine renders every page → admin reviews WF1 daily action plan</li>
+          <li><b>Stickman 30min longform $0 →</b> Claude Max auto-scripts {c.words_per_longform} words per domain (scalable {s.pages_count} via PAGES_COUNT) → stickman free engine renders every page daily, publishes Mon/Wed/Fri → admin reviews WF1 daily action plan</li>
           <li><b>OpusClip auto (Claude Pro&Max together n8n automatically clips) →</b> 5-8 shorts virality ranked → admin gets feedback (no approval required) — brand voice per page via solo_domains.brand_voice</li>
-          <li><b>Stickman longform + Shorts →</b> OpusClip virality → Higgsfield polish (longform + shorts) → character lock → queue38 — Content Guy G4 only (G5 removed) → Buffer auto-schedules</li>
+          <li><b>Monthly 14-day sequence →</b> Growth Operator book phases + 11 buy buttons → Higgsfield slides → R2 → Buffer (IG + TikTok only after 1K followers on both; WF11 alerts all 3) — <b>Stickman longform + Shorts →</b> OpusClip virality → Higgsfield polish (longform + shorts) → character lock → queue38 — Content Guy G4 only (G5 removed) → Buffer auto-schedules</li>
           <li><b>Jarvis SEO (Claude Max) → Buffer Team unlimited →</b> social gives Jarvis autopublish approval → live 24/7 without opening platforms ({c.channels.join("/")})</li>
           <li><b>Analytics one-app Vercel embeds n8n+Buffer+Chatfuel →</b> social manager feedback from Jarvis on all platforms → admin sees one dashboard for all 3 bros</li>
           <li><b>Whop ladder auto on PASS {t.demand_percent}%+{t.demand_min_replies} →</b> admin monetizes pages — Whop sales fund n8n loops (MVP ${s.mvp_monthly} → SCALE ${s.scale_monthly} for {s.pages_count} pages)</li>

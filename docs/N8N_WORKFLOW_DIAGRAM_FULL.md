@@ -5,11 +5,11 @@
 *Direct image: [github blob](https://github.com/tsheznick-sys/Shadow-Operation/blob/arena/6c47af3d-shadow-operation/docs/n8n_workflow_map.png) · [raw png](https://github.com/tsheznick-sys/Shadow-Operation/raw/arena/6c47af3d-shadow-operation/docs/n8n_workflow_map.png) · [Drive copy](https://drive.google.com/file/d/1I8vVE58o7vCzLJHVbHjCNFprlzgfKRNp/view) · embed URL `https://drive.google.com/thumbnail?id=1I8vVE58o7vCzLJHVbHjCNFprlzgfKRNp&sz=w3000`*
 
 **Branch:** `arena/6c47af3d-shadow-operation` · **Status:** `pr_open`
-**Poster:** `docs/n8n_workflow_map.png` (3000px, 5 lanes + engine rail) · **ASCII map:** §1b · **Node tables:** §4
+**Poster:** `docs/n8n_workflow_map.png` (3000px, 5 lanes + engine rail) · **Sequence guide:** `docs/GROWTH_OPERATOR_14DAY_SEQUENCE.md` · **ASCII map:** §1b · **Node tables:** §4
 **Source of truth:** `n8n/n8n_workflows_self_3man.json` · **App:** `jarvis-app` (11 pages, 9 API routes)
-**Workflows:** 10 entries = WF1, WF2, WF3, WF4, WF5, WF5A, WF6, WF7, WF8, WF9
+**Workflows:** 12 entries = WF1, WF2, WF3, WF4, WF5, WF5A, WF6, WF7, WF8, WF9 + **WF10 monthly 14-day sequence** + **WF11 follower gate (1K)**
 **Engine:** `stickman_all` — `kaomei/stickman-video-director` free renders **30m longform + Shorts on every page** → OpusClip 9.2 → **Higgsfield polish on longform AND shorts $0.08/clip** → Buffer 6/day + X 1–2 (TubeGen/Wan = fallback only)
-**Cost:** MVP **$61/mo** · SCALE 5 pages **$160/mo** (stickman $0 engine, TubeGen $29 fallback only, Higgsfield $29 longform+shorts polish, LUT/watermark stays removed)
+**Cost:** MVP **$61/mo** · SCALE 5 pages **$165/mo** (stickman $0 engine, TubeGen $29 fallback only, Higgsfield $29 longform+shorts polish, LUT/watermark stays removed)
 
 ---
 

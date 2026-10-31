@@ -1,0 +1,38 @@
+{
+  "name": "Jarvis Solo Content - 4 Workflows",
+  "workflows": [
+    {
+      "id": "wf1_research",
+      "name": "WF1 - Research Best Monetizable Weekly",
+      "trigger": "cron 0 8 * * 1 (Mon 08:00 EAT)",
+      "nodes": ["Postgres SELECT 50 creators", "HTTP Social Blade/HypeAuditor", "IF ER>3% ratio<50 GREEN", "Claude 3.5 Sonnet primary + Grok-2 secondary rank top5 monetizable", "Telegram+Gmail Sir Top5 + Postgres UPDATE solo_domains"],
+      "import_hint": "n8n Cloud → Import → Postgres creds + HTTP + Claude+Grok + Telegram + Gmail",
+      "sql": "SELECT handle, platform, followers, avg_comments, buyer_pool_x3, ratio, er, gate FROM creators WHERE gate='GREEN' ORDER BY buyer_pool_x3*er DESC LIMIT 50"
+    },
+    {
+      "id": "wf2_content_maker",
+      "name": "WF2 - Make 6/Day Short+Long (Flow/Pillow/Wan)",
+      "trigger": "cron 0 2 * * * (02:00 EAT while you sleep)",
+      "nodes": ["Postgres top5 solo_domains", "Claude 3.5 Sonnet primary + Grok-2 secondary 6 scripts (3x8s short +2x32s long +1x60s)", "HTTP Flow 8s + Pillow HD mock 0cr + Wan 1.3B T4 32s → ffmpeg p01_32s_9x16 mp4→Drive", "Postgres INSERT publisher_queue38 pending_G4", "Linear Create Issue SHA", "Telegram Sir 6 videos ready for G4"],
+      "flow_tier": "Tier0 Pillow 0cr + Tier2 Wan 1.3B T4 free Colab + Tier1 Higgsfield UI manual (no card)",
+      "output": "publisher_queue38 (date, caption, video_url, status pending_G4)"
+    },
+    {
+      "id": "wf3_publisher_demand_whop",
+      "name": "WF3 - Publisher G4 + Demand 1%+25 → Whop Vault Auto",
+      "trigger": "queue38 pending_G4 → Telegram Approve button → Publisher API 6/day IG+TikTok+YT + cron 0 9 * * * demand check",
+      "nodes": ["IF approved → HTTP Publisher API 6/day", "Cron 09:00 EAT HTTP IG/TikTok/YT analytics views+replies", "IF replies>=max(25, ceil(views*0.01)) PASS → Whop Create Product $27+$9+$79+$19/mo ladder", "ManyChat Push 8ch", "Gmail Sir PASS vault live — you decide live", "ELSE Gmail FAIL → Claude reframe (Grok X check) → queue next 6"],
+      "rule": "R9 no Whop before PASS, R10 strict 1%+25 — reused for YOUR audience"
+    },
+    {
+      "id": "wf4_brand_daily",
+      "name": "WF4 - ManyChat 8ch + Brand Gmail + Daily Brief",
+      "trigger": "ManyChat webhook + Gmail IMAP brand@* + cron 45 5 * * *",
+      "nodes": ["ManyChat new subscriber → Postgres replies → Whop entitlement → Telegram New vault buyer $27", "Gmail brand IMAP → Grok classify X real-time + Claude reframe → Telegram Sir brand deal inbound", "Cron 05:45 Telegram+Gmail Shadow Hot Sir 6 videos live 2.1K views 18 replies 1 Whop sale $1.20 OpenAI"],
+      "cost_today": "Postgres query sums Claude+Grok usage"
+    }
+  ],
+  "creds_needed": ["n8n Cloud $20/mo", "DATABASE_URL Neon free", "CLAUDE_API_KEY + GROK_API_KEY (XAI_API_KEY)", "Gmail OAuth2 gmail.modify", "TELEGRAM_BOT_TOKEN", "LINEAR_API_KEY", "WHOP_API_KEY", "MANYCHAT_API_KEY", "Flow API + Drive OAuth2 + Wan T4 Colab URL", "R2 optional"],
+  "total_cost": "n8n $20 + Neon $0 + Claude $20 + Grok $16 (OpenAI removed) + R2 $5 = $56/mo MVP (Claude $20+Grok $16) → $119/mo scaled — Whop 2 sales $54 covers MVP — self sustained both loops",
+  "next_step": "n8n Cloud → Import this JSON → add creds → run WF1 → top5 monetizable → WF2 makes 6/day full-time"
+}

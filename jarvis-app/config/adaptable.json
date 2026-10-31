@@ -5,7 +5,7 @@
     "created": "2026-10-30",
     "branch": "arena/6c47af3d-shadow-operation",
     "status": "pr_open",
-    "updated": "2026-10-31 Round1: WF1 daily 08:00 whole-internet strategy scan + action plan \u00b7 stickman_all every page \u00b7 Higgsfield polishes longform+shorts \u00b7 G5 approval removed"
+    "updated": "2026-10-31 Round2: longform publish 3/wk (render daily) \u00b7 R2 canonical storage off Drive \u00b7 monthly 14-day sequence per Growth Operator book (Higgsfield slides \u2192 Buffer) \u00b7 IG/TikTok gate at 1K"
   },
   "niches": {
     "strategy": "Grok weekly re-rank via WF1, not hardcoded",
@@ -79,6 +79,42 @@
       "g4_content": true,
       "g5_social": false,
       "note": "G5 social review removed 2026-10-31 \u2014 G4 approve auto-schedules to Buffer; /social stays read-only analytics"
+    },
+    "longform_publish": "render daily 02:00 (free) but PUBLISH 3x/week Mon/Wed/Fri per page \u2014 extras bank as backlog (Round2 answer)",
+    "longform_render": "daily 02:00 \u2014 all pages stickman free",
+    "storage": {
+      "canonical": "Cloudflare R2 ($5/mo, 10GB free egress) \u2014 longform masters, shorts, sequence slides",
+      "metadata_index": "Neon Postgres table sequence_assets + publisher_queue38 (row per asset \u2014 cheaper than object storage for metadata)",
+      "drive": "deliverables + docs only (bundle, proofs, call recordings) \u2014 NOT content masters (owner 2026-10-31)",
+      "note": "if Neon approaches free-tier limit, index moves to a single jsonb column per cycle before any paid tier"
+    },
+    "monthly_sequence": {
+      "cadence": "monthly \u2014 1st of month built 07:00 EAT, Day 1 = 2nd of month",
+      "guide": "Shadow_Operation_Playbook.pdf (Consulting.com Growth Operator training) \u2014 MAIN GUIDE",
+      "guide_drive_id": "1c7H10-d4QgjomCoUNhox3pEE00mqsP0V",
+      "phases": {
+        "warm_up": "days 1-3 \u2014 attention and trust, no selling",
+        "value_delivery": "days 4-9 \u2014 teach and prove, seed the problem",
+        "money_days": "days 10-14 \u2014 open offer, answer objections, close"
+      },
+      "buy_buttons": [
+        "reciprocity",
+        "commitment",
+        "social proof",
+        "authority",
+        "scarcity",
+        "urgency",
+        "specificity",
+        "loss aversion",
+        "identity",
+        "ease-of-use",
+        "risk reversal"
+      ],
+      "asset_gen": "Higgsfield renders each slide in the page operation style \u2014 stickman character lock, 1080x1350 feed / 1080x1920 story",
+      "publish": "R2 upload -> G4 once per cycle in /content -> Buffer (IG carousel + TikTok, gated)",
+      "follower_gate": "IG >= 1000 AND TikTok >= 1000 before Buffer publishes; trigger all 3 when both land; one-platform-only starts alone",
+      "demand_test": "3-slide carousel in Stories only, read after 72h \u2014 50+ comments GREEN, 25-49 AMBER, <25 RED hold",
+      "docs": "docs/GROWTH_OPERATOR_14DAY_SEQUENCE.md"
     }
   },
   "conversion": {
@@ -91,7 +127,15 @@
     "chatfuel": "IG & TikTok only (user lock) \u2014 CHATFUEL_TOKEN",
     "manychat": "YT only fallback if MANYCHAT_API_KEY set (8ch optional) \u2014 YT comments cannot ChatFuel",
     "yt_triage": "YT comments \u2192 Gmail GMAIL_* triage if no ManyChat",
-    "hard_rules": "R1 no manual, R2 no free audit before YES, R3 IP gate, R4 human-send, R5 no fabrication, R6 math discipline, R7 3-email\u2192FINAL TERMS, R8 data hygiene, R9 no Whop before PASS, R10 strict 1%+25 IG/TikTok/YT only, R11 personalize voice"
+    "hard_rules": "R1 no manual, R2 no free audit before YES, R3 IP gate, R4 human-send, R5 no fabrication, R6 math discipline, R7 3-email\u2192FINAL TERMS, R8 data hygiene, R9 no Whop before PASS, R10 strict 1%+25 IG/TikTok/YT only, R11 personalize voice",
+    "amber_sequence": "AMBER nurture = the MONTHLY 14-day Growth Operator sequence (Warm-Up 1-3 / Value 4-9 / Money 10-14) with Higgsfield slides pushed to Buffer \u2014 IG + TikTok gated at 1K followers",
+    "demand_test": {
+      "green": 50,
+      "amber": 25,
+      "red_below": 25,
+      "window_hours": 72,
+      "placement": "Stories only \u2014 never a feed post"
+    }
   },
   "improve_loop": {
     "excluded": "G4 queue38 tweaks \u2014 per user lock All above aside for the G4 (Content Guy approves once, not in loop)",
@@ -122,7 +166,7 @@
   "shadow_pattern": "leak_expand: Daily 05:45 leak finder biggest leak in operator_context via /api/cron/daily-brief + weekly Grok re-rank top5 expand \u2192 auto-expand to 5 pages template big_run_1000.py + WF9 pods \u2014 superfast to Whop",
   "scale": {
     "mvp": "$61/mo \u2192 $732/yr 1 page 6/day (stickman free + OpusClip free + Higgsfield manual + Buffer Free 3ch)",
-    "scale_5": "$160/mo \u2192 $1,920/yr + ~$60 PSTN = $1,980 Year1 (5 pages stickman free $0 engine + OpusClip $15 + Higgsfield $29 longform+shorts polish + Buffer Team $60 + brain $36) \u2014 TubeGen $29 dropped to fallback only \u2014 3 sales $81 covers MVP, 6 sales $162 covers scale",
+    "scale_5": "$165/mo \u2192 $1,980/yr + ~$60 PSTN (stickman $0 engine + OpusClip $15 + Higgsfield $29 longform+shorts+sequence slides + Buffer Team $60 + R2 $5 + brain $36 + TubeGen $29 fallback only) \u2014 7 sales $189 covers scale",
     "year1": "Pocket $189/mo\u00d712=$2,268 \u2192 Net $1K/mo for 3 bros 30/20/50 \u2192 100K gross before re-tool \u2014 docs/YEAR1_POCKET_TO_100K_SCALE.md",
     "adaptable_pages": "Env PAGES_COUNT 5 (scalable any N) \u2014 no code change, WF1-9 loop domains",
     "languages": "English default, extendable via CLAUDE_LOCALE env + Grok X trending locale"

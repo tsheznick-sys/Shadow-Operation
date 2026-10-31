@@ -1,5 +1,5 @@
 {
-  "name": "Jarvis SELF 3-Man Content Jarvis - 9 Workflows (WF8 Retention 1-2% + WF9 Proof Loop + Entitlement wired)",
+  "name": "Jarvis SELF 3-Man Content Jarvis - 12 Workflows (WF1-WF9 + WF10 monthly 14-day sequence + WF11 follower gate 1K)",
   "workflows": [
     {
       "id": "wf1_research_grok",
@@ -25,7 +25,8 @@
         "Claude Code (Claude Max): Generate 6 scripts/domain (3x8s short +2x32s long +1x60s deep -> 4500 words for 30min) Butler tone JSON {title,script,captions,hashtags} + scene beats",
         "HTTP Request stickman-video-director (STICKMAN_REPO_URL) render 30m scene-per-beat per domain \u2014 $0 free engine primary for EVERY page",
         "IF stickman render fails/timeout -> HTTP Request TubeGen API (TUBEGEN_API_KEY) OR WAN_T4_URL (Colab free) fallback only",
-        "Drive Upload to NUMINOUS_WHOP_DEPLOY/17KpzZCm/ - p01_32s_9x16.mp4 Katana if needed via ffmpeg",
+        "R2 Upload (canonical, off Drive per 2026-10-31) - p01_32s_9x16.mp4 Katana if needed via ffmpeg",
+        "Publish gate: render daily 02:00 but PUBLISH 3x/week Mon/Wed/Fri (LONGFORM_PUBLISH_DAYS=1,3,5) \u2014 extras bank as backlog (2026-10-31)",
         "Postgres INSERT publisher_queue38_longform (date, video_url, engine_used, status='clip_pending')",
         "Telegram Sir longforms ready 02:15 EAT + which engine rendered each page - Linear SHA"
       ],
@@ -54,7 +55,7 @@
         "Vercel /content pending_G4 view -> Content guy G4 approve once (edit caption/hashtag/thumbnail) -> Postgres status='content_approved'",
         "Claude Code SEO pack per platform: IG hashtags vs TikTok hooks vs YT titles + buyer_pool_x3 targeting",
         "Postgres UPDATE status='content_approved' -> trigger Buffer schedule immediately (G5 social review REMOVED 2026-10-31)",
-        "HTTP Buffer API (BUFFER_TOKEN Team $12/ch) schedule {{$env.BUFFER_SERIOUS_DAILY || 6}}/day serious (IG/TikTok/YT) + {{$env.BUFFER_X_DAILY || 2}}/day X discovery per domain unlimited (env PLATFORMS+X_MODE)",
+        "HTTP Buffer API (BUFFER_TOKEN Team $12/ch) schedule {{$env.BUFFER_SERIOUS_DAILY || 6}}/day serious (IG/TikTok/YT) + longform 3x/week Mon/Wed/Fri per page + {{$env.BUFFER_X_DAILY || 2}}/day X discovery per domain unlimited (env PLATFORMS+X_MODE)",
         "Telegram Sir 6/day live via Buffer + longform uploaded to YT - Linear Done SHA"
       ],
       "rule": "G4 is the ONLY human approve (G5 removed 2026-10-31) \u2014 Buffer auto-schedules on G4. X discovery filler 1-2/day not counted in 6/day serious. /social = read-only analytics."
@@ -75,16 +76,19 @@
     },
     {
       "id": "wf5a_amber_14day",
-      "name": "WF5A-AMBER - 14-Day Nurture (AMBER 50-70+3-5% -> ChatFuel IG&TikTok + ManyChat YT drip Day1-14 then Whop)",
+      "name": "WF5A - AMBER = MONTHLY 14-Day Growth Operator Sequence (Higgsfield slides -> Buffer, IG/TikTok gated 1K)",
       "trigger": "AMBER branch from WF5 09:00 daily -> enroll contacts who commented but ratio 50-70 + ER 3-5%",
       "nodes": [
-        "IF AMBER: ratio {{$env.THRESHOLD_RATIO_GREEN || 50}}-{{$env.THRESHOLD_RATIO_AMBER_MAX || 70}} && er {{$env.THRESHOLD_ER_AMBER_MIN || 3}}-{{$env.THRESHOLD_ER_AMBER_MAX || 5}}% (STRICT AMBER via env) -> enroll Comments->DM->14-day->Whop (prioritized second to GREEN)",
-        "ChatFuel {{$env.CHATFUEL_SCOPE || IG&TikTok}} + ManyChat YT enroll: Day1-3 Value Proof (1 script moving to {{$env.THRESHOLD_RATIO_GREEN || 50}}+{{$env.THRESHOLD_ER_GREEN || 5}}%+ + value clip WF3 proof), Day4-7 DM scripts+teardown quietwolfzz 514K case + GS variants, Day8-14 DM close + Whop ${{$env.TIER_CIRCLE_PRICE || 19}}/mo Circle \u2014 same shadow conversion tempo daily CTA",
-        "IF reply YES any day 1-14 -> EXIT 14-day -> goto WF5-GREEN fast-close FINAL TERMS 10pts (both to advantage)",
-        "Both AMBER+GREEN share Whop ladder $27+$9+$79+$19/mo \u2014 AMBER exits to GREEN fast-close on YES",
-        "Post-14d no YES -> HOLD -> WF6 leak finder + WF1 weekly re-rank \u2014 improve loop: A/B Higgsfield short-form + OpusClip virality 9.2 + daily ER Social Blade alternatives + weekly Grok 1000 niches re-rank + Whop ladder A/B (no G4 per lock)"
+        "IF AMBER: ratio {{$env.THRESHOLD_RATIO_GREEN || 50}}-{{$env.THRESHOLD_RATIO_AMBER_MAX || 70}} && er {{$env.THRESHOLD_ER_AMBER_MIN || 3}}-{{$env.THRESHOLD_ER_AMBER_MAX || 5}}% -> enroll in the monthly sequence",
+        "Guide: Shadow_Operation_Playbook.pdf (Consulting.com Growth Operator training) \u2014 Warm-Up day1-3 / Value Delivery day4-9 / Money Days day10-14 + 11 buy buttons (docs/GROWTH_OPERATOR_14DAY_SEQUENCE.md)",
+        "Inputs: Claude reads last month top3 posts + Whop ladder + objections -> builds day/phase/slides/hook/body/CTA/link_sticker JSON",
+        "Higgsfield renders slides in page operation style (stickman character lock, 1080x1350 feed / 1080x1920 story) -> R2 upload -> Neon INSERT sequence_assets",
+        "G4 once per cycle in /content -> Buffer schedule IG carousel + TikTok ONLY if follower gate open (WF11)",
+        "Demand test: 3-slide carousel Stories only, read after 72h -> {{$env.THRESHOLD_DEMAND_GREEN || 50}}+ GREEN / {{$env.THRESHOLD_DEMAND_AMBER || 25}}-49 AMBER / <25 RED hold (pre-send checklist before every day)",
+        "IF reply YES any day 1-14 -> EXIT to WF5-GREEN fast-close FINAL TERMS 10pts (both to advantage)",
+        "Post-cycle no YES -> HOLD -> WF6 leak finder + WF1 daily re-rank \u2014 improve loop A/B Higgsfield slides + OpusClip virality + Whitepaper ladder A/B (no G4 in loop)"
       ],
-      "rule": "AMBER Comments->DM->14-day->Whop \u2014 daily CTA, not 3-email cap. Both GREEN+AMBER prioritize Comments->DM->Whop->Purchase."
+      "rule": "Monthly 14-day Growth Operator sequence per book \u2014 Stories-first, warm-up never skipped, 3-slide demand test read at 72h, IG+TikTok only after 1K followers on both. IG/TikTok gate alerts all 3 when reached."
     },
     {
       "id": "wf6_brand_daily_leak",
@@ -146,6 +150,34 @@
         "Thu 19:00 teardown Zoom Whop Event -> Vapi Vesper transcribes -> Neon vault -> Clip 32s teaser -> Buffer next day"
       ],
       "metrics": "WWS replay target 40% base, activation 85% in 7d, DAU 60%, save 45% \u2014 alerts if churn >2.5% 7d rolling"
+    },
+    {
+      "id": "wf10_monthly_sequence",
+      "name": "WF10 - Monthly 14-Day Growth Operator Sequence (Higgsfield slides -> Buffer)",
+      "trigger": "cron 0 7 1 * * (1st of month 07:00 EAT \u2014 Day 1 = 2nd)",
+      "nodes": [
+        "Cron 1st 07:00 -> Postgres SELECT last month top3 posts + Whop ladder + objection list per page",
+        "Claude Code: build 14 days x slides from Shadow_Operation_Playbook.pdf phases \u2014 Warm-Up 1-3 (no selling) / Value Delivery 4-9 / Money Days 10-14 + distribute 11 buy buttons",
+        "Higgsfield: render every slide in page operation style \u2014 stickman character lock, 1080x1350 feed + 1080x1920 story, no watermark, no LUT",
+        "R2 upload (canonical, off Drive) -> Postgres INSERT sequence_assets (cycle, day, phase, url, prompt_hash)",
+        "Vercel /content: Content G4 approves ONCE per cycle (not per slide) -> status cycle_approved",
+        "IF follower gate open (WF11: IG>=1000 AND TikTok>=1000) -> Buffer schedule IG carousel + TikTok; else queue until gate opens",
+        "Telegram/Signal/Gmail all 3: cycle built, slide count, G4 pending, follower headroom on each platform"
+      ],
+      "rule": "Book-faithful: warm-up never skipped, Stories only, 3-slide demand test read at 72h (50/25 bar), no invented testimonials"
+    },
+    {
+      "id": "wf11_follower_gate",
+      "name": "WF11 - Follower Gate 1K (IG + TikTok) -> unlock monthly sequence + alert all 3",
+      "trigger": "cron 30 6 * * * (daily 06:30 EAT)",
+      "nodes": [
+        "HTTP IG Graph API + TikTok API -> followers_current, followers_delta_7d",
+        "IF IG >= {{$env.FOLLOWER_GATE_IG || 1000}} AND TikTok >= {{$env.FOLLOWER_GATE_TIKTOK || 1000}} -> unlock WF10 cycle for Buffer",
+        "IF only one platform cleared -> publish that platform alone, keep other queued (never block both)",
+        "Telegram + Signal + Gmail all 3: 1K reached on IG and TikTok \u2014 sequence unlocked, cycle live",
+        "Postgres UPDATE follower_gate (platform, followers, unlocked_at) + daily headroom line in 05:45 brief"
+      ],
+      "rule": "TikTok and IG start only after 1K followers on both (owner 2026-10-31) \u2014 triggers all 3 the moment it lands"
     }
   ],
   "creds_needed": [
@@ -165,10 +197,11 @@
     "TELEGRAM_BOT_TOKEN + SIGNAL_API all 3",
     "Gmail OAuth2 gmail.modify 500/day",
     "Drive OAuth2 HQ 17KpzZCm",
-    "R2 $5/mo backup",
-    "LINEAR_API_KEY SHA"
+    "R2 $5/mo \u2014 CANONICAL content storage (longform masters, shorts, sequence slides) \u2014 Drive keeps deliverables only (2026-10-31)",
+    "LINEAR_API_KEY SHA",
+    "HIGGSFIELD_API_KEY also renders the monthly 14-day sequence slides (stickman lock) \u2014 $0.08/slide"
   ],
-  "total_cost": "MVP 1 page: Vercel $0 + Neon $0 + n8n $20 + Claude $20 + Grok $16 + stickman free $0 + OpusClip free + Buffer Free 3ch = $56-61/mo \u2192 SCALE 5 pages: +OpusClip $15 + Higgsfield $29 (longform+shorts polish) + Buffer Team $60 = $160/mo incl stickman $0 engine (TubeGen $29 fallback only) \u2014 3 Whop sales $81 covers MVP, 6 sales $162 covers scale",
+  "total_cost": "MVP 1 page: Vercel $0 + Neon $0 + n8n $20 + Claude $20 + Grok $16 + stickman free + OpusClip free + Buffer Free + R2 $5 = $61/mo -> SCALE 5 pages: +OpusClip $15 + Higgsfield $29 (longform+shorts+sequence slides) + Buffer Team $60 = $165/mo (TubeGen $29 fallback only) \u2014 3 sales $81 covers MVP, 7 sales $189 covers scale",
   "next_step": "n8n Cloud Import this JSON -> add WHOP_API_KEY + WHOP_PRODUCT_LITE_ID/PRO_ID + WISE_API_KEY -> Vercel env same + set Whop webhooks membership_cancelled/payment_failed -> test /api/entitlement?whop_user_id=xxx -> WF8 retention save",
-  "self_only": "3-man core self-only scalable 5 domains \u2014 ALL pages Stickman Finance-style stickman free engine (kaomei/stickman-video-director) 30m longform + Shorts \u2192 OpusClip virality 9.2 \u2192 Higgsfield polish longform+shorts \u2192 character lock (one prompt/one frame) \u2014 G4 only (G5 removed) \u2014 cloud free GitHub+Vercel Hobby+Neon free"
+  "self_only": "3-man core self-only scalable 5 domains \u2014 ALL pages stickman free engine 30m longform (render daily, publish Mon/Wed/Fri) + Shorts -> OpusClip 9.2 -> Higgsfield polish longform+shorts -> R2 canonical storage -> monthly 14-day Growth Operator sequence with Higgsfield slides -> Buffer (IG/TikTok gated at 1K) -> G4 only \u2014 cloud free GitHub+Vercel Hobby+Neon free"
 }
