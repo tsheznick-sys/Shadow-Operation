@@ -5,6 +5,24 @@
 
 import { nextEight } from "./numerology";
 
+// ── THE FIX: compute on NET, not gross ───────────────────────────────────────
+// The old model divided gross Circle revenue by the price. Whop takes 3% + Stripe
+// 2.7% + $0.30 on every charge, so at 35 members the community was $27 short of
+// its own $710 prize pool. Every member count below is solved on money that
+// actually reaches the account.
+export const PROCESSOR_PCT = 0.03 + 0.027;
+export const PROCESSOR_FIXED = 0.30;
+
+/** What lands in the account for one Circle charge. */
+export function netPerMember(price: number): number {
+  return Math.max(0, price - (price * PROCESSOR_PCT + PROCESSOR_FIXED));
+}
+
+/** How much the processor takes across a cohort — shown, never hidden. */
+export function feeDrag(price: number, members: number): number {
+  return price * members - netPerMember(price) * members;
+}
+
 export type FundingInputs = {
   circlePrice: number;
   members: number;
@@ -22,6 +40,9 @@ export type FundingModel = {
   recommendedMembers: number;
   breakEvenRaw: number;
   recommendedRaw: number;
+  netPerMember: number;
+  netRevenue: number;
+  feeDrag: number;
   prizePool: number;
   reserve: number;
   toolsCovered: number;
@@ -62,17 +83,23 @@ export function computeFunding(inputs: FundingInputs): FundingModel {
   const circleRevenue = inputs.circlePrice * inputs.members;
   const totalRevenue = circleRevenue + inputs.oneTimeMonthly;
 
-  // Members needed before Circle alone covers tools + prizes (no reserve).
-  const breakEvenRaw = Math.ceil((inputs.toolsMonthly + inputs.prizeTarget) / Math.max(inputs.circlePrice, 1));
-  // Recommended floor adds the reserve buffer on top.
+  // NET per member — the only number that can pay a bill.
+  const perMemberNet = netPerMember(inputs.circlePrice);
+
+  // Break-even: tools + prizes must be covered by money that actually arrives.
+  const breakEvenRaw = Math.ceil((inputs.toolsMonthly + inputs.prizeTarget) / Math.max(perMemberNet, 1));
+  // Recommended: tools + prizes + the annual fund, plus a 10% buffer so one bad
+  // month does not put the operation back on the owner's card.
   const recommendedRaw = Math.ceil(
-    (inputs.toolsMonthly + inputs.prizeTarget + annualFundPerMonth) / Math.max(inputs.circlePrice, 1)
+    ((inputs.toolsMonthly + inputs.prizeTarget + annualFundPerMonth) * 1.1) / Math.max(perMemberNet, 1)
   );
   // Snap UP to the next 8-aligned member count (never down — a floor has to stay a floor).
   const breakEvenMembers = nextEight(breakEvenRaw);
   const recommendedMembers = nextEight(Math.max(recommendedRaw, breakEvenMembers));
 
-  const afterTools = Math.max(0, circleRevenue - inputs.toolsMonthly);
+  const netRevenue = perMemberNet * inputs.members;
+  const feesPaid = feeDrag(inputs.circlePrice, inputs.members);
+  const afterTools = Math.max(0, netRevenue - inputs.toolsMonthly);
   const prizePool = Math.min(inputs.prizeTarget, afterTools);
   const reserve = Math.max(0, afterTools - prizePool);
 
@@ -81,26 +108,26 @@ export function computeFunding(inputs: FundingInputs): FundingModel {
   const buckets = [
     {
       name: "Tools & engines",
-      amount: Math.min(circleRevenue, inputs.toolsMonthly),
-      pct: circleRevenue > 0 ? Math.round((Math.min(circleRevenue, inputs.toolsMonthly) / circleRevenue) * 100) : 0,
+      amount: Math.min(netRevenue, inputs.toolsMonthly),
+      pct: netRevenue > 0 ? Math.round((Math.min(netRevenue, inputs.toolsMonthly) / netRevenue) * 100) : 0,
       note: "Vercel · Neon · n8n · Claude · Grok · R2 · OpusClip · Higgsfield · Buffer",
     },
     {
       name: "Community prizes",
       amount: prizePool,
-      pct: circleRevenue > 0 ? Math.round((prizePool / circleRevenue) * 100) : 0,
+      pct: netRevenue > 0 ? Math.round((prizePool / netRevenue) * 100) : 0,
       note: "WWS prizes · pod bonuses — scales with members, never fixed if revenue is short",
     },
     {
       name: "Annual renewal fund",
       amount: Math.min(reserve, annualFundPerMonth),
-      pct: circleRevenue > 0 ? Math.round((Math.min(reserve, annualFundPerMonth) / circleRevenue) * 100) : 0,
+      pct: netRevenue > 0 ? Math.round((Math.min(reserve, annualFundPerMonth) / netRevenue) * 100) : 0,
       note: "Pre-funds the annual prepay so month-12 bills never dip into your pocket",
     },
     {
       name: "Reserve / refunds",
       amount: Math.max(0, reserve - Math.min(reserve, annualFundPerMonth)),
-      pct: circleRevenue > 0 ? Math.round((Math.max(0, reserve - Math.min(reserve, annualFundPerMonth)) / circleRevenue) * 100) : 0,
+      pct: netRevenue > 0 ? Math.round((Math.max(0, reserve - Math.min(reserve, annualFundPerMonth)) / netRevenue) * 100) : 0,
       note: "Chargebacks, refunds, one bad month of churn",
     },
   ];
@@ -116,9 +143,12 @@ export function computeFunding(inputs: FundingInputs): FundingModel {
     recommendedMembers,
     breakEvenRaw,
     recommendedRaw,
+    netPerMember: Math.round(perMemberNet * 100) / 100,
+    netRevenue: Math.round(netRevenue * 100) / 100,
+    feeDrag: Math.round(feesPaid * 100) / 100,
     prizePool,
     reserve,
-    toolsCovered: Math.min(circleRevenue, inputs.toolsMonthly),
+    toolsCovered: Math.min(netRevenue, inputs.toolsMonthly),
     annualBills: Math.round(annualBills),
     annualFundNeeded: Math.round(annualBills),
     annualFundPerMonth,

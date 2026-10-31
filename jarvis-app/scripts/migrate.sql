@@ -246,3 +246,56 @@ CREATE TABLE IF NOT EXISTS ledger_brand_settings (
 
 COMMENT ON TABLE ledger_brand_settings IS
   'Nobody publishes someone else''s revenue. A brand opts itself in, or it stays admin-only.';
+
+-- ── SELF-IMPROVEMENT (WF15) ──────────────────────────────────────────────────
+-- A hunch may be tested, never shipped. One variable per test, 20% holdout.
+CREATE TABLE IF NOT EXISTS experiments (
+  id                TEXT PRIMARY KEY,
+  stage             TEXT NOT NULL CHECK (stage IN ('self','operation','money')),
+  page              TEXT NOT NULL,
+  variable          TEXT NOT NULL,
+  incumbent         TEXT NOT NULL,
+  challenger        TEXT NOT NULL,
+  started_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
+  sample            INT  NOT NULL DEFAULT 0,
+  incumbent_score   NUMERIC(12,4) NOT NULL DEFAULT 0,
+  challenger_score  NUMERIC(12,4) NOT NULL DEFAULT 0,
+  outcome           TEXT NOT NULL DEFAULT 'running'
+                    CHECK (outcome IN ('running','promoted','killed','inconclusive')),
+  note              TEXT
+);
+
+-- What actually works, per niche. Archived on retirement, never deleted —
+-- so a dead idea is not retried in six months under a new name.
+CREATE TABLE IF NOT EXISTS playbook (
+  key          TEXT PRIMARY KEY,
+  stage        TEXT NOT NULL,
+  page         TEXT NOT NULL,
+  rule         TEXT NOT NULL,
+  wins         INT  NOT NULL DEFAULT 0,
+  losses       INT  NOT NULL DEFAULT 0,
+  promoted_at  TIMESTAMPTZ,
+  retired_at   TIMESTAMPTZ,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_playbook_live ON playbook (wins DESC) WHERE retired_at IS NULL;
+
+-- ── SCALEOUT (WF16) ──────────────────────────────────────────────────────────
+-- One row per page. Revenue is read PER PAGE — an average hides a dead one.
+CREATE TABLE IF NOT EXISTS page_portfolio (
+  page        TEXT PRIMARY KEY,
+  niche       TEXT NOT NULL,
+  status      TEXT NOT NULL DEFAULT 'cloning'
+              CHECK (status IN ('live','cloning','graduated','archived')),
+  template_of TEXT,                                  -- which graduated page this was cloned from
+  template_ver TEXT,
+  graduating  JSONB,                                 -- the eight gate results at decision time
+  revenue     NUMERIC(12,2) NOT NULL DEFAULT 0,
+  cost        NUMERIC(12,2) NOT NULL DEFAULT 0,
+  fails       INT NOT NULL DEFAULT 0,                -- 72h demand-test failures
+  graduated_at TIMESTAMPTZ,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+COMMENT ON TABLE page_portfolio IS
+  'Duplication rule: a page must clear all eight graduation gates before its template may be cloned.';

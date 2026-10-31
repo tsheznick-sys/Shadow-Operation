@@ -140,14 +140,14 @@ def arrow(x1, y1, x2, y2, color=(76, 94, 116), width=3, head=11):
 d.text((40, 28), "JARVIS — n8n WORKFLOW MAP", font=F_TITLE, fill=TEXT)
 d.text(
     (40, 92),
-    "14 workflows · Google OAuth + 2FA · 18-question interviews · autonomy 80% overall · 2 YT channels per brand · global pause · self-funding",
+    "17 workflows · 36 routes · self-improving (WF15) + duplicating only graduated pages (WF16) · 2 YT channels per brand · self-funding",
     font=F_SUB,
     fill=MUTED,
 )
 mx = 2960
 for line in reversed([
     "branch arena/6c47af3d-shadow-operation",
-    "14 workflows · 17 routes",
+    "17 workflows · 36 routes",
     "WF1 daily 08:00 internet scan",
     "6/day serious + X 1-2",
 ]):
@@ -235,7 +235,7 @@ LANES = [
               "Webhooks: cancelled + payment_failed -> WF8",
               "Revenue -> revenue_log -> funding_ledger",
               "Every price reduces to 8 — except the $28 first shot (the 1)"],
-             "35 members cover tools + prizes · 44 everything", C_GREEN),
+             "44 members cover tools+prizes · 53 everything (net)", C_GREEN),
             ("WF11", "Demand-Test Gate", "72h after the 3-slide test",
              ["3-slide carousel in Stories only — never a feed post",
               "50+ comments = PASS -> full sequence runs immediately",
@@ -372,7 +372,7 @@ LANES = [
              "replaces asking you the same questions twice", C_BLUE),
             ("FUNDING", "/money", "self-funding model",
              ["Circle $26: tools $165 first, prizes to $710, annual fund $133",
-              "Break-even 35 · recommended 44 members · reserve 12.5%",
+              "Break-even 44 · recommended 53 · solved on NET after fees",
               "Prize pool scales with revenue — never a fixed promise",
               "Payments HELD until owner grants; grant is audited"],
              "35 = tools + prizes · 44 = everything funded", C_GREEN),
@@ -488,7 +488,7 @@ def rail(bg, bottom):
     ry += 22
 
     section("FUNDING (SELF)")
-    for k, v in [("Circle price", "$26"), ("Tools / mo", "$165"), ("Prize cap", "$710"), ("Annual fund", "$133 / mo"), ("Break-even", "35 members"), ("Recommended", "44 members")]:
+    for k, v in [("Circle price", "$26"), ("Tools / mo", "$165"), ("Prize cap", "$710"), ("Annual fund", "$133 / mo"), ("Break-even", "44 members"), ("Recommended", "53 members")]:
         kv(k, v, vcol=C_GREEN)
 
     section("AUTONOMY (RECOMMENDED)")
@@ -529,7 +529,7 @@ fy = bottom + 26
 d.rounded_rectangle([28, fy, 2250, fy + 62], radius=14, fill=(13, 18, 26), outline=(30, 40, 52), width=1)
 d.text(
     (50, fy + 20),
-    "WF1 daily scan -> WF2 stickman 30m (2 YT channels/brand) -> WF3 OpusClip + Higgsfield -> WF4 G4 -> Buffer -> WF5 demand -> Whop -> WF8 save -> WF9 proof -> WF6 leak -> WF10 monthly -> WF11 demand test -> WF13 pause -> WF1",
+    "WF1 daily scan -> WF2 stickman 30m -> WF3 OpusClip + Higgsfield -> WF4 G4 -> Buffer -> WF5 demand -> Whop -> WF8 save -> WF9 ledger -> WF6 leak -> WF10 monthly -> WF11 demand test -> WF13 pause -> WF1    ‖    WF15 improve (self->operation->money) -> WF16 duplicate GRADUATED pages in parallel",
     font=font(15, True, mono=True),
     fill=C_TEAL,
 )

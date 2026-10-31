@@ -233,6 +233,44 @@
       ],
       "metrics": "completion 60%+ of active · verified-day rate · finisher->First Shot 100% invited · finisher->paid 8-15% · unverified days excluded from top 3 · alert <40% completion by day 7",
       "notes": "Operators only. The gate is 14 days of paid tenure — the one filter money cannot shortcut, because tourists do not pay for two weeks."
+    },
+    {
+      "id": "wf15_self_improvement",
+      "name": "WF15 - Self-Improvement Loop (grade self -> operation -> money, one variable per test)",
+      "trigger": "cron 0 7 * * 1 weekly (Mon 07:00) + webhook experiment_close",
+      "nodes": [
+        "Stage gate FIRST: self is always on. operation unlocks after 3 consecutive self-wins. money unlocks only after cost/clip falls 2 cycles AND G4 rejection <10% AND a month above the member floor (53) with churn <=2.0%. A stage that is not unlocked is skipped, not faked.",
+        "Stage 1 SELF: score Jarvis's own output against what the market did — hook retention, ER, comment quality, objection rate. Jarvis proposes the change; WF15 recomputes the score independently, so it cannot grade its own homework.",
+        "Stage 2 OPERATION: render pass rate, G4 rejection rate, publish cadence, cost per shipped clip, duplicate-question rate. Cheaper and cleaner before it goes anywhere near money.",
+        "Stage 3 MONEY: pricing, offers, the 14-day sequence, the save menu. Recommendations only — a PRICE change is never automatic, it goes to the owner with the data attached.",
+        "Every test: change exactly ONE variable, keep a 20% holdout on the incumbent, require LEARN_MIN_SAMPLE (30) and LEARN_MIN_DAYS (7) before reading. Two changes and the result is unreadable.",
+        "Decision (lib/learn.decide): promote only if it beats the incumbent by > LEARN_WIN_MARGIN (10%) AND the primary metric is not lost; behind -> killed; inside the margin -> inconclusive, which is NOT a win and is never shipped as one.",
+        "Playbook write: a tactic enters only after 2 independent wins on 2 DIFFERENT pages. It leaves after 2 consecutive losses and is archived (retired_at), never deleted, so a dead idea is not retried later under a new name.",
+        "Decay: every tactic is re-tested after LEARN_DECAY_DAYS (60). What worked in October is not guaranteed in January.",
+        "Weekly Telegram + /improve: running / promoted / killed / inconclusive counts, the current stage, and what is blocking the next unlock.",
+        "Gated by WF13 global pause. Experiments that spend money stop; scoring and reading continue."
+      ],
+      "metrics": "one variable per test 100% · promoted only above +10% margin · inconclusive never shipped · 60-day re-test compliance · stage unlock never bypassed",
+      "notes": "Self -> operation -> money, in that order. A system that cannot correct its own output will scale its mistakes."
+    },
+    {
+      "id": "wf16_scaleout",
+      "name": "WF16 - Scale-Out Duplicator (graduate a page, freeze a template, run clones in parallel)",
+      "trigger": "cron 0 8 * * 1 weekly + webhook page_graduate + webhook clone_demand_test_failed",
+      "nodes": [
+        "GRADUATION CHECK (lib/scaleout.graduate): all eight gates must pass — demand test 50+, 30 days live, ER >=5% rolling 7d, buyer pool x3 >=3,000, 3 paying buyers, churn <=2.0%, cost per clip <= $0.25, 5 proven hooks. Miss one and it stays a page, not a template.",
+        "On graduation: freeze a TEMPLATE version — master prompt, character lock, hook bank, cadence, playbook slice. Written immutably so a later tweak cannot silently change what was copied.",
+        "PARALLEL ALLOWANCE (parallelAllowance): 1 graduated page -> cap 3 live. 2 -> cap 6. 3+ -> cap 10 (the supervision ceiling at 80% autonomy). The cap lifts on proof, never on ambition.",
+        "NICHE DISTANCE: a new page must sit at least 2 niches from every existing page until the playbook holds 5 proven hooks per niche — otherwise clones compete for the same audience and the same comments.",
+        "CLONE: copy template only. Never copy the audience, the comments or the credibility. The clone publishes an honesty line: it starts at zero and we will publish that too.",
+        "ISOLATION: one credential set, one R2 prefix, one Buffer channel group, one budget per page. A bad page cannot poison the others — this is the only reason parallel is safe.",
+        "KILL RULE: a clone failing its 72h demand test SCALE_KILL_AFTER_FAILS (2x) is archived, not nursed. Sunk cost is bounded by design, not by sentiment.",
+        "PORTFOLIO: revenue logged PER PAGE into page_portfolio (never an aggregate — an average hides a dead page). A page that pays for itself is worth more than a bigger average.",
+        "REINVEST: a new page is funded from graduated pages, never from the owner's pocket. Telegram weekly: live / graduated / self-funding / margin / to-archive.",
+        "Creating a NEW template needs the owner. Cloning an APPROVED template runs unsupervised at 85%. Gated by WF13 global pause."
+      ],
+      "metrics": "0 clones before graduation · 8/8 gates enforced · cap never exceeded · kill after 2 fails · per-page margin positive · no aggregate reporting",
+      "notes": "Duplicating an unproven page multiplies losses at the same speed it multiplies wins."
     }
   ],
   "creds_needed": [

@@ -5,7 +5,7 @@
     "created": "2026-10-30",
     "branch": "arena/6c47af3d-shadow-operation",
     "status": "pr_open",
-    "updated": "2026-10-31 CHALLENGE v2: operators-only, gated to 14 days paid tenure with NO entry fee, API-verified numbers (reject >20% mismatch), non-finishers -> Lite \\$17. LEDGER v2: live totals (15 min) + audited daily rows (24h lag), revenue admin-only with per-brand opt-in."
+    "updated": "2026-10-31 PRICING FIX + SELF-IMPROVEMENT + SCALEOUT: funding is fee-aware (break-even 44, recommended 53 \u2014 the old 35 was $27 short of its own prize pool). Jarvis now runs a measured weekly learning loop (self -> operation -> money, in that order) and duplicates only GRADUATED pages, in parallel lanes with hard isolation."
   },
   "niches": {
     "strategy": "Grok weekly re-rank via WF1, not hardcoded",
@@ -312,11 +312,11 @@
     "prize_target": 710,
     "annual_bills": 1596,
     "annual_fund_per_month": 133,
-    "break_even_members": 35,
-    "recommended_members": 44,
-    "break_even_raw": 34,
-    "recommended_raw": 39,
-    "math": "break-even 35: 35x$26=$910 - $165 tools = $745 >= $710 prize pool (raw 34, snapped up to 35). Recommended 44: 44x$26=$1,144 - $165 - $710 = $269 >= $133/mo annual fund, leaving $136 reserve (raw 39, snapped up to 44).",
+    "break_even_members": 44,
+    "recommended_members": 53,
+    "break_even_raw": 37,
+    "recommended_raw": 46,
+    "math": "FEE-AWARE. net = $26 - (3% + 2.7% + $0.30) = $24.22/member. break-even: 37 members clear tools+prizes ($895.9 net - $165 = $730.9 >= $710) -> snap UP to 44. recommended: (165+710+133) x 1.10 / 24.22 = 45.78 -> 46 -> snap UP to 53. At 44: net $1,065.6 - $165 - $710 = $190.6. At 53: net $1,283.6 - $165 - $710 = $408.6, annual fund $133 covered, $275 reserve.",
     "why_710": "closest 8 to the old $750 cap (750 -> 746 is nearer but unreadable; 710 keeps a round prize number and 7+1+0=8)",
     "order": [
       "tools",
@@ -327,7 +327,11 @@
     "prize_rule": "prize pool = max(0, circle revenue - tools), cap 710 \u2014 scales with members, never a fixed promise",
     "ledger": "Neon funding_ledger",
     "docs": "docs/COMMUNITY_FUNDING_MODEL.md",
-    "decide_from_data": "final floor locked from 60 days of real churn + conversion data, not from a model"
+    "decide_from_data": "final floor locked from 60 days of real churn + conversion data, not from a model",
+    "net_per_member": 24.22,
+    "processor_fees": "3% Whop + 2.7% Stripe + $0.30 = $1.78 on a $26 charge -> $24.22 net",
+    "previous_error": "The $35 break-even was computed on GROSS revenue and ignored processor fees. At 35 members net revenue is $847.6 - $165 = $682.6, which is $27 SHORT of the $710 prize pool. Fixed 2026-10-31 by solving on net. Off by 9 members.",
+    "note_53": "53 is also the challenge cohort size \u2014 the room that produces the next 53 members is the one that funds it."
   },
   "autopay": {
     "state_default": "not_granted",
@@ -660,5 +664,78 @@
     ],
     "docs": "docs/TRUST_ENGINE.md",
     "env_summary": "PROOF_PUBLIC / PROOF_LAG_HOURS / PROOF_INCLUDE_FAILURES / CHALLENGE_COHORT_SIZE / CHALLENGE_MIN_COMPLETION / FIRST_SHOT_GUARANTEE / GUARANTEE_THRESHOLD"
+  },
+  "learning": {
+    "purpose": "Jarvis improves itself, then the operation, then the money \u2014 in that order, and only with evidence.",
+    "law": "no change without a measured before and after. A hunch may be TESTED, never SHIPPED.",
+    "cycle": "weekly: observe -> hypothesise -> test 1 variable -> read the result -> promote or kill -> write the playbook",
+    "order_why": "Self first: a system that cannot correct its own output will scale its mistakes. Each stage only unlocks when the previous one is measurably working.",
+    "stages": {
+      "1_self": {
+        "what": "Jarvis grades its own work against what the market did \u2014 hook retention, ER, comment quality, objection rate",
+        "gate_to_next": "3 consecutive cycles where the promoted change beat the incumbent on the same metric",
+        "cannot": "cannot grade itself on revenue alone, and cannot promote a change it also scored \u2014 WF15 recomputes independently"
+      },
+      "2_operation": {
+        "what": "The same loop applied to throughput: render pass rate, G4 rejection rate, publish cadence, cost per clip, DQ rate",
+        "gate_to_next": "cost per shipped clip falls for 2 cycles AND G4 rejection below 10%"
+      },
+      "3_money": {
+        "what": "Then the loop touches pricing, offers, sequences and the save menu \u2014 the only stage where money moves",
+        "gate_to_next": "a full month above the recommended member floor (53) with churn at or under 2.0%"
+      }
+    },
+    "sample_rules": {
+      "min_sample": 30,
+      "min_days": 7,
+      "one_variable": "exactly one thing changes per test; two changes and the result is unreadable",
+      "holdout": "20% of each page's posts keep the incumbent so the comparison has a control",
+      "confidence": "a change wins only if it beats the incumbent by more than 10% and does not lose the primary metric"
+    },
+    "playbook": {
+      "what": "what works, per niche \u2014 hooks, lengths, posting times, CTAs, objection answers, thumbnails",
+      "promotion": "a tactic enters the playbook after 2 independent wins on 2 different pages",
+      "demotion": "a tactic leaves after 2 consecutive losses; it is archived, not deleted, so the same dead idea is not retried",
+      "decay": "every tactic re-tested every 60 days \u2014 what works in October is not guaranteed in January"
+    },
+    "writes_to": "config/adaptable.json -> learning.promoted (read-only at runtime), Neon playbook table, and the page template used for duplication",
+    "autonomy": "AUTONOMY_RESEARCH 95% for testing; promoting a tactic into the playbook is automatic; changing a PRICE is never automatic",
+    "env": "LEARN_MIN_SAMPLE=30 \u00b7 LEARN_MIN_DAYS=7 \u00b7 LEARN_HOLDOUT_PCT=20 \u00b7 LEARN_WIN_MARGIN=10 \u00b7 LEARN_DECAY_DAYS=60",
+    "workflow": "WF15"
+  },
+  "scaleout": {
+    "purpose": "Prove one page, then duplicate it in parallel \u2014 never duplicate an unproven one.",
+    "law": "a page earns the right to be copied. Cloning before proof multiplies losses at the same speed it multiplies wins.",
+    "graduation": {
+      "name": "PAGE GRADUATION",
+      "must_hold_all": [
+        "demand test PASS (50+ comments at 72h)",
+        "30 days live",
+        "ER >= 5% rolling 7 days",
+        "buyer pool x3 >= 3,000",
+        "at least 3 paying buyers from that page",
+        "churn at or under 2.0%",
+        "cost per shipped clip at or under the plan"
+      ],
+      "then": "the page becomes a TEMPLATE: its prompts, character lock, hook bank, posting times and playbook slice are frozen as a version"
+    },
+    "duplication": {
+      "what_copies": "template version: master prompt, character lock, hook bank, cadence, playbook slice",
+      "what_never_copies": "the audience, the comments, the credibility. A clone starts at zero and is told so publicly",
+      "parallel_cap": 3,
+      "ramp": "3 live pages maximum until the third one graduates; then 6; then 10 \u2014 the cap only lifts on proof, never on ambition",
+      "isolation": "one credential set, one R2 prefix, one Buffer channel group and one budget per page \u2014 a bad page cannot poison the others",
+      "niche_distance": "a new page must be at least 2 niches away from an existing one until the playbook has 5 proven hooks per niche",
+      "kill_rule": "a clone that fails its 72h demand test twice is archived, not nursed \u2014 the sunk cost is bounded by design"
+    },
+    "money_model": {
+      "per_page": "one graduating page supports the Circle that funds the tools; the second and third pages are the margin",
+      "portfolio": "revenue is read per page, not in aggregate \u2014 an average hides a dead page",
+      "reinvest": "new pages are funded from graduated pages, never from the owner's pocket",
+      "ceiling": "lanes stop at 10 pages because 10 pages x 10 channels is the most one owner can supervise at 80% autonomy"
+    },
+    "autonomy": "duplication runs at AUTONOMY_SEQUENCE 85% once a template exists; creating a NEW template needs the owner",
+    "env": "SCALE_PARALLEL_CAP=3 \u00b7 SCALE_MAX_PAGES=10 \u00b7 SCALE_GRAD_MIN_DAYS=30 \u00b7 SCALE_GRAD_MIN_BUYERS=3 \u00b7 SCALE_KILL_AFTER_FAILS=2",
+    "workflow": "WF16"
   }
 }

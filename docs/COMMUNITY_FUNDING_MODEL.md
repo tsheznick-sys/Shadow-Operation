@@ -2,7 +2,7 @@
 
 **Question asked (2026-10-31):** keep the community running and churn super low — what is the recommended split, where does the money need to go, and when does Jarvis get authority to connect payments?
 
-**Short answer:** the community funds itself from **35 active Circle members** for tools + prizes, and **44** for everything including the annual renewal. Below that, prizes scale with revenue instead of sitting at a fixed cap. Payments authority stays **held** until the owner grants it in `/money` — Jarvis proposes, never moves money.
+**Short answer:** the community funds itself from **44 active Circle members** for tools + prizes, and **53** for everything including the annual renewal. (Corrected 2026-10-31: the earlier 35/44 was solved on **gross** revenue and ignored the 3% + 2.7% + $0.30 the processor takes.) Below that, prizes scale with revenue instead of sitting at a fixed cap. Payments authority stays **held** until the owner grants it in `/money` — Jarvis proposes, never moves money.
 
 **Every number in this document is 8-aligned** (see `docs/PRICING_NUMEROLOGY.md`): $26 Circle · $710 prizes · 35 break-even · 44 recommended.
 
@@ -27,20 +27,22 @@ At **$26/mo** Circle:
 | Line | Members | Monthly Circle revenue | What it means |
 |---|---|---|---|
 | Tools only | **7** | $182 | covers the $165 stack |
-| Break-even | **35** | $910 | $165 tools + $710 prizes = $875 → **$35 spare** |
-| **Recommended floor** | **44** | $1,144 | $165 + $710 + $133 annual fund = $1,008 → **$136 reserve** |
-| Comfortable | **53** | $1,378 | everything funded, **$370 monthly reserve** |
+| Break-even | **44** | $1,144 gross / **$1,065.59 net** | − $165 − $710 = **$190.59 spare** |
+| **Recommended floor** | **53** | $1,378 gross / **$1,283.55 net** | − $165 − $710 − $133 = **$275.55 reserve** |
+| Comfortable | **62** | $1,612 gross / **$1,501.52 net** | everything funded, **$493 reserve** |
 
 **How the two headline numbers were derived — not picked:**
 
 ```
-break-even  = (165 + 710) ÷ 26 = 33.65 → 34 → snap UP to 35
-recommended = (165 + 710 + 133) ÷ 26 = 38.77 → 39 → snap UP to 44
+net per member = 26 − (26 × 5.7% + 0.30) = $24.22
+
+break-even  = (165 + 710)          ÷ 24.22 = 36.13 → 37 → snap UP to 44
+recommended = (165 + 710 + 133)×1.10 ÷ 24.22 = 45.78 → 46 → snap UP to 53
 ```
 
 They snap **up**, never down: a floor has to stay a floor. `jarvis-app/lib/funding.ts` does this in code (`nextEight`), so the page can never show a number that doesn't fund the operation.
 
-So: **7 members keep the lights on, 35 covers tools + prizes, 44 funds everything.**
+So: **7 members keep the lights on, 44 covers tools + prizes, 53 funds everything.**
 
 ---
 
@@ -55,7 +57,7 @@ So: **7 members keep the lights on, 35 covers tools + prizes, 44 funds everythin
 
 **Order of operations is the recommendation:** tools → prizes → annual fund → reserve. Not the reverse. A community that pays prizes before it pays its engine dies in month three.
 
-**Pro-rata rule until 35 members:** prize pool = `max(0, Circle revenue − $165)`, capped at $710. At 17 members that is $277 in prizes, not $710. Announce it as a formula, not a promise.
+**Pro-rata rule until 44 members:** prize pool = `max(0, Circle revenue − $165)`, capped at $710. At 17 members that is $277 in prizes, not $710. Announce it as a formula, not a promise.
 
 ---
 
@@ -105,10 +107,10 @@ Granting writes an `audit_log` row and is reversible with one click (**Keep held
 | 17 | $442 | $165 | $277 | $0 | $0 |
 | 26 | $676 | $165 | $511 | $0 | $0 |
 | **35** | **$910** | **$165** | **$710** | **$0** | **$35** |
-| **44** | **$1,144** | **$165** | **$710** | **$133** | **$136** |
-| 53 | $1,378 | $165 | $710 | $133 | **$370** |
+| **53** | **$1,283.55** | **$165** | **$710** | **$133** | **$275.55** |
+| 62 | $1,501.52 | $165 | $710 | $133 | **$493.52** |
 
-At 53 members the operation is fully funded, annually pre-paid, and holds a $370 monthly reserve — with no money from your pocket after setup.
+At 62 members the operation is fully funded, annually pre-paid, and holds a $370 monthly reserve — with no money from your pocket after setup.
 
 ---
 
@@ -122,4 +124,4 @@ At 53 members the operation is fully funded, annually pre-paid, and holds a $370
 
 ---
 
-*Prices superseded on 2026-10-31: Circle $19→$26, prizes $750→$710, break-even 48→35, recommended 51→44, saves $5/50%/$9 → $8/35%/$17.*
+*Superseded 2026-10-31: Circle $19→$26, prizes $750→$710, saves $5/50%/$9 → $8/35%/$17. **Break-even 48→44 and recommended 51→53**, now solved on NET revenue after processor fees — the intermediate 35/44 was fee-blind and insolvent at 35.*

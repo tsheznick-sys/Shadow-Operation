@@ -77,6 +77,51 @@ def check_config(path: str) -> list[str]:
     if fund.get("circle_price") != 26:
         problems.append(f"{path}: circle_price is {fund.get('circle_price')}, expected 26")
 
+    # The fee-blind arithmetic that shipped once must never come back.
+    problems += check_solvency(fund, path)
+
+    return problems
+
+
+def net_per_member(price: float, pct: float = 0.057, fixed: float = 0.30) -> float:
+    """What actually reaches the account after Whop 3% + Stripe 2.7% + $0.30."""
+    return price - (price * pct + fixed)
+
+
+def check_solvency(fund: dict, label: str) -> list[str]:
+    """The bug that shipped once: member counts computed on GROSS revenue.
+
+    A break-even that cannot pay the prize pool out of NET revenue is not a
+    break-even, it is a rounding error with a promise attached.
+    """
+    problems: list[str] = []
+    price = fund.get("circle_price", 26)
+    tools = fund.get("tools_monthly", 165)
+    prizes = fund.get("prize_target", 710)
+    annual = fund.get("annual_fund_per_month", 133)
+    be = fund.get("break_even_members")
+    rec = fund.get("recommended_members")
+    net = net_per_member(price)
+
+    if not isinstance(be, int) or not isinstance(rec, int):
+        return [f"{label}: break_even_members / recommended_members missing"]
+
+    be_net = be * net - tools
+    if be_net < prizes:
+        problems.append(
+            f"{label}: break-even {be} is INSOLVENT — net after tools ${be_net:.2f} < prizes ${prizes}. "
+            f"Needs {(tools + prizes) / net:.1f} members minimum."
+        )
+
+    rec_net = rec * net - tools - prizes
+    if rec_net < annual:
+        problems.append(
+            f"{label}: recommended {rec} does not cover the annual fund — ${rec_net:.2f} left vs ${annual}/mo needed."
+        )
+
+    if rec <= be:
+        problems.append(f"{label}: recommended {rec} must exceed break-even {be}")
+
     return problems
 
 
@@ -135,6 +180,7 @@ def main() -> int:
         return 1
 
     print("ALL PRICES ALIGNED — ladder, saves, prizes, break-even and env all reduce to 8 (28 excepted).")
+    print("FUNDING SOLVENT — every member count pays its bills out of NET revenue, not gross.")
     return 0
 
 

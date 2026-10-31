@@ -52,7 +52,7 @@ WF4 buffer       → 6 Shorts/day serious + longform Mon/Wed/Fri + X 1–2 disco
 
 **Save offers:** pause **$8/mo** · **35% off → $17** for 3 months · Lite **$17** — **one per 30 days**. (35% of $26 is $16.90, quoted as $17 — rate and price both reduce to 8.)
 
-**Funding is self-funding:** $26 Circle · tools $165 paid first · prizes **$710** pro-rata · annual fund $133/mo. **Break-even 35 members · recommended 44** — both derived from the new prices and snapped up to an 8, never picked. At 44: `$1,144 − $165 − $710 = $269`, the $133/mo annual fund is covered and **$136 stays as reserve**. **Autopay is HELD** until you grant it.
+**Funding is self-funding:** $26 Circle · tools $165 paid first · prizes **$710** pro-rata · annual fund $133/mo. **Break-even 44 members · recommended 53** — solved on **NET** revenue (fees cost $1.78 of every $26), then snapped up to an 8. At 44: net `$1,065.59 − $165 − $710 = $190.59`. At 53: net `$1,283.55 − $165 − $710 − $133 = $275.55 reserve`. *The earlier 35/44 was fee-blind and $27 short of its own prize pool.* **Autopay is HELD** until you grant it.
 
 ---
 

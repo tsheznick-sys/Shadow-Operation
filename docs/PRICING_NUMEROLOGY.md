@@ -84,33 +84,35 @@ Both were recalculated, not re-labelled.
 **Break-even — recomputed from the new prices:**
 
 ```
-break-even = (tools + prizes) ÷ circle
-           = (165 + 710) ÷ 26
-           = 33.65 → 34 members
-snap UP to the next 8 → 35 members
+net per member = 26 − (26 × 5.7% + $0.30) = $24.22   ← fees are real
+
+break-even = (tools + prizes) ÷ net
+           = (165 + 710) ÷ 24.22
+           = 36.13 → 37 members
+snap UP to the next 8 → 44 members
 ```
 
-At 35 members: `35 × $26 = $910 − $165 tools = $745` → the $710 prize pool is fully funded with $35 spare.
+At 44 members: net `$1,065.59 − $165 − $710 = $190.59` spare. **The old 35 was $27 short of its own prize pool** — gross math, real fees.
 
 **Recommended — everything covered, including the annual bill:**
 
 ```
-(tools + prizes + annual fund) ÷ circle
-= (165 + 710 + 133) ÷ 26
-= 38.77 → 39 members
-snap UP → 44 members
+(tools + prizes + annual fund) × 1.10 ÷ net
+= (165 + 710 + 133) × 1.10 ÷ 24.22
+= 45.78 → 46 members
+snap UP → 53 members
 ```
 
-At 44 members: `$1,144 − $165 − $710 = $269` → the $133/mo annual fund is covered, **$136 left as reserve**.
+At 53 members: net `$1,283.55 − $165 − $710 − $133 = $275.55` reserve.
 
 | | Old | New |
 |---|---|---|
 | Circle | $19 | **$26** |
 | Prize cap | $750 | **$710** |
-| Break-even | 48 | **35** |
-| Recommended | 51 | **44** |
+| Break-even | 48 | **44** |
+| Recommended | 51 | **53** |
 
-**Members needed dropped 13**, not because we got cheaper — because every rung got more expensive. That is the whole point of Life Path 8 pricing: fewer, better buyers carrying the same operation.
+**Members needed dropped 4** against the original 48 (and rose 9 against the fee-blind 35), not because we got cheaper — because every rung got more expensive. That is the whole point of Life Path 8 pricing: fewer, better buyers carrying the same operation.
 
 ---
 
